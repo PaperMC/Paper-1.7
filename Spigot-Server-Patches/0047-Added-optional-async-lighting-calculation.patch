@@ -1,11 +1,11 @@
-From 8090b99eb85b137cc76d1ae0ad497496d015593d Mon Sep 17 00:00:00 2001
+From e17a95f0cf79e0a47017f47feecb2c422d8c0be9 Mon Sep 17 00:00:00 2001
 From: Roman Alexander <romanalexander@users.noreply.github.com>
 Date: Tue, 24 Mar 2015 01:06:40 -0400
 Subject: [PATCH] Added optional async lighting calculation.
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 1977c6c..cbab7e6 100644
+index 1977c6c..0ea4b20 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -9,7 +9,7 @@ import java.util.List;
@@ -57,7 +57,7 @@ index 1977c6c..cbab7e6 100644
              int l = enumskyblock == EnumSkyBlock.SKY ? 0 : block.m();
              int i1 = block.k();
  
-@@ -2428,117 +2427,134 @@ public abstract class World implements IBlockAccess {
+@@ -2428,117 +2427,137 @@ public abstract class World implements IBlockAccess {
          }
      }
  
@@ -114,14 +114,14 @@ index 1977c6c..cbab7e6 100644
 -                                        this.I[i1++] = j4 - i + 32 | k4 - j + 32 << 6 | l4 - k + 32 << 12 | l2 - i5 << 18;
 +    private ThreadPoolExecutor service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 +    public boolean c(final EnumSkyBlock enumskyblock, final int i, final int j, final int k) {
-+        Runnable runnable = new Runnable() {
++        Callable<Boolean> callable = new Callable<Boolean>() {
 +            @Override
-+            public void run() {
++            public Boolean call() {
 +                // CraftBukkit start - Use neighbor cache instead of looking up
 +                Chunk chunk = World.this.getChunkIfLoaded(i >> 4, k >> 4);
 +                if (chunk == null || !chunk.areNeighborsLoaded(1) /* !World.this.areChunksLoaded(i, j, k, 17)*/) {
 +                    // CraftBukkit end
-+                    return;
++                    return false;
 +                } else {
 +                    int l = 0;
 +                    int i1 = 0;
@@ -162,7 +162,7 @@ index 1977c6c..cbab7e6 100644
 +                                            int j4 = i2 + Facing.b[i4];
 +                                            int k4 = j2 + Facing.c[i4];
 +                                            int l4 = k2 + Facing.d[i4];
-+                                            Chunk lightChunk = World.this.getChunkIfLoaded(j4 >> 4, k4 >> 4);
++                                            Chunk lightChunk = World.this.getChunkIfLoaded(j4 >> 4, l4 >> 4);
 +                                            int i5;
 +                                            if (lightChunk != null) {
 +                                                i5 = Math.max(1, chunk.getType(j4 & 15, k4, l4 & 15).k());
@@ -270,7 +270,7 @@ index 1977c6c..cbab7e6 100644
                      }
 +
 +                    World.this.methodProfiler.b();
-+
++                    return true;
                  }
              }
 -
@@ -278,19 +278,22 @@ index 1977c6c..cbab7e6 100644
 -            return true;
 +        };
 +        if(paperSpigotConfig.useAsyncLighting) {
-+            service.submit(runnable);
++            service.submit(callable);
 +        } else {
-+            runnable.run();
++            try {
++                return callable.call();
++            } catch(Exception ignore) {
++            }
          }
 +        return true;
      }
  
      public boolean a(boolean flag) {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 686b457..5bc6b51 100644
+index 686b457..8b68ba1 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-@@ -196,4 +196,11 @@ public class PaperSpigotWorldConfig
+@@ -196,4 +196,12 @@ public class PaperSpigotWorldConfig
          boatsDropBoats = getBoolean( "game-mechanics.boats-drop-boats", false );
          lessPickyTorches = getBoolean( "game-mechanics.less-picky-torch-placement", false );
      }
@@ -301,6 +304,7 @@ index 686b457..5bc6b51 100644
 +        useAsyncLighting = getBoolean( "use-async-lighting", false);
 +        log( "World async lighting: " + useAsyncLighting);
 +    }
++
  }
 -- 
 1.9.5.msysgit.0
