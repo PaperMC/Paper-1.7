@@ -1,0 +1,50 @@
+From d295935ce4bdccdd84b2b07699392454edb8739f Mon Sep 17 00:00:00 2001
+From: Iceee <andrew@opticgaming.tv>
+Date: Thu, 12 Jun 2014 13:37:35 -0500
+Subject: [PATCH] Fix redstone lag issues
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 91f036b..a7da9c2 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -527,6 +527,7 @@ public class WorldServer extends World {
+         if (i != this.M.size()) {
+             throw new IllegalStateException("TickNextTick list out of synch");
+         } else {
++            /* PaperSpigot start - Fix redstone lag issues
+             if (i > 1000) {
+                 // CraftBukkit start - If the server has too much to process over time, try to alleviate that
+                 if (i > 20 * 1000) {
+@@ -535,7 +536,12 @@ public class WorldServer extends World {
+                     i = 1000;
+                 }
+                 // CraftBukkit end
++            } */
++
++            if (i > paperSpigotConfig.tickNextTickListCap) {
++                i = paperSpigotConfig.tickNextTickListCap;
+             }
++            // PaperSpigot end
+ 
+             this.methodProfiler.a("cleaning");
+ 
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 686b457..8f8b04c 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -196,4 +196,11 @@ public class PaperSpigotWorldConfig
+         boatsDropBoats = getBoolean( "game-mechanics.boats-drop-boats", false );
+         lessPickyTorches = getBoolean( "game-mechanics.less-picky-torch-placement", false );
+     }
++
++    public int tickNextTickListCap;
++    private void tickNextTickListCap()
++    {
++        tickNextTickListCap = getInt( "tick-next-tick-list-cap", 10000 ); // Higher values will be friendlier to vanilla style mechanics (to a point) but may hurt performance
++        log( "WorldServer TickNextTickList cap set at " + tickNextTickListCap );
++    }
+ }
+-- 
+1.9.1
+
