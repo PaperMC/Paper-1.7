@@ -1,0 +1,59 @@
+From 2a2891441eac17ad4149e67a428771b1d6675608 Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach.brown@destroystokyo.com>
+Date: Thu, 2 Apr 2015 15:22:20 -0500
+Subject: [PATCH] Backport EntityActivationRange fixes
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index 28749c1..46c779f 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -104,7 +104,7 @@ public abstract class Entity {
+     protected DataWatcher datawatcher;
+     private double g;
+     private double h;
+-    public boolean ag;
++    public boolean ag; public boolean isAddedToChunk() { return ag; } // PaperSpigot - EAR backport
+     public int ah;
+     public int ai;
+     public int aj;
+@@ -126,7 +126,7 @@ public abstract class Entity {
+     public CustomTimingsHandler tickTimer = org.bukkit.craftbukkit.SpigotTimings.getEntityTimings(this); // Spigot
+     public final byte activationType = org.spigotmc.ActivationRange.initializeEntityActivationType(this);
+     public final boolean defaultActivationState;
+-    public long activatedTick = 0;
++    public long activatedTick = Integer.MIN_VALUE; // PaperSpigot - EAR backport
+     public boolean fromMobSpawner;
+     public void inactiveTick() { }
+     // Spigot end
+diff --git a/src/main/java/org/spigotmc/ActivationRange.java b/src/main/java/org/spigotmc/ActivationRange.java
+index 903172a..6fea403 100644
+--- a/src/main/java/org/spigotmc/ActivationRange.java
++++ b/src/main/java/org/spigotmc/ActivationRange.java
+@@ -12,6 +12,7 @@ import net.minecraft.server.EntityComplexPart;
+ import net.minecraft.server.EntityCreature;
+ import net.minecraft.server.EntityEnderCrystal;
+ import net.minecraft.server.EntityEnderDragon;
++import net.minecraft.server.EntityFallingBlock; // PaperSpigot
+ import net.minecraft.server.EntityFireball;
+ import net.minecraft.server.EntityFireworks;
+ import net.minecraft.server.EntityHuman;
+@@ -262,6 +263,15 @@ public class ActivationRange
+     public static boolean checkIfActive(Entity entity)
+     {
+         SpigotTimings.checkIfActiveTimer.startTiming();
++
++        // PaperSpigot start - EAR backport
++        // Never safe to skip fireworks or entities not yet added to chunk and we don't skip falling blocks
++        if ( !entity.isAddedToChunk() || entity instanceof EntityFireworks || entity instanceof EntityFallingBlock ) {
++            SpigotTimings.checkIfActiveTimer.stopTiming();
++            return true;
++        }
++        // PaperSpigot end
++
+         boolean isActive = entity.activatedTick >= MinecraftServer.currentTick || entity.defaultActivationState;
+ 
+         // Should this entity tick?
+-- 
+2.3.5
+
