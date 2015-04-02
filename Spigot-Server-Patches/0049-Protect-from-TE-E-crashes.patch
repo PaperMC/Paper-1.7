@@ -1,0 +1,68 @@
+From bb0284dfccbc6054be663ee87c29ae582b02506f Mon Sep 17 00:00:00 2001
+From: Aikar <aikar@aikar.co>
+Date: Wed, 3 Jul 2013 08:29:26 -0400
+Subject: [PATCH] Protect from TE/E crashes
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntity.java b/src/main/java/net/minecraft/server/TileEntity.java
+index 27fedeb..896b658 100644
+--- a/src/main/java/net/minecraft/server/TileEntity.java
++++ b/src/main/java/net/minecraft/server/TileEntity.java
+@@ -187,7 +187,10 @@ public class TileEntity {
+ 
+     public void a(CrashReportSystemDetails crashreportsystemdetails) {
+         crashreportsystemdetails.a("Name", (Callable) (new CrashReportTileEntityName(this)));
++        Block block = this.q(); // EMC
++        if (block != null) { // EMC
+         CrashReportSystemDetails.a(crashreportsystemdetails, this.x, this.y, this.z, this.q(), this.p());
++        } // EMC
+         crashreportsystemdetails.a("Actual block type", (Callable) (new CrashReportTileEntityType(this)));
+         crashreportsystemdetails.a("Actual block data value", (Callable) (new CrashReportTileEntityData(this)));
+     }
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index c0c078e..81e3fa6 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1469,10 +1469,19 @@ public abstract class World implements IBlockAccess {
+                     this.playerJoinedWorld(entity);
+                     SpigotTimings.tickEntityTimer.stopTiming(); // Spigot
+                 } catch (Throwable throwable1) {
++                    // EMC start
++                    SpigotTimings.tickEntityTimer.stopTiming(); // Spigot
++                    System.err.println("Entity threw exception at " + entity.world.getWorld().getName()+":"+entity.locX +"," + entity.locY+","+entity.locZ);
++                    throwable1.printStackTrace();
++                    entity.dead = true;
++                    continue;
++                    /*
+                     crashreport = CrashReport.a(throwable1, "Ticking entity");
+                     crashreportsystemdetails = crashreport.a("Entity being ticked");
+                     entity.a(crashreportsystemdetails);
+                     throw new ReportedException(crashreport);
++                    */
++                    // EMC end
+                 }
+             }
+ 
+@@ -1525,11 +1534,19 @@ public abstract class World implements IBlockAccess {
+                     tileentity.h();
+                     tileentity.tickTimer.stopTiming(); // Spigot
+                 } catch (Throwable throwable2) {
++                    // EMC start
+                     tileentity.tickTimer.stopTiming(); // Spigot
++                    System.err.println("TileEntity threw exception at " + tileentity.world.getWorld().getName()+":"+tileentity.x +"," + tileentity.y+","+tileentity.z);
++                    throwable2.printStackTrace();
++                    iterator.remove();
++                    continue;
++                    /*
+                     crashreport = CrashReport.a(throwable2, "Ticking block entity");
+                     crashreportsystemdetails = crashreport.a("Block entity being ticked");
+                     tileentity.a(crashreportsystemdetails);
+                     throw new ReportedException(crashreport);
++                    */
++                    // EMC end
+                 }
+             }
+ 
+-- 
+1.9.4.msysgit.2
+
