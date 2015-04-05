@@ -1,24 +1,27 @@
-From 0d511e130661d86a09b73302da92bb3cfa8d6efd Mon Sep 17 00:00:00 2001
+From f0b837e83a946ae7f6b46777ed4ee590c0707f85 Mon Sep 17 00:00:00 2001
 From: Roman Alexander <romanalexander@users.noreply.github.com>
 Date: Wed, 25 Mar 2015 20:27:13 -0500
 Subject: [PATCH] Configurable async light updates
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 1977c6c..c0c078e 100644
+index 1977c6c..9bf2a98 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -10,6 +10,9 @@ import java.util.Random;
- import java.util.Set;
+@@ -11,6 +11,12 @@ import java.util.Set;
  import java.util.UUID;
  import java.util.concurrent.Callable;
-+import java.util.concurrent.LinkedBlockingQueue;
-+import java.util.concurrent.ThreadPoolExecutor;
-+import java.util.concurrent.TimeUnit;
  
++// PaperSpigot start
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
++import net.minecraft.util.com.google.common.util.concurrent.ThreadFactoryBuilder;
++// PaperSpigot end
++
  // CraftBukkit start
  import org.bukkit.Bukkit;
-@@ -812,13 +815,14 @@ public abstract class World implements IBlockAccess {
+ import org.bukkit.block.BlockState;
+@@ -812,13 +818,14 @@ public abstract class World implements IBlockAccess {
              int l = i >> 4;
              int i1 = k >> 4;
  
@@ -36,7 +39,7 @@ index 1977c6c..c0c078e 100644
          } else {
              return enumskyblock.c;
          }
-@@ -828,9 +832,10 @@ public abstract class World implements IBlockAccess {
+@@ -828,9 +835,10 @@ public abstract class World implements IBlockAccess {
          if (i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000) {
              if (j >= 0) {
                  if (j < 256) {
@@ -50,7 +53,7 @@ index 1977c6c..c0c078e 100644
                          chunk.a(enumskyblock, i & 15, j, k & 15, l);
  
                          for (int i1 = 0; i1 < this.u.size(); ++i1) {
-@@ -2388,10 +2393,11 @@ public abstract class World implements IBlockAccess {
+@@ -2388,10 +2396,11 @@ public abstract class World implements IBlockAccess {
      }
  
      private int a(int i, int j, int k, EnumSkyBlock enumskyblock) {
@@ -64,7 +67,7 @@ index 1977c6c..c0c078e 100644
              int l = enumskyblock == EnumSkyBlock.SKY ? 0 : block.m();
              int i1 = block.k();
  
-@@ -2428,118 +2434,140 @@ public abstract class World implements IBlockAccess {
+@@ -2428,118 +2437,140 @@ public abstract class World implements IBlockAccess {
          }
      }
  
@@ -120,7 +123,7 @@ index 1977c6c..c0c078e 100644
 -                                    if (i3 == l2 - i5 && i1 < this.I.length) {
 -                                        this.I[i1++] = j4 - i + 32 | k4 - j + 32 << 6 | l4 - k + 32 << 12 | l2 - i5 << 18;
 +    // PaperSpigot start - Configurable async light updates
-+    private ThreadPoolExecutor service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
++    private ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build());
 +    public boolean c(final EnumSkyBlock enumskyblock, final int i, final int j, final int k) {
 +        Callable<Boolean> callable = new Callable<Boolean>() {
 +            @Override
@@ -173,7 +176,7 @@ index 1977c6c..c0c078e 100644
 +                                            Chunk lightChunk = World.this.getChunkIfLoaded(j4 >> 4, l4 >> 4);
 +                                            int i5;
 +                                            if (lightChunk != null) {
-+                                                i5 = Math.max(1, chunk.getType(j4 & 15, k4, l4 & 15).k());
++                                                i5 = Math.max(1, lightChunk.getType(j4 & 15, k4, l4 & 15).k());
 +                                            } else {
 +                                                i5 = 255;
 +                                            }
@@ -285,7 +288,7 @@ index 1977c6c..c0c078e 100644
 -            this.methodProfiler.b();
 -            return true;
 +        };
-+        if(paperSpigotConfig.useAsyncLighting) {
++        if (paperSpigotConfig.useAsyncLighting) {
 +            service.submit(callable);
 +        } else {
 +            try {
@@ -300,7 +303,7 @@ index 1977c6c..c0c078e 100644
      public boolean a(boolean flag) {
          return false;
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 44d271a..4e306bc 100644
+index 44d271a..ddd33e8 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 @@ -206,4 +206,11 @@ public class PaperSpigotWorldConfig
@@ -311,7 +314,7 @@ index 44d271a..4e306bc 100644
 +    public boolean useAsyncLighting;
 +    private void useAsyncLighting()
 +    {
-+        useAsyncLighting = getBoolean( "use-async-lighting", false);
++        useAsyncLighting = getBoolean( "use-async-lighting", false );
 +        log( "World async lighting: " + useAsyncLighting );
 +    }
  }
