@@ -1,0 +1,99 @@
+From d5599321c346bfc726ad7c1750c25c9d835129b8 Mon Sep 17 00:00:00 2001
+From: md_5 <git@md-5.net>
+Date: Mon, 6 Apr 2015 16:52:46 -0500
+Subject: [PATCH] Allow Capping Entity Tick Time
+
+This patch adds world configuration options for max-tick-time-entity which allows setting a hard cap on the amount of time (in milliseconds) that a tick can consume. The default value of 50ms is very conservative and means this feature will not activate until the server is well below 15tps (minimum). Values of 20ms have been reported to provide a good performance increase, however I personally think 25ms for entities would give even more significant gains, assuming that these things are not a large priority on your server.
+
+Setting this option too low could lead to jerkiness / lag. The gain however is a faster and more responsive server to other actions such as blocks, chat, combat etc.
+
+This feature was commisioned by Chunkr and backported from 1.8 to 1.7.10
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 64cfb37..90be8b0 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -120,6 +120,7 @@ public abstract class World implements IBlockAccess {
+     public static boolean haveWeSilencedAPhysicsCrash;
+     public static String blockLocation;
+     public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
++    private org.github.paperspigot.TickLimiter entityLimiter; // PaperSpigot - Configurable entity tick time cap backport
+ 
+     public static long chunkToKey(int x, int z)
+     {
+@@ -261,6 +262,7 @@ public abstract class World implements IBlockAccess {
+         this.worldProvider.a(this);
+         this.chunkProvider = this.j();
+         timings = new SpigotTimings.WorldTimingsHandler(this); // Spigot - code below can generate new world and access timings
++        this.entityLimiter = new org.github.paperspigot.TickLimiter(paperSpigotConfig.entityMaxTickTime); // PaperSpigot - Configurable entity tick time cap backport
+         if (!this.worldData.isInitialized()) {
+             try {
+                 this.a(worldsettings);
+@@ -1454,7 +1456,14 @@ public abstract class World implements IBlockAccess {
+         timings.entityTick.startTiming(); // Spigot
+         guardEntityList = true; // Spigot
+         // CraftBukkit start - Use field for loop variable
+-        for (this.tickPosition = 0; this.tickPosition < this.entityList.size(); ++this.tickPosition) {
++        // PaperSpigot start - Configurable entity tick time cap backport
++        int entitiesThisCycle = 0;
++        if (tickPosition < 0) tickPosition = 0;
++        for (entityLimiter.initTick();
++             entitiesThisCycle < entityList.size() && (entitiesThisCycle % 10 == 0 || entityLimiter.shouldContinue());
++             tickPosition++, entitiesThisCycle++) {
++            tickPosition = (tickPosition < entityList.size()) ? tickPosition : 0;
++            // PaperSpigot end
+             entity = (Entity) this.entityList.get(this.tickPosition);
+             if (entity.vehicle != null) {
+                 if (!entity.vehicle.dead && entity.vehicle.passenger == entity) {
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 8be9740..037fbc0 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -235,4 +235,11 @@ public class PaperSpigotWorldConfig
+         generateTemple = getBoolean( "generator-settings.temple", true );
+         generateVillage = getBoolean( "generator-settings.village", true );
+     }
++
++    public int entityMaxTickTime;
++    private void entityMaxTickTime()
++    {
++        entityMaxTickTime = getInt( "max-tick-time-entity", 50 );
++        log( "Entity max Tick Time: " + entityMaxTickTime + "ms" );
++    }
+ }
+diff --git a/src/main/java/org/github/paperspigot/TickLimiter.java b/src/main/java/org/github/paperspigot/TickLimiter.java
+new file mode 100644
+index 0000000..7d5be5e
+--- /dev/null
++++ b/src/main/java/org/github/paperspigot/TickLimiter.java
+@@ -0,0 +1,27 @@
++package org.github.paperspigot;
++
++/**
++ * Originally made by md_5 for Spigot 1.8
++ * Backported to 1.7.10
++ */
++public class TickLimiter {
++
++    private final int maxTime;
++    private long startTime;
++
++    public TickLimiter(int maxtime)
++    {
++        this.maxTime = maxtime;
++    }
++
++    public void initTick()
++    {
++        startTime = System.currentTimeMillis();
++    }
++
++    public boolean shouldContinue()
++    {
++        long remaining = System.currentTimeMillis() - startTime;
++        return remaining < maxTime;
++    }
++}
+-- 
+2.3.5
+
