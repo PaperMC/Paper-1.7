@@ -1,0 +1,80 @@
+From 4ab434e1b139e8f55e69e54896513c608a06502d Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach.brown@destroystokyo.com>
+Date: Mon, 13 Apr 2015 15:58:18 -0500
+Subject: [PATCH] Force load chunks for specific entities that fly through
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 7cbb33b..5fb1509 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1700,6 +1700,17 @@ public abstract class World implements IBlockAccess {
+                 if (this.isChunkLoaded(k, i1)) {
+                     entity.ag = true;
+                     this.getChunkAt(k, i1).a(entity);
++                // PaperSpigot start - Force load chunks for specific entities that fly through
++                } else if ((entity instanceof EntityEnderPearl && entity.world.paperSpigotConfig.loadUnloadedEnderPearls) ||
++                        (entity instanceof EntityTNTPrimed && entity.world.paperSpigotConfig.loadUnloadedTNTEntities) ||
++                        (entity instanceof EntityFallingBlock && entity.world.paperSpigotConfig.loadUnloadedFallingBlocks)) {
++                    ChunkProviderServer chunkProvider = (ChunkProviderServer) this.chunkProvider;
++                    boolean before = chunkProvider.forceChunkLoad;
++                    chunkProvider.forceChunkLoad = true;
++                    entity.ag = true;
++                    this.getChunkAt(k, i1).a(entity);
++                    chunkProvider.forceChunkLoad = before;
++                // PaperSpigot end
+                 } else {
+                     entity.ag = false;
+                 }
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 745f4a7..171d94c 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -243,9 +243,20 @@ public class PaperSpigotWorldConfig
+         log( "Entity max Tick Time: " + entityMaxTickTime + "ms" );
+     }
+ 
++
+     public boolean optimizeDraining;
+     private void optimizeDraining()
+     {
+-        optimizeDraining = getBoolean( "optimize-draining", false );
++        optimizeDraining = getBoolean("optimize-draining", false);
++    }
++
++    public boolean loadUnloadedEnderPearls;
++    public boolean loadUnloadedTNTEntities;
++    public boolean loadUnloadedFallingBlocks;
++    private void loadUnloaded()
++    {
++        loadUnloadedEnderPearls = getBoolean( "load-chunks.enderpearls", false );
++        loadUnloadedTNTEntities = getBoolean( "load-chunks.tnt-entities", false );
++        loadUnloadedFallingBlocks = getBoolean( "load-chunks.falling-blocks", false );
+     }
+ }
+diff --git a/src/main/java/org/spigotmc/ActivationRange.java b/src/main/java/org/spigotmc/ActivationRange.java
+index 6fea403..06145fc 100644
+--- a/src/main/java/org/spigotmc/ActivationRange.java
++++ b/src/main/java/org/spigotmc/ActivationRange.java
+@@ -12,6 +12,7 @@ import net.minecraft.server.EntityComplexPart;
+ import net.minecraft.server.EntityCreature;
+ import net.minecraft.server.EntityEnderCrystal;
+ import net.minecraft.server.EntityEnderDragon;
++import net.minecraft.server.EntityEnderPearl; // PaperSpigot
+ import net.minecraft.server.EntityFallingBlock; // PaperSpigot
+ import net.minecraft.server.EntityFireball;
+ import net.minecraft.server.EntityFireworks;
+@@ -266,7 +267,9 @@ public class ActivationRange
+ 
+         // PaperSpigot start - EAR backport
+         // Never safe to skip fireworks or entities not yet added to chunk and we don't skip falling blocks
+-        if ( !entity.isAddedToChunk() || entity instanceof EntityFireworks || entity instanceof EntityFallingBlock ) {
++        if ( !entity.isAddedToChunk() || entity instanceof EntityFireworks || entity instanceof EntityFallingBlock ||
++                (entity instanceof EntityEnderPearl && entity.world.paperSpigotConfig.loadUnloadedEnderPearls) ||
++                (entity instanceof EntityTNTPrimed && entity.world.paperSpigotConfig.loadUnloadedTNTEntities) ) {
+             SpigotTimings.checkIfActiveTimer.stopTiming();
+             return true;
+         }
+-- 
+2.3.5
+
