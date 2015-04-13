@@ -83,7 +83,7 @@ index 3bf2af0..1977c6c 100644
              entity.ticksLived++;
              entity.inactiveTick();
 +            // PaperSpigot start - Remove entities in unloaded chunks
-+            if (entity instanceof EntityEnderPearl || (!this.isChunkLoaded(i, j) &&
++            if (!this.isChunkLoaded(i, j) && ((entity instanceof EntityEnderPearl && this.paperSpigotConfig.removeUnloadedEnderPearls) ||
 +                    (entity instanceof EntityFallingBlock && this.paperSpigotConfig.removeUnloadedFallingBlocks) ||
 +                    (entity instanceof EntityTNTPrimed && this.paperSpigotConfig.removeUnloadedTNTEntities))) {
 +                entity.inUnloadedChunk = true;
