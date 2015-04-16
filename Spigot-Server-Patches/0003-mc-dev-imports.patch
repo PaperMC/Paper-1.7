@@ -1,4 +1,4 @@
-From 933ec2977dae87c37b27a1b24a3603db50aa7392 Mon Sep 17 00:00:00 2001
+From e5f72303f0b04ac429f1fdde14b1c6f88e6b315b Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Tue, 22 Jul 2014 21:05:53 -0500
 Subject: [PATCH] mc-dev imports
@@ -1525,14 +1525,15 @@ index 0000000..3eb029d
 +}
 diff --git a/src/main/java/net/minecraft/server/NBTTagList.java b/src/main/java/net/minecraft/server/NBTTagList.java
 new file mode 100644
-index 0000000..f80f93d
+index 0000000..bdde30a
 --- /dev/null
 +++ b/src/main/java/net/minecraft/server/NBTTagList.java
-@@ -0,0 +1,167 @@
+@@ -0,0 +1,168 @@
 +package net.minecraft.server;
 +
 +import java.io.DataInput;
 +import java.io.DataOutput;
++import java.io.IOException;
 +import java.util.ArrayList;
 +import java.util.Iterator;
 +import java.util.List;
@@ -1544,7 +1545,7 @@ index 0000000..f80f93d
 +
 +    public NBTTagList() {}
 +
-+    void write(DataOutput dataoutput) {
++    void write(DataOutput dataoutput) throws IOException {
 +        if (!this.list.isEmpty()) {
 +            this.type = ((NBTBase) this.list.get(0)).getTypeId();
 +        } else {
@@ -1559,7 +1560,7 @@ index 0000000..f80f93d
 +        }
 +    }
 +
-+    void load(DataInput datainput, int i, NBTReadLimiter nbtreadlimiter) {
++    void load(DataInput datainput, int i, NBTReadLimiter nbtreadlimiter) throws IOException {
 +        if (i > 512) {
 +            throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
 +        } else {

@@ -1,14 +1,14 @@
-From bc9cdfc75d16e770a1f3a491e8895a913372aa68 Mon Sep 17 00:00:00 2001
+From 910e56f828ca3a1a86f72fa85f76fe3a5b9ba351 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Thu, 16 Apr 2015 15:52:25 -0500
 Subject: [PATCH] Backport NBTReadLimiter changes
 
 
 diff --git a/src/main/java/net/minecraft/server/NBTTagList.java b/src/main/java/net/minecraft/server/NBTTagList.java
-index f80f93d..c5fd403 100644
+index bdde30a..8a7400c 100644
 --- a/src/main/java/net/minecraft/server/NBTTagList.java
 +++ b/src/main/java/net/minecraft/server/NBTTagList.java
-@@ -40,6 +40,7 @@ public class NBTTagList extends NBTBase {
+@@ -41,6 +41,7 @@ public class NBTTagList extends NBTBase {
  
              for (int k = 0; k < j; ++k) {
                  NBTBase nbtbase = NBTBase.createTag(this.type);
@@ -17,7 +17,7 @@ index f80f93d..c5fd403 100644
                  nbtbase.load(datainput, i + 1, nbtreadlimiter);
                  this.list.add(nbtbase);
 diff --git a/src/main/java/org/spigotmc/LimitStream.java b/src/main/java/org/spigotmc/LimitStream.java
-index dcc0548..d6c8903 100644
+index dcc0548..003e512 100644
 --- a/src/main/java/org/spigotmc/LimitStream.java
 +++ b/src/main/java/org/spigotmc/LimitStream.java
 @@ -19,21 +19,21 @@ public class LimitStream extends FilterInputStream
@@ -41,7 +41,7 @@ index dcc0548..d6c8903 100644
      public int read(byte[] b, int off, int len) throws IOException
      {
 -        limit.a( len );
-+        limit.a( len * 8); // PaperSpigot - Backport NBTReadLimiter changes
++        limit.a( len * 8 ); // PaperSpigot - Backport NBTReadLimiter changes
          return super.read( b, off, len );
      }
  }
