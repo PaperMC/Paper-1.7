@@ -1,11 +1,11 @@
-From 2a2891441eac17ad4149e67a428771b1d6675608 Mon Sep 17 00:00:00 2001
+From c3ece8451973b59e0a3933df92999c5900316ef5 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Thu, 2 Apr 2015 15:22:20 -0500
 Subject: [PATCH] Backport EntityActivationRange fixes
 
 
 diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
-index 28749c1..46c779f 100644
+index 28749c1..48e28fa 100644
 --- a/src/main/java/net/minecraft/server/Entity.java
 +++ b/src/main/java/net/minecraft/server/Entity.java
 @@ -104,7 +104,7 @@ public abstract class Entity {
@@ -26,6 +26,39 @@ index 28749c1..46c779f 100644
      public boolean fromMobSpawner;
      public void inactiveTick() { }
      // Spigot end
+diff --git a/src/main/java/net/minecraft/server/EntityItem.java b/src/main/java/net/minecraft/server/EntityItem.java
+index a61e91a..97830f3 100644
+--- a/src/main/java/net/minecraft/server/EntityItem.java
++++ b/src/main/java/net/minecraft/server/EntityItem.java
+@@ -137,6 +137,28 @@ public class EntityItem extends Entity {
+         }
+     }
+ 
++    // PaperSpigot start - copied from above
++    @Override
++    public void inactiveTick() {
++        // CraftBukkit start - Use wall time for pickup and despawn timers
++        int elapsedTicks = MinecraftServer.currentTick - this.lastTick;
++        this.pickupDelay -= elapsedTicks;
++        this.age += elapsedTicks;
++        this.lastTick = MinecraftServer.currentTick;
++        // CraftBukkit end
++
++        if (!this.world.isStatic && this.age >= world.spigotConfig.itemDespawnRate) { // Spigot
++            // CraftBukkit start - fire ItemDespawnEvent
++            if (org.bukkit.craftbukkit.event.CraftEventFactory.callItemDespawnEvent(this).isCancelled()) {
++                this.age = 0;
++                return;
++            }
++            // CraftBukkit end
++            this.die();
++        }
++    }
++    // PaperSpigot end
++
+     private void k() {
+         // Spigot start
+         double radius = world.spigotConfig.itemMerge;
 diff --git a/src/main/java/org/spigotmc/ActivationRange.java b/src/main/java/org/spigotmc/ActivationRange.java
 index 903172a..6fea403 100644
 --- a/src/main/java/org/spigotmc/ActivationRange.java
