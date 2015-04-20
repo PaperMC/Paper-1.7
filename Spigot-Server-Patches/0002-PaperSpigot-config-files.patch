@@ -1,11 +1,11 @@
-From da7e53caceb34fb4e99f9363c281696e8e668625 Mon Sep 17 00:00:00 2001
+From eff375d6ab902126f0a5139440267b218650cf1c Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Sat, 12 Jul 2014 19:32:01 -0500
 Subject: [PATCH] PaperSpigot config files
 
 
 diff --git a/src/main/java/net/minecraft/server/DedicatedServer.java b/src/main/java/net/minecraft/server/DedicatedServer.java
-index 9cc0526..e9a1a67 100644
+index 9cc0526..1e4b355 100644
 --- a/src/main/java/net/minecraft/server/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/DedicatedServer.java
 @@ -131,6 +131,10 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
@@ -13,7 +13,7 @@ index 9cc0526..e9a1a67 100644
              org.spigotmc.SpigotConfig.registerCommands();
              // Spigot end
 +            // PaperSpigot start
-+            org.github.paperspigot.PaperSpigotConfig.init();
++            //org.github.paperspigot.PaperSpigotConfig.init();
 +            org.github.paperspigot.PaperSpigotConfig.registerCommands();
 +            // PaperSpigot stop
  
@@ -68,10 +68,10 @@ index 10621b3..1548042 100644
  
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 new file mode 100644
-index 0000000..7ea1617
+index 0000000..2619491
 --- /dev/null
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-@@ -0,0 +1,140 @@
+@@ -0,0 +1,142 @@
 +package org.github.paperspigot;
 +
 +import com.google.common.base.Throwables;
@@ -107,6 +107,8 @@ index 0000000..7ea1617
 +    static int version;
 +    static Map<String, Command> commands;
 +    /*========================================================================*/
++
++    static { init(); }
 +
 +    public static void init()
 +    {
