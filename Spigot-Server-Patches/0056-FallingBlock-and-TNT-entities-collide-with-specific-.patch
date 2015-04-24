@@ -15,7 +15,7 @@ index 5fb1509..a931851 100644
 -                                block.a( this, x, y, z, axisalignedbb, this.L, entity );
 +                                // PaperSpigot start - FallingBlocks and TNT collide with specific non-collidable blocks
 +                                if (entity.world.paperSpigotConfig.fallingBlocksCollideWithSigns && (entity instanceof EntityTNTPrimed || entity instanceof EntityFallingBlock) &&
-+                                        (block instanceof BlockSign || block instanceof BlockFenceGate || block instanceof BlockTorch || block instanceof BlockButtonAbstract || block instanceof BlockLever || block instanceof BlockTripwireHook)) {
++                                        (block instanceof BlockSign || block instanceof BlockFenceGate || block instanceof BlockTorch || block instanceof BlockButtonAbstract || block instanceof BlockLever || block instanceof BlockTripwireHook || block instanceof BlockTripwire)) {
 +                                    AxisAlignedBB aabb = AxisAlignedBB.a(x, y, z, x + 1.0, y + 1.0, z + 1.0);
 +                                    if (axisalignedbb.b(aabb)) this.L.add(aabb);
 +                                } else {
