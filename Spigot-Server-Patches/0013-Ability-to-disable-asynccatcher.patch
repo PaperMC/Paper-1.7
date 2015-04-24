@@ -1,14 +1,14 @@
-From 78b47c601829196323f63810551203efb2620d88 Mon Sep 17 00:00:00 2001
+From 200b12d2a8a58941ceb540973c000226997e08ec Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Tue, 5 Aug 2014 17:39:04 -0500
 Subject: [PATCH] Ability to disable asynccatcher
 
 
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-index f4acbb3..2cc159b 100644
+index c5bcb41..7cdab52 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-@@ -143,4 +143,13 @@ public class PaperSpigotConfig
+@@ -145,4 +145,13 @@ public class PaperSpigotConfig
      {
          babyZombieMovementSpeed = getDouble( "settings.baby-zombie-movement-speed", 0.5D); // Player moves at 0.1F, for reference
      }

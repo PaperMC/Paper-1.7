@@ -1,4 +1,4 @@
-From b2dffc69e02d9596ee8068bb0743ed3b92e43c19 Mon Sep 17 00:00:00 2001
+From 6a3fb9614eb47989743d00383b873324937bc576 Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Sun, 31 Aug 2014 12:13:32 -0500
 Subject: [PATCH] Configurable strength and weakness effect modifiers
@@ -26,10 +26,10 @@ index 3eb029d..c448789 100644
      }
  }
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-index 25a94a6..a7b18e4 100644
+index fe43f8a..0091cbf 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-@@ -161,4 +161,12 @@ public class PaperSpigotConfig
+@@ -163,4 +163,12 @@ public class PaperSpigotConfig
              Bukkit.getLogger().log( Level.INFO, "Disabling player interaction limiter, your server may be more vulnerable to malicious users" );
          }
      }

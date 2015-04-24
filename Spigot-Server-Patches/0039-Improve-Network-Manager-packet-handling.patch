@@ -1,4 +1,4 @@
-From 5d78233f3f2518a9464c83173aea7e3da0d99431 Mon Sep 17 00:00:00 2001
+From d0c4db66e27ad9074640269d3be2aa37f2f0f44d Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 19 Oct 2014 16:01:51 -0500
 Subject: [PATCH] Improve Network Manager packet handling
@@ -40,10 +40,10 @@ index 76a5403..5a5604c 100644
                  // CraftBukkit start
                  if (!this.isConnected() || !this.m.config().isAutoRead()) {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-index a7b18e4..df42019 100644
+index 0091cbf..e23430b 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-@@ -169,4 +169,10 @@ public class PaperSpigotConfig
+@@ -171,4 +171,10 @@ public class PaperSpigotConfig
          strengthEffectModifier = getDouble( "effect-modifiers.strength", 1.3D );
          weaknessEffectModifier = getDouble( "effect-modifiers.weakness", -0.5D );
      }
