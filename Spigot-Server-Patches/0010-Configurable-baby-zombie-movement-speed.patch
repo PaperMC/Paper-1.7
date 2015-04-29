@@ -1,4 +1,4 @@
-From 0b2f0d7f6919abe5727ca0e0e52301664183e237 Mon Sep 17 00:00:00 2001
+From facf4134a389dbf154efc707e81b9398877c8491 Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Tue, 5 Aug 2014 17:18:23 -0500
 Subject: [PATCH] Configurable baby zombie movement speed
@@ -19,10 +19,10 @@ index f732579..41e59ba 100644
      private int bt;
      private boolean bu = false;
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-index 7ea1617..f4acbb3 100644
+index 2619491..c5bcb41 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-@@ -137,4 +137,10 @@ public class PaperSpigotConfig
+@@ -139,4 +139,10 @@ public class PaperSpigotConfig
          config.addDefault( path, def );
          return config.getString( path, config.getString( path ) );
      }
@@ -34,5 +34,5 @@ index 7ea1617..f4acbb3 100644
 +    }
  }
 -- 
-1.9.1
+2.3.7
 
