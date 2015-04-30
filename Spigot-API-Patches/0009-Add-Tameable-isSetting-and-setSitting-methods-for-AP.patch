@@ -1,0 +1,35 @@
+From a9f2f73ff8d35528901aaf8081ddbda8f25a899a Mon Sep 17 00:00:00 2001
+From: Christian Jones <elmoooo@gmail.com>
+Date: Thu, 30 Apr 2015 03:11:10 +0100
+Subject: [PATCH] Add Tameable isSetting and setSitting methods for API
+
+
+diff --git a/src/main/java/org/bukkit/entity/Tameable.java b/src/main/java/org/bukkit/entity/Tameable.java
+index 68ae433..8261c66 100644
+--- a/src/main/java/org/bukkit/entity/Tameable.java
++++ b/src/main/java/org/bukkit/entity/Tameable.java
+@@ -3,6 +3,21 @@ package org.bukkit.entity;
+ public interface Tameable {
+ 
+     /**
++     * Check if this is sitting
++     * <p>
++     *
++     * @return true if this is sitting
++     */
++    boolean isSitting();
++
++    /**
++     * Sets if this is setting.
++     *
++     * @param sitting the value to set
++     */
++    void setSitting(boolean sitting);
++
++    /**
+      * Check if this is tamed
+      * <p>
+      * If something is tamed then a player can not tame it through normal
+-- 
+1.9.5.msysgit.1
+
