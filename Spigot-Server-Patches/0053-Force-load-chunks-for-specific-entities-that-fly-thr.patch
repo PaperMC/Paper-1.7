@@ -1,4 +1,4 @@
-From ff6332741bc4c1c85edf62a91976173101da61d9 Mon Sep 17 00:00:00 2001
+From c9005a5013c3880f53fc34559d05f7691702ffed Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Mon, 13 Apr 2015 15:58:18 -0500
 Subject: [PATCH] Force load chunks for specific entities that fly through
@@ -110,10 +110,10 @@ index 8aa1663..380fcca 100644
          // CraftBukkit end
      }
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 7cbb33b..5fb1509 100644
+index 2ad8614..dedc487 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1700,6 +1700,17 @@ public abstract class World implements IBlockAccess {
+@@ -1691,6 +1691,17 @@ public abstract class World implements IBlockAccess {
                  if (this.isChunkLoaded(k, i1)) {
                      entity.ag = true;
                      this.getChunkAt(k, i1).a(entity);
@@ -132,14 +132,15 @@ index 7cbb33b..5fb1509 100644
                      entity.ag = false;
                  }
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 745f4a7..2d55742 100644
+index 4892310..f3d7129 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-@@ -243,9 +243,20 @@ public class PaperSpigotWorldConfig
-         log( "Entity max Tick Time: " + entityMaxTickTime + "ms" );
+@@ -235,10 +235,20 @@ public class PaperSpigotWorldConfig
+         generateTemple = getBoolean( "generator-settings.temple", true );
+         generateVillage = getBoolean( "generator-settings.village", true );
      }
- 
-+
+-
++    
      public boolean optimizeDraining;
      private void optimizeDraining()
      {
@@ -180,5 +181,5 @@ index 6fea403..06145fc 100644
              return true;
          }
 -- 
-2.3.5
+1.9.4.msysgit.2
 

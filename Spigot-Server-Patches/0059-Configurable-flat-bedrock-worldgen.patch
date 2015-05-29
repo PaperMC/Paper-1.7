@@ -1,4 +1,4 @@
-From 5a2f6520bd6aaa5f2412d2f2d2e2ba6a193be7ae Mon Sep 17 00:00:00 2001
+From a342a07542fe3aa9b589a13b497bad296556a147 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Wed, 6 May 2015 15:02:54 -0700
 Subject: [PATCH] Configurable flat bedrock worldgen
@@ -47,7 +47,7 @@ index bb70599..b851249 100644
  
                          if (block2 != null && block2.getMaterial() != Material.AIR) {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 19c77cc..a4a2baa 100644
+index 8407d46..57c2b8d 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 @@ -224,6 +224,7 @@ public class PaperSpigotWorldConfig
@@ -64,8 +64,8 @@ index 19c77cc..a4a2baa 100644
          generateVillage = getBoolean( "generator-settings.village", true );
 +        generateFlatBedrock = getBoolean( "generator-settings.flat-bedrock", false );
      }
- 
-     public int entityMaxTickTime;
+     
+     public boolean optimizeDraining;
 -- 
 1.9.4.msysgit.2
 

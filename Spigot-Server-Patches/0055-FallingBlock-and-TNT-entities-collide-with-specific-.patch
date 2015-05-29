@@ -1,14 +1,14 @@
-From acdc23fa86385cc2f9577a9efc24fb82761e6d0b Mon Sep 17 00:00:00 2001
+From 353dd27f6a3a0ae62e8277c8120fab097b039e66 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Tue, 21 Apr 2015 01:36:02 -0700
 Subject: [PATCH] FallingBlock and TNT entities collide with specific blocks
 
 
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 5fb1509..a931851 100644
+index dedc487..c434490 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -1275,7 +1275,15 @@ public abstract class World implements IBlockAccess {
+@@ -1273,7 +1273,15 @@ public abstract class World implements IBlockAccess {
                              Block block = chunk.getType(x - cx, y, z - cz );
                              if ( block != null )
                              {
@@ -26,10 +26,10 @@ index 5fb1509..a931851 100644
                          }
                      }
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 2d55742..19c77cc 100644
+index f3d7129..8407d46 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-@@ -259,4 +259,10 @@ public class PaperSpigotWorldConfig
+@@ -251,4 +251,10 @@ public class PaperSpigotWorldConfig
          loadUnloadedTNTEntities = getBoolean( "load-chunks.tnt-entities", false );
          loadUnloadedFallingBlocks = getBoolean( "load-chunks.falling-blocks", false );
      }
@@ -41,5 +41,5 @@ index 2d55742..19c77cc 100644
 +    }
  }
 -- 
-2.3.5
+1.9.4.msysgit.2
 

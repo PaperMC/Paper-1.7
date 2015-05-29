@@ -1,4 +1,4 @@
-From 592f99367f5eaa04043cf17291276c00200ccbef Mon Sep 17 00:00:00 2001
+From a16f1b1923f406bb927422f29fa82a8beef0b1fd Mon Sep 17 00:00:00 2001
 From: prplz <prplz@kohi.net>
 Date: Fri, 17 Apr 2015 12:54:54 +1000
 Subject: [PATCH] Backport NBTReadLimiter security fixes
@@ -76,5 +76,5 @@ index dcc0548..1804518 100644
      }
  }
 -- 
-1.9.1
+1.9.4.msysgit.2
 

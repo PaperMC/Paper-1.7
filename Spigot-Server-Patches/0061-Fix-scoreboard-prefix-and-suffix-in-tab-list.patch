@@ -1,4 +1,4 @@
-From 9ae8979caf28ade64758fefba4732e43c5723745 Mon Sep 17 00:00:00 2001
+From a1ea9222c4b9c2e46d1f68188b9b290ba809d51f Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Thu, 28 May 2015 22:57:05 -0700
 Subject: [PATCH] Fix scoreboard prefix and suffix in tab list

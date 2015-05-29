@@ -1,4 +1,4 @@
-From 6b07562e68db2bfe28cfc622243df356fbfb47e6 Mon Sep 17 00:00:00 2001
+From 923f0c3e19ca3caeed6465f4131e7d1890800f97 Mon Sep 17 00:00:00 2001
 From: Michael Himing <mhiming@gmail.com>
 Date: Wed, 29 Apr 2015 00:58:22 +1000
 Subject: [PATCH] Better container checks
@@ -25,5 +25,5 @@ index 4bca04b..5a8aabb 100644
  
          if (oshort != null && packetplayintransaction.d() == oshort.shortValue() && this.player.activeContainer.windowId == packetplayintransaction.c() && !this.player.activeContainer.c(this.player)) {
 -- 
-2.3.7
+1.9.4.msysgit.2
 
