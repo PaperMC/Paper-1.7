@@ -1,0 +1,25 @@
+From 5253fb9ce2d73b1bcfe67b0044ab3471fb744639 Mon Sep 17 00:00:00 2001
+From: Iceee <andrew@opticgaming.tv>
+Date: Sat, 30 May 2015 13:55:40 -0700
+Subject: [PATCH] Fix race condition in PacketPlayOutMultiBlockChange
+
+
+diff --git a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
+index 1e86a8f..15f3ff8 100644
+--- a/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
++++ b/src/main/java/net/minecraft/server/PacketPlayOutMultiBlockChange.java
+@@ -23,7 +23,10 @@ public class PacketPlayOutMultiBlockChange extends Packet {
+ 
+     public PacketPlayOutMultiBlockChange(int i, short[] ashort, Chunk chunk) {
+         // Spigot start
+-        this.ashort = ashort;
++        // PaperSpigot start - Fix race condition in PacketPlayOutMultiBlockChange
++        this.ashort = new short[ashort.length];
++        System.arraycopy(ashort, 0, this.ashort, 0, ashort.length);
++        // PaperSpigot end
+         this.chunk = chunk;
+         // Spigot end
+         this.b = new ChunkCoordIntPair(chunk.locX, chunk.locZ);
+-- 
+1.9.4.msysgit.2
+
