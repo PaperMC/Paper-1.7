@@ -1,4 +1,4 @@
-From e08fd27038d9614ee331e5e84e747819f192f546 Mon Sep 17 00:00:00 2001
+From 61a51e8ee40829d73dd441dbd6dd8d9be154887c Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Thu, 2 Apr 2015 21:58:49 -0700
 Subject: [PATCH] Generator Settings
@@ -164,6 +164,26 @@ index ef4894e..bb70599 100644
 +        if (this.o.paperSpigotConfig.generateFortress) this.c.a(this, this.o, i, j, (Block[]) null); // PaperSpigot
      }
  }
+diff --git a/src/main/java/net/minecraft/server/StructureGenerator.java b/src/main/java/net/minecraft/server/StructureGenerator.java
+index f835b01..6d0cea8 100644
+--- a/src/main/java/net/minecraft/server/StructureGenerator.java
++++ b/src/main/java/net/minecraft/server/StructureGenerator.java
+@@ -62,6 +62,7 @@ public abstract class StructureGenerator extends WorldGenBase {
+     }
+ 
+     public boolean b(int i, int j, int k) {
++        if (this.c == null) return false; // PaperSpigot
+         this.a(this.c);
+         return this.c(i, j, k) != null;
+     }
+@@ -89,6 +90,7 @@ public abstract class StructureGenerator extends WorldGenBase {
+     }
+ 
+     public boolean d(int i, int j, int k) {
++        if (this.c == null) return false; // PaperSpigot
+         this.a(this.c);
+         Iterator iterator = this.d.values().iterator();
+ 
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 index e7a2b74..8be9740 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
@@ -194,5 +214,5 @@ index e7a2b74..8be9740 100644
 +    }
  }
 -- 
-2.3.5
+1.9.5.msysgit.1
 
