@@ -1,0 +1,235 @@
+From 8251039f58ec68c5869bf2357247d5fc69cab9fb Mon Sep 17 00:00:00 2001
+From: thinkofdeath <thinkofdeath@spigotmc.org>
+Date: Sun, 14 Jun 2015 10:35:52 -0700
+Subject: [PATCH] Backport NextTickList changes
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index d0e73a5..7ad0852 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
+ import org.bukkit.WeatherType;
+ import org.bukkit.block.BlockState;
+ import org.bukkit.craftbukkit.util.LongHash;
++import org.bukkit.craftbukkit.util.HashTreeSet; // PaperSpigot
+ 
+ import org.bukkit.event.block.BlockFormEvent;
+ import org.bukkit.event.weather.LightningStrikeEvent;
+@@ -30,8 +31,7 @@ public class WorldServer extends World {
+     private final MinecraftServer server;
+     public EntityTracker tracker; // CraftBukkit - private final -> public
+     private final PlayerChunkMap manager;
+-    private Set M;
+-    private TreeSet N;
++    private HashTreeSet<NextTickListEntry> N; // PaperSpigot
+     public ChunkProviderServer chunkProviderServer;
+     public boolean savingDisabled;
+     private boolean O;
+@@ -60,12 +60,8 @@ public class WorldServer extends World {
+             this.entitiesById = new IntHashMap();
+         }
+ 
+-        if (this.M == null) {
+-            this.M = new HashSet();
+-        }
+-
+         if (this.N == null) {
+-            this.N = new TreeSet();
++            this.N = new HashTreeSet<NextTickListEntry>(); // PaperSpigot
+         }
+ 
+         this.Q = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
+@@ -483,8 +479,7 @@ public class WorldServer extends World {
+                 nextticklistentry.a(i1);
+             }
+ 
+-            if (!this.M.contains(nextticklistentry)) {
+-                this.M.add(nextticklistentry);
++            if (!this.N.contains(nextticklistentry)) { // PaperSpigot
+                 this.N.add(nextticklistentry);
+             }
+         }
+@@ -498,8 +493,7 @@ public class WorldServer extends World {
+             nextticklistentry.a((long) l + this.worldData.getTime());
+         }
+ 
+-        if (!this.M.contains(nextticklistentry)) {
+-            this.M.add(nextticklistentry);
++        if (!this.N.contains(nextticklistentry)) { // PaperSpigot
+             this.N.add(nextticklistentry);
+         }
+     }
+@@ -524,7 +518,7 @@ public class WorldServer extends World {
+     public boolean a(boolean flag) {
+         int i = this.N.size();
+ 
+-        if (i != this.M.size()) {
++        if (false) { // PaperSpigot
+             throw new IllegalStateException("TickNextTick list out of synch");
+         } else {
+             /* PaperSpigot start - Fix redstone lag issues
+@@ -554,7 +548,6 @@ public class WorldServer extends World {
+                 }
+ 
+                 this.N.remove(nextticklistentry);
+-                this.M.remove(nextticklistentry);
+                 this.V.add(nextticklistentry);
+             }
+ 
+@@ -569,7 +562,6 @@ public class WorldServer extends World {
+ 
+                     if (next.a().isPowerSource() || next.a() instanceof IContainer) {
+                         iterator.remove();
+-                        this.M.remove(next);
+                         this.V.add(next);
+                     }
+                 }
+@@ -643,7 +635,6 @@ public class WorldServer extends World {
+ 
+                 if (nextticklistentry.a >= i && nextticklistentry.a < j && nextticklistentry.c >= k && nextticklistentry.c < l) {
+                     if (flag) {
+-                        this.M.remove(nextticklistentry);
+                         iterator.remove();
+                     }
+ 
+@@ -728,12 +719,8 @@ public class WorldServer extends World {
+             this.entitiesById = new IntHashMap();
+         }
+ 
+-        if (this.M == null) {
+-            this.M = new HashSet();
+-        }
+-
+         if (this.N == null) {
+-            this.N = new TreeSet();
++            this.N = new HashTreeSet<NextTickListEntry>(); // PaperSpigot
+         }
+ 
+         this.b(worldsettings);
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java b/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
+new file mode 100644
+index 0000000..80a5c29
+--- /dev/null
++++ b/src/main/java/org/bukkit/craftbukkit/util/HashTreeSet.java
+@@ -0,0 +1,117 @@
++package org.bukkit.craftbukkit.util;
++
++import java.util.Collection;
++import java.util.HashSet;
++import java.util.Iterator;
++import java.util.Set;
++import java.util.TreeSet;
++
++public class HashTreeSet<V> implements Set<V> {
++
++    private HashSet<V> hash = new HashSet<V>();
++    private TreeSet<V> tree = new TreeSet<V>();
++
++    public HashTreeSet() {
++
++    }
++
++    @Override
++    public int size() {
++        return hash.size();
++    }
++
++    @Override
++    public boolean isEmpty() {
++        return hash.isEmpty();
++    }
++
++    @Override
++    public boolean contains(Object o) {
++        return hash.contains(o);
++    }
++
++    @Override
++    public Iterator<V> iterator() {
++        return new Iterator<V>() {
++
++            private Iterator<V> it = tree.iterator();
++            private V last;
++
++            @Override
++            public boolean hasNext() {
++                return it.hasNext();
++            }
++
++            @Override
++            public V next() {
++                return last = it.next();
++            }
++
++            @Override
++            public void remove() {
++                if (last == null) {
++                    throw new IllegalStateException();
++                }
++                it.remove();
++                hash.remove(last);
++                last = null;
++            }
++        };
++    }
++
++    @Override
++    public Object[] toArray() {
++        return hash.toArray();
++    }
++
++    @Override
++    public Object[] toArray(Object[] a) {
++        return hash.toArray(a);
++    }
++
++    @Override
++    public boolean add(V e) {
++        hash.add(e);
++        return tree.add(e);
++    }
++
++    @Override
++    public boolean remove(Object o) {
++        hash.remove(o);
++        return tree.remove(o);
++    }
++
++    @Override
++    public boolean containsAll(Collection c) {
++        return hash.containsAll(c);
++    }
++
++    @Override
++    public boolean addAll(Collection c) {
++        tree.addAll(c);
++        return hash.addAll(c);
++    }
++
++    @Override
++    public boolean retainAll(Collection c) {
++        tree.retainAll(c);
++        return hash.retainAll(c);
++    }
++
++    @Override
++    public boolean removeAll(Collection c) {
++        tree.removeAll(c);
++        return hash.removeAll(c);
++    }
++
++    @Override
++    public void clear() {
++        hash.clear();
++        tree.clear();
++    }
++
++    public V first() {
++        return tree.first();
++    }
++
++}
+-- 
+1.9.5.msysgit.1
+
