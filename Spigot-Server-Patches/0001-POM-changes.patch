@@ -1,11 +1,11 @@
-From a6cb5f15ee55872bca21477b48725304e230eb84 Mon Sep 17 00:00:00 2001
+From b6d1bba350c4dfa6e2ebb7df18a5b511e130f967 Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Mon, 21 Jul 2014 15:36:01 -0500
 Subject: [PATCH] POM changes
 
 
 diff --git a/pom.xml b/pom.xml
-index 0d00e79..34cbf19 100644
+index 0d00e79..d811b2e 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -1,12 +1,12 @@
@@ -36,7 +36,7 @@ index 0d00e79..34cbf19 100644
      <version>dev-SNAPSHOT</version>
      <relativePath>../pom.xml</relativePath>
    </parent>
-@@ -41,14 +41,14 @@
+@@ -41,20 +41,25 @@
  
    <dependencies>
      <dependency>
@@ -54,7 +54,18 @@ index 0d00e79..34cbf19 100644
        <artifactId>minecraft-server</artifactId>
        <version>${minecraft.version}-SNAPSHOT</version>
        <type>jar</type>
-@@ -115,18 +115,20 @@
+       <scope>compile</scope>
+     </dependency>
+     <dependency>
++      <groupId>io.netty</groupId>
++      <artifactId>netty-all</artifactId>
++      <version>4.0.28.Final</version>
++    </dependency>
++    <dependency>
+       <groupId>net.sf.jopt-simple</groupId>
+       <artifactId>jopt-simple</artifactId>
+       <version>3.2</version>
+@@ -115,18 +120,20 @@
      <defaultGoal>install</defaultGoal>
      <plugins>
        <plugin>
@@ -84,7 +95,7 @@ index 0d00e79..34cbf19 100644
              </goals>
            </execution>
          </executions>
-@@ -140,7 +142,7 @@
+@@ -140,7 +147,7 @@
              <manifestEntries>
                <Main-Class>org.bukkit.craftbukkit.Main</Main-Class>
                <Implementation-Title>CraftBukkit</Implementation-Title>
@@ -107,5 +118,5 @@ index 9304637..3a4b142 100644
  
          if (stream != null) {
 -- 
-2.4.2.windows.1
+2.4.3.windows.1
 
