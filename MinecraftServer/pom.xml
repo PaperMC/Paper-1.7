@@ -30,6 +30,11 @@
             <version>1.7.10</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.0.28.Final</version>
+        </dependency>
     </dependencies>
 
     <build>
