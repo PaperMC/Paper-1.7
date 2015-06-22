@@ -52,25 +52,6 @@ index 250c05f..8692f69 100644
          playerinteractmanager.player = this;
          this.playerInteractManager = playerinteractmanager;
          ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
-diff --git a/src/main/java/net/minecraft/server/EntityTracker.java b/src/main/java/net/minecraft/server/EntityTracker.java
-index c0766d6..8ee4a42 100644
---- a/src/main/java/net/minecraft/server/EntityTracker.java
-+++ b/src/main/java/net/minecraft/server/EntityTracker.java
-@@ -93,9 +93,12 @@ public class EntityTracker {
-     public void addEntity(Entity entity, int i, int j, boolean flag) {
-         org.spigotmc.AsyncCatcher.catchOp( "entity track"); // Spigot
-         i = org.spigotmc.TrackingRange.getEntityTrackingRange(entity, i); // Spigot
--        if (i > this.e) {
--            i = this.e;
-+        // PaperSpigot start - Player view distance API
-+        int viewDistance = entity instanceof EntityPlayer ? ((EntityPlayer) entity).viewDistance: this.e;
-+        if (i > viewDistance) {
-+            i = viewDistance;
-         }
-+        // PaperSpigot end
- 
-         try {
-             if (this.trackedEntities.b(entity.getId())) {
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 index 6f60cac..4c39755 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
