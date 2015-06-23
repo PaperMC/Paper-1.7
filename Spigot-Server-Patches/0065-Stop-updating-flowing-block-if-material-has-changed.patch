@@ -1,0 +1,22 @@
+From ba82dd34afe41dd27c53d2e26081298e2122a788 Mon Sep 17 00:00:00 2001
+From: Iceee <andrew@opticgaming.tv>
+Date: Wed, 17 Jun 2015 00:57:31 -0700
+Subject: [PATCH] Stop updating flowing block if material has changed
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index 4224478..cc45d60 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -102,6 +102,8 @@ public class BlockFlowing extends BlockFluids {
+             this.n(world, i, j, k);
+         }
+ 
++        if (world.getType(i, j, k).getMaterial() != material) return; // PaperSpigot - Stop updating flowing block if material has changed
++
+         if (this.q(world, i, j - 1, k)) {
+             // CraftBukkit start - Send "down" to the server
+             BlockFromToEvent event = new BlockFromToEvent(source, BlockFace.DOWN);
+-- 
+1.9.5.msysgit.1
+
