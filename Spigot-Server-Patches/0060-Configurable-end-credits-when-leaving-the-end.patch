@@ -1,4 +1,4 @@
-From 4aa87c3382894c9ea1f3cc45d09cb0b76ee325db Mon Sep 17 00:00:00 2001
+From 9358501e42e551050a12ae4093b315c653091970 Mon Sep 17 00:00:00 2001
 From: DoctorDark <doctordark11@gmail.com>
 Date: Fri, 22 May 2015 19:51:27 +0100
 Subject: [PATCH] Configurable end credits when leaving the end
@@ -74,10 +74,10 @@ index dda4169..7fd43f7 100644
              return;
          }
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 57c2b8d..ca12649 100644
+index f8a95f9..91d4fc2 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-@@ -259,4 +259,10 @@ public class PaperSpigotWorldConfig
+@@ -253,4 +253,10 @@ public class PaperSpigotWorldConfig
      {
          fallingBlocksCollideWithSigns = getBoolean( "falling-blocks-collide-with-signs", false );
      }
@@ -89,5 +89,5 @@ index 57c2b8d..ca12649 100644
 +    }
  }
 -- 
-1.9.4.msysgit.2
+1.9.5.msysgit.1
 

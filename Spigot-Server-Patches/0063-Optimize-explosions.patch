@@ -1,4 +1,4 @@
-From 85f589126374142468712eddb83d5f7ec4d318c0 Mon Sep 17 00:00:00 2001
+From 59b1598b38c1e5b61eacad9b5f20dfd2a2ef978e Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sat, 13 Jun 2015 19:47:27 -0700
 Subject: [PATCH] Optimize explosions
@@ -143,10 +143,10 @@ index c434490..8d76395 100644
      public static long chunkToKey(int x, int z)
      {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index ca12649..8dde25b 100644
+index 91d4fc2..ec27f79 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-@@ -265,4 +265,10 @@ public class PaperSpigotWorldConfig
+@@ -259,4 +259,10 @@ public class PaperSpigotWorldConfig
      {
          disableEndCredits = getBoolean( "game-mechanics.disable-end-credits", false );
      }
