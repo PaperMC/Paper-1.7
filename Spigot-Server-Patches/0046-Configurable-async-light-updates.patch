@@ -1,14 +1,63 @@
-From f0b837e83a946ae7f6b46777ed4ee590c0707f85 Mon Sep 17 00:00:00 2001
-From: Roman Alexander <romanalexander@users.noreply.github.com>
-Date: Wed, 25 Mar 2015 20:27:13 -0500
+From 17f8e242bce5009d1d2bdc9f75c47da393809c48 Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Wed, 24 Jun 2015 02:56:49 -0700
 Subject: [PATCH] Configurable async light updates
 
 
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 86a13e7..1b57206 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -8,6 +8,7 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.Random;
+ import java.util.concurrent.Callable;
++import java.util.concurrent.atomic.AtomicInteger; // PaperSpigot
+ 
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -41,6 +42,10 @@ public class Chunk {
+     public long s;
+     private int x;
+     protected net.minecraft.util.gnu.trove.map.hash.TObjectIntHashMap<Class> entityCount = new net.minecraft.util.gnu.trove.map.hash.TObjectIntHashMap<Class>(); // Spigot
++    // PaperSpigot start - Asynchronous light updates
++    public AtomicInteger pendingLightUpdates = new AtomicInteger();
++    public long lightUpdateTime;
++    // PaperSpigot end
+ 
+     // CraftBukkit start - Neighbor loaded cache for chunk lighting and entity ticking
+     private int neighbors = 0x1 << 12;
+@@ -295,7 +300,7 @@ public class Chunk {
+     private void c(int i, int j, int k, int l) {
+         if (l > k && this.world.areChunksLoaded(i, 0, j, 16)) {
+             for (int i1 = k; i1 < l; ++i1) {
+-                this.world.c(EnumSkyBlock.SKY, i, i1, j);
++                this.world.updateLight(EnumSkyBlock.SKY, i, i1, j); // PaperSpigot - Asynchronous lighting updates
+             }
+ 
+             this.n = true;
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 22330c3..8aff010 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -55,6 +55,12 @@ public class ChunkProviderServer implements IChunkProvider {
+     }
+ 
+     public void queueUnload(int i, int j) {
++        // PaperSpigot start - Asynchronous lighting updates
++        Chunk chunk = this.chunks.get(LongHash.toLong(i, j));
++        if (chunk != null && chunk.world.paperSpigotConfig.useAsyncLighting && (chunk.pendingLightUpdates.get() > 0 || chunk.world.getTime() - chunk.lightUpdateTime < 20)) {
++            return;
++        }
++        // PaperSpigot end
+         if (this.world.worldProvider.e()) {
+             ChunkCoordinates chunkcoordinates = this.world.getSpawn();
+             int k = i * 16 + 8 - chunkcoordinates.x;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 1977c6c..9bf2a98 100644
+index dcb5474..783912d 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
-@@ -11,6 +11,12 @@ import java.util.Set;
+@@ -11,6 +11,13 @@ import java.util.Set;
  import java.util.UUID;
  import java.util.concurrent.Callable;
  
@@ -16,292 +65,114 @@ index 1977c6c..9bf2a98 100644
 +import java.util.concurrent.ExecutorService;
 +import java.util.concurrent.Executors;
 +import net.minecraft.util.com.google.common.util.concurrent.ThreadFactoryBuilder;
++import org.bukkit.craftbukkit.CraftChunk;
 +// PaperSpigot end
 +
  // CraftBukkit start
  import org.bukkit.Bukkit;
  import org.bukkit.block.BlockState;
-@@ -812,13 +818,14 @@ public abstract class World implements IBlockAccess {
-             int l = i >> 4;
-             int i1 = k >> 4;
+@@ -114,6 +121,7 @@ public abstract class World implements IBlockAccess {
+     public static boolean haveWeSilencedAPhysicsCrash;
+     public static String blockLocation;
+     public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
++    private ExecutorService lightingExecutor; // PaperSpigot - Asynchronous lighting updates
  
--            if (!this.isChunkLoaded(l, i1)) {
-+            // PaperSpigot start - Configurable async light updates
-+            Chunk chunk = this.getChunkIfLoaded(l, i1);
-+            if (chunk == null) {
-                 return enumskyblock.c;
-             } else {
--                Chunk chunk = this.getChunkAt(l, i1);
--
-                 return chunk.getBrightness(enumskyblock, i & 15, j, k & 15);
+     public static long chunkToKey(int x, int z)
+     {
+@@ -614,7 +622,7 @@ public abstract class World implements IBlockAccess {
+ 
+         if (!this.worldProvider.g) {
+             for (i1 = k; i1 <= l; ++i1) {
+-                this.c(EnumSkyBlock.SKY, i, i1, j);
++                this.updateLight(EnumSkyBlock.SKY, i, i1, j); // PaperSpigot - Asynchronous lighting updates
              }
-+            // PaperSpigot end
-         } else {
-             return enumskyblock.c;
          }
-@@ -828,9 +835,10 @@ public abstract class World implements IBlockAccess {
-         if (i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000) {
-             if (j >= 0) {
-                 if (j < 256) {
--                    if (this.isChunkLoaded(i >> 4, k >> 4)) {
--                        Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
--
-+                    // PaperSpigot start - Configurable async light updates
-+                    Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
-+                    if (chunk != null) {
-+                    // PaperSpigot end
-                         chunk.a(enumskyblock, i & 15, j, k & 15, l);
  
-                         for (int i1 = 0; i1 < this.u.size(); ++i1) {
-@@ -2388,10 +2396,11 @@ public abstract class World implements IBlockAccess {
+@@ -2380,10 +2388,10 @@ public abstract class World implements IBlockAccess {
+         boolean flag = false;
+ 
+         if (!this.worldProvider.g) {
+-            flag |= this.c(EnumSkyBlock.SKY, i, j, k);
++            flag |= this.updateLight(EnumSkyBlock.SKY, i, j, k); // PaperSpigot - Asynchronous lighting updates
+         }
+ 
+-        flag |= this.c(EnumSkyBlock.BLOCK, i, j, k);
++        flag |= this.updateLight(EnumSkyBlock.BLOCK, i, j, k); // PaperSpigot - Asynchronous lighting updates
+         return flag;
      }
  
-     private int a(int i, int j, int k, EnumSkyBlock enumskyblock) {
--        if (enumskyblock == EnumSkyBlock.SKY && this.i(i, j, k)) {
-+        Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4); // PaperSpigot - Configurable async light updates
-+        if (chunk == null || (enumskyblock == EnumSkyBlock.SKY && chunk.d(i & 15, j, k & 15))) {
-             return 15;
-         } else {
--            Block block = this.getType(i, j, k);
-+            Block block = chunk.getType(i & 15, j, k & 15); // PaperSpigot - Configurable async light updates
-             int l = enumskyblock == EnumSkyBlock.SKY ? 0 : block.m();
-             int i1 = block.k();
- 
-@@ -2428,118 +2437,140 @@ public abstract class World implements IBlockAccess {
+@@ -2428,10 +2436,10 @@ public abstract class World implements IBlockAccess {
          }
      }
  
 -    public boolean c(EnumSkyBlock enumskyblock, int i, int j, int k) {
--        // CraftBukkit start - Use neighbor cache instead of looking up
++    public boolean c(EnumSkyBlock enumskyblock, int i, int j, int k, Chunk chunk, List<Chunk> neighbors) { // PaperSpigot
+         // CraftBukkit start - Use neighbor cache instead of looking up
 -        Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
 -        if (chunk == null || !chunk.areNeighborsLoaded(1) /* !this.areChunksLoaded(i, j, k, 17)*/) {
--            // CraftBukkit end
--            return false;
--        } else {
--            int l = 0;
--            int i1 = 0;
--
--            this.methodProfiler.a("getBrightness");
--            int j1 = this.b(enumskyblock, i, j, k);
--            int k1 = this.a(i, j, k, enumskyblock);
--            int l1;
--            int i2;
--            int j2;
--            int k2;
--            int l2;
--            int i3;
--            int j3;
--            int k3;
--            int l3;
--
--            if (k1 > j1) {
--                this.I[i1++] = 133152;
--            } else if (k1 < j1) {
--                this.I[i1++] = 133152 | j1 << 18;
--
--                while (l < i1) {
--                    l1 = this.I[l++];
--                    i2 = (l1 & 63) - 32 + i;
--                    j2 = (l1 >> 6 & 63) - 32 + j;
--                    k2 = (l1 >> 12 & 63) - 32 + k;
--                    l2 = l1 >> 18 & 15;
--                    i3 = this.b(enumskyblock, i2, j2, k2);
--                    if (i3 == l2) {
--                        this.b(enumskyblock, i2, j2, k2, 0);
--                        if (l2 > 0) {
--                            j3 = MathHelper.a(i2 - i);
--                            l3 = MathHelper.a(j2 - j);
--                            k3 = MathHelper.a(k2 - k);
--                            if (j3 + l3 + k3 < 17) {
--                                for (int i4 = 0; i4 < 6; ++i4) {
--                                    int j4 = i2 + Facing.b[i4];
--                                    int k4 = j2 + Facing.c[i4];
--                                    int l4 = k2 + Facing.d[i4];
--                                    int i5 = Math.max(1, this.getType(j4, k4, l4).k());
--
--                                    i3 = this.b(enumskyblock, j4, k4, l4);
--                                    if (i3 == l2 - i5 && i1 < this.I.length) {
--                                        this.I[i1++] = j4 - i + 32 | k4 - j + 32 << 6 | l4 - k + 32 << 12 | l2 - i5 << 18;
-+    // PaperSpigot start - Configurable async light updates
-+    private ExecutorService service = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build());
-+    public boolean c(final EnumSkyBlock enumskyblock, final int i, final int j, final int k) {
-+        Callable<Boolean> callable = new Callable<Boolean>() {
-+            @Override
-+            public Boolean call() {
-+                // CraftBukkit start - Use neighbor cache instead of looking up
-+                Chunk chunk = World.this.getChunkIfLoaded(i >> 4, k >> 4);
-+                if (chunk == null || !chunk.areNeighborsLoaded(1) /* !World.this.areChunksLoaded(i, j, k, 17)*/) {
-+                    // CraftBukkit end
-+                    return false;
-+                } else {
-+                    int l = 0;
-+                    int i1 = 0;
-+
-+                    World.this.methodProfiler.a("getBrightness");
-+                    int j1 = World.this.b(enumskyblock, i, j, k);
-+                    int k1 = World.this.a(i, j, k, enumskyblock);
-+                    int l1;
-+                    int i2;
-+                    int j2;
-+                    int k2;
-+                    int l2;
-+                    int i3;
-+                    int j3;
-+                    int k3;
-+                    int l3;
-+
-+                    if (k1 > j1) {
-+                        World.this.I[i1++] = 133152;
-+                    } else if (k1 < j1) {
-+                        World.this.I[i1++] = 133152 | j1 << 18;
-+
-+                        while (l < i1) {
-+                            l1 = World.this.I[l++];
-+                            i2 = (l1 & 63) - 32 + i;
-+                            j2 = (l1 >> 6 & 63) - 32 + j;
-+                            k2 = (l1 >> 12 & 63) - 32 + k;
-+                            l2 = l1 >> 18 & 15;
-+                            i3 = World.this.b(enumskyblock, i2, j2, k2);
-+                            if (i3 == l2) {
-+                                World.this.b(enumskyblock, i2, j2, k2, 0);
-+                                if (l2 > 0) {
-+                                    j3 = MathHelper.a(i2 - i);
-+                                    l3 = MathHelper.a(j2 - j);
-+                                    k3 = MathHelper.a(k2 - k);
-+                                    if (j3 + l3 + k3 < 17) {
-+                                        for (int i4 = 0; i4 < 6; ++i4) {
-+                                            int j4 = i2 + Facing.b[i4];
-+                                            int k4 = j2 + Facing.c[i4];
-+                                            int l4 = k2 + Facing.d[i4];
-+                                            Chunk lightChunk = World.this.getChunkIfLoaded(j4 >> 4, l4 >> 4);
-+                                            int i5;
-+                                            if (lightChunk != null) {
-+                                                i5 = Math.max(1, lightChunk.getType(j4 & 15, k4, l4 & 15).k());
-+                                            } else {
-+                                                i5 = 255;
-+                                            }
-+                                            i3 = World.this.b(enumskyblock, j4, k4, l4);
-+                                            if (i3 == l2 - i5 && i1 < World.this.I.length) {
-+                                                World.this.I[i1++] = j4 - i + 32 | k4 - j + 32 << 6 | l4 - k + 32 << 12 | l2 - i5 << 18;
-+                                            }
-+                                        }
-                                     }
-                                 }
-                             }
-                         }
--                    }
--                }
- 
--                l = 0;
--            }
-+                        l = 0;
-+                    }
- 
--            this.methodProfiler.b();
--            this.methodProfiler.a("checkedPosition < toCheckCount");
--
--            while (l < i1) {
--                l1 = this.I[l++];
--                i2 = (l1 & 63) - 32 + i;
--                j2 = (l1 >> 6 & 63) - 32 + j;
--                k2 = (l1 >> 12 & 63) - 32 + k;
--                l2 = this.b(enumskyblock, i2, j2, k2);
--                i3 = this.a(i2, j2, k2, enumskyblock);
--                if (i3 != l2) {
--                    this.b(enumskyblock, i2, j2, k2, i3);
--                    if (i3 > l2) {
--                        j3 = Math.abs(i2 - i);
--                        l3 = Math.abs(j2 - j);
--                        k3 = Math.abs(k2 - k);
--                        boolean flag = i1 < this.I.length - 6;
--
--                        if (j3 + l3 + k3 < 17 && flag) {
--                            if (this.b(enumskyblock, i2 - 1, j2, k2) < i3) {
--                                this.I[i1++] = i2 - 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
--                            }
-+                    World.this.methodProfiler.b();
-+                    World.this.methodProfiler.a("checkedPosition < toCheckCount");
-+
-+                    while (l < i1) {
-+                        l1 = World.this.I[l++];
-+                        i2 = (l1 & 63) - 32 + i;
-+                        j2 = (l1 >> 6 & 63) - 32 + j;
-+                        k2 = (l1 >> 12 & 63) - 32 + k;
-+                        l2 = World.this.b(enumskyblock, i2, j2, k2);
-+                        i3 = World.this.a(i2, j2, k2, enumskyblock);
-+                        if (i3 != l2) {
-+                            World.this.b(enumskyblock, i2, j2, k2, i3);
-+                            if (i3 > l2) {
-+                                j3 = Math.abs(i2 - i);
-+                                l3 = Math.abs(j2 - j);
-+                                k3 = Math.abs(k2 - k);
-+                                boolean flag = i1 < World.this.I.length - 6;
-+
-+                                if (j3 + l3 + k3 < 17 && flag) {
-+                                    if (World.this.b(enumskyblock, i2 - 1, j2, k2) < i3) {
-+                                        World.this.I[i1++] = i2 - 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
-+                                    }
- 
--                            if (this.b(enumskyblock, i2 + 1, j2, k2) < i3) {
--                                this.I[i1++] = i2 + 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
--                            }
-+                                    if (World.this.b(enumskyblock, i2 + 1, j2, k2) < i3) {
-+                                        World.this.I[i1++] = i2 + 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
-+                                    }
- 
--                            if (this.b(enumskyblock, i2, j2 - 1, k2) < i3) {
--                                this.I[i1++] = i2 - i + 32 + (j2 - 1 - j + 32 << 6) + (k2 - k + 32 << 12);
--                            }
-+                                    if (World.this.b(enumskyblock, i2, j2 - 1, k2) < i3) {
-+                                        World.this.I[i1++] = i2 - i + 32 + (j2 - 1 - j + 32 << 6) + (k2 - k + 32 << 12);
-+                                    }
- 
--                            if (this.b(enumskyblock, i2, j2 + 1, k2) < i3) {
--                                this.I[i1++] = i2 - i + 32 + (j2 + 1 - j + 32 << 6) + (k2 - k + 32 << 12);
--                            }
-+                                    if (World.this.b(enumskyblock, i2, j2 + 1, k2) < i3) {
-+                                        World.this.I[i1++] = i2 - i + 32 + (j2 + 1 - j + 32 << 6) + (k2 - k + 32 << 12);
-+                                    }
- 
--                            if (this.b(enumskyblock, i2, j2, k2 - 1) < i3) {
--                                this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 - 1 - k + 32 << 12);
--                            }
-+                                    if (World.this.b(enumskyblock, i2, j2, k2 - 1) < i3) {
-+                                        World.this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 - 1 - k + 32 << 12);
-+                                    }
- 
--                            if (this.b(enumskyblock, i2, j2, k2 + 1) < i3) {
--                                this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 + 1 - k + 32 << 12);
-+                                    if (World.this.b(enumskyblock, i2, j2, k2 + 1) < i3) {
-+                                        World.this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 + 1 - k + 32 << 12);
-+                                    }
-+                                }
-                             }
-                         }
-                     }
-+
-+                    World.this.methodProfiler.b();
-+                    return true;
-                 }
++        //Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
++        if (chunk == null /*|| !chunk.areNeighborsLoaded(1)*/ /* !this.areChunksLoaded(i, j, k, 17)*/) {
+             // CraftBukkit end
+             return false;
+         } else {
+@@ -2537,10 +2545,57 @@ public abstract class World implements IBlockAccess {
              }
--
--            this.methodProfiler.b();
--            return true;
-+        };
-+        if (paperSpigotConfig.useAsyncLighting) {
-+            service.submit(callable);
-+        } else {
-+            try {
-+                return callable.call();
-+            } catch(Exception ignore) {
-+            }
-         }
-+        return true;
-     }
-+    // PaperSpigot end
  
+             this.methodProfiler.b();
++            // PaperSpigot start - Asynchronous light updates
++            chunk.pendingLightUpdates.decrementAndGet();
++            for (Chunk neighbor : neighbors) {
++                neighbor.pendingLightUpdates.decrementAndGet();
++            }
++            // PaperSpigot end
+             return true;
+         }
+     }
+ 
++    /**
++     * PaperSpigot - Asynchronous lighting updates
++     */
++    public boolean updateLight(final EnumSkyBlock enumskyblock, final int x, final int y, final int z) {
++        final Chunk chunk = this.getChunkIfLoaded(x >> 4, z >> 4);
++        if (chunk == null || (!chunk.world.paperSpigotConfig.useAsyncLighting && !chunk.areNeighborsLoaded(1))) {
++            return false;
++        }
++
++        final List<Chunk> neighbors = new ArrayList<Chunk>();
++        for (int cx = (x >> 4) - 1; cx < (x >> 4) + 1; ++cx) {
++            for (int cz = (z >> 4) - 1; cz < (z >> 4) + 1; ++cz) {
++                Chunk neighbor = ((CraftChunk) chunk.world.getWorld().getChunkAt(cx, cz)).getHandle(); // Force chunk load
++                if (neighbor != chunk) {
++                    neighbor.pendingLightUpdates.incrementAndGet();
++                    neighbor.lightUpdateTime = chunk.world.getTime();
++                    neighbors.add(neighbor);
++                }
++            }
++        }
++
++        chunk.pendingLightUpdates.incrementAndGet();
++        chunk.lightUpdateTime = chunk.world.getTime();
++
++        if (!chunk.world.paperSpigotConfig.useAsyncLighting) {
++            return this.c(enumskyblock, x, y, z, chunk, neighbors);
++        }
++
++        if (lightingExecutor == null) {
++            lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build());
++        }
++
++        lightingExecutor.submit(new Runnable() {
++            @Override
++            public void run() {
++                World.this.c(enumskyblock, x, y, z, chunk, neighbors);
++            }
++        });
++        return true;
++    }
++
      public boolean a(boolean flag) {
          return false;
+     }
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 index 44d271a..ddd33e8 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
@@ -319,5 +190,5 @@ index 44d271a..ddd33e8 100644
 +    }
  }
 -- 
-2.3.5
+1.9.5.msysgit.1
 

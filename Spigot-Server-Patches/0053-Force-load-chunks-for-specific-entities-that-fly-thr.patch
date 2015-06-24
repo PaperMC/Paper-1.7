@@ -1,19 +1,18 @@
-From 797344357c9cfc0a09e8fbab852c93911e3747c8 Mon Sep 17 00:00:00 2001
+From a43aa031d44d2b8497cc999d311184901f84c567 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Wed, 24 Jun 2015 01:06:51 -0700
 Subject: [PATCH] Force load chunks for specific entities that fly through
 
 
 diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-index 22330c3..f421613 100644
+index 8aff010..88962d2 100644
 --- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
 +++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
-@@ -55,6 +55,18 @@ public class ChunkProviderServer implements IChunkProvider {
-     }
- 
-     public void queueUnload(int i, int j) {
+@@ -61,6 +61,17 @@ public class ChunkProviderServer implements IChunkProvider {
+             return;
+         }
+         // PaperSpigot end
 +        // PaperSpigot start - Don't unload chunk if it contains an entity that loads chunks
-+        Chunk chunk = this.chunks.get(LongHash.toLong(i, j));
 +        if (chunk != null) {
 +            for (List<Entity> entities : chunk.entitySlices) {
 +                for (Entity entity : entities) {

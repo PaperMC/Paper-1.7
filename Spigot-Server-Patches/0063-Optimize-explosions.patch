@@ -1,4 +1,4 @@
-From 59b1598b38c1e5b61eacad9b5f20dfd2a2ef978e Mon Sep 17 00:00:00 2001
+From 1ac2f9328cfd3b28db13d73b2490a961d18456f7 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sat, 13 Jun 2015 19:47:27 -0700
 Subject: [PATCH] Optimize explosions
@@ -122,7 +122,7 @@ index 692e74f..31dea6d 100644
  
              // this.h[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index c434490..8d76395 100644
+index 6af85f8..9379e24 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
@@ -132,12 +132,12 @@ index c434490..8d76395 100644
 +import java.util.HashMap;
 +import java.util.Map;
  import net.minecraft.util.com.google.common.util.concurrent.ThreadFactoryBuilder;
+ import org.bukkit.craftbukkit.CraftChunk;
  // PaperSpigot end
- 
-@@ -120,6 +122,7 @@ public abstract class World implements IBlockAccess {
-     public static boolean haveWeSilencedAPhysicsCrash;
+@@ -122,6 +124,7 @@ public abstract class World implements IBlockAccess {
      public static String blockLocation;
      public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
+     private ExecutorService lightingExecutor; // PaperSpigot - Asynchronous lighting updates
 +    public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<Explosion.CacheKey, Float>(); // PaperSpigot - Optimize explosions
  
      public static long chunkToKey(int x, int z)
