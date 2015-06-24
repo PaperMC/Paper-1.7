@@ -1,13 +1,22 @@
-From e0a368cd8c7323dad7bb8d259ec1b2bde1a0970b Mon Sep 17 00:00:00 2001
+From 103b1de6488db655d1451fbe7da2ead208b39117 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Tue, 23 Jun 2015 23:32:56 -0700
 Subject: [PATCH] Fast draining
 
 
 diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
-index cc45d60..20b6795 100644
+index cc45d60..9bf2712 100644
 --- a/src/main/java/net/minecraft/server/BlockFlowing.java
 +++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -73,7 +73,7 @@ public class BlockFlowing extends BlockFluids {
+                 }
+             }
+ 
+-            if (this.material == Material.LAVA && l < 8 && j1 < 8 && j1 > l && random.nextInt(4) != 0) {
++            if (!world.paperSpigotConfig.fastDrainLava && this.material == Material.LAVA && l < 8 && j1 < 8 && j1 > l && random.nextInt(4) != 0) { // PaperSpigot
+                 i1 *= 4;
+             }
+ 
 @@ -83,7 +83,7 @@ public class BlockFlowing extends BlockFluids {
                  }
              } else {
