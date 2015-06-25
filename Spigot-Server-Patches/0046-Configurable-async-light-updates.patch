@@ -1,4 +1,4 @@
-From 17f8e242bce5009d1d2bdc9f75c47da393809c48 Mon Sep 17 00:00:00 2001
+From 9d576828a53496c4346508e5503c85a205b786d7 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Wed, 24 Jun 2015 02:56:49 -0700
 Subject: [PATCH] Configurable async light updates
@@ -54,7 +54,7 @@ index 22330c3..8aff010 100644
              ChunkCoordinates chunkcoordinates = this.world.getSpawn();
              int k = i * 16 + 8 - chunkcoordinates.x;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index dcb5474..783912d 100644
+index dcb5474..cc70492 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -11,6 +11,13 @@ import java.util.Set;
@@ -115,16 +115,21 @@ index dcb5474..783912d 100644
              // CraftBukkit end
              return false;
          } else {
-@@ -2537,10 +2545,57 @@ public abstract class World implements IBlockAccess {
+@@ -2536,11 +2544,64 @@ public abstract class World implements IBlockAccess {
+                 }
              }
  
-             this.methodProfiler.b();
 +            // PaperSpigot start - Asynchronous light updates
-+            chunk.pendingLightUpdates.decrementAndGet();
-+            for (Chunk neighbor : neighbors) {
-+                neighbor.pendingLightUpdates.decrementAndGet();
++            if (chunk.world.paperSpigotConfig.useAsyncLighting) {
++                chunk.pendingLightUpdates.decrementAndGet();
++                if (neighbors != null) {
++                    for (Chunk neighbor : neighbors) {
++                        neighbor.pendingLightUpdates.decrementAndGet();
++                    }
++                }
 +            }
 +            // PaperSpigot end
+             this.methodProfiler.b();
              return true;
          }
      }
@@ -138,27 +143,29 @@ index dcb5474..783912d 100644
 +            return false;
 +        }
 +
-+        final List<Chunk> neighbors = new ArrayList<Chunk>();
-+        for (int cx = (x >> 4) - 1; cx < (x >> 4) + 1; ++cx) {
-+            for (int cz = (z >> 4) - 1; cz < (z >> 4) + 1; ++cz) {
-+                Chunk neighbor = ((CraftChunk) chunk.world.getWorld().getChunkAt(cx, cz)).getHandle(); // Force chunk load
-+                if (neighbor != chunk) {
-+                    neighbor.pendingLightUpdates.incrementAndGet();
-+                    neighbor.lightUpdateTime = chunk.world.getTime();
-+                    neighbors.add(neighbor);
-+                }
-+            }
++        if (!chunk.world.paperSpigotConfig.useAsyncLighting) {
++            return this.c(enumskyblock, x, y, z, chunk, null);
++        }
++
++        if (lightingExecutor == null) {
++            lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build());
 +        }
 +
 +        chunk.pendingLightUpdates.incrementAndGet();
 +        chunk.lightUpdateTime = chunk.world.getTime();
 +
-+        if (!chunk.world.paperSpigotConfig.useAsyncLighting) {
-+            return this.c(enumskyblock, x, y, z, chunk, neighbors);
-+        }
-+
-+        if (lightingExecutor == null) {
-+            lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build());
++        final List<Chunk> neighbors = new ArrayList<Chunk>();
++        for (int cx = (x >> 4) - 1; cx < (x >> 4) + 1; ++cx) {
++            for (int cz = (z >> 4) - 1; cz < (z >> 4) + 1; ++cz) {
++                if (this.isChunkLoaded(cx, cz)) {
++                    Chunk neighbor = this.getChunkAt(cx, cz);
++                    if (neighbor != chunk) {
++                        neighbor.pendingLightUpdates.incrementAndGet();
++                        neighbor.lightUpdateTime = chunk.world.getTime();
++                        neighbors.add(neighbor);
++                    }
++                }
++            }
 +        }
 +
 +        lightingExecutor.submit(new Runnable() {
