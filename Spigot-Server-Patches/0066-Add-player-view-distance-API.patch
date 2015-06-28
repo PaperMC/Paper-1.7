@@ -112,8 +112,8 @@ index 6f60cac..4c39755 100644
 +            int cz = (int) player.locZ >> 4;
 +
 +            if (viewDistance - player.viewDistance > 0) {
-+                for (int x = cx - viewDistance; x < cx + viewDistance; ++x) {
-+                    for (int z = cz - viewDistance; z < cz + viewDistance; ++z) {
++                for (int x = cx - viewDistance; x <= cx + viewDistance; ++x) {
++                    for (int z = cz - viewDistance; z <= cz + viewDistance; ++z) {
 +                        PlayerChunk playerChunk = this.a(x, z, true);
 +                        if (!PlayerChunk.b(playerChunk).contains(player)) {
 +                            playerChunk.a(player);
@@ -121,8 +121,8 @@ index 6f60cac..4c39755 100644
 +                    }
 +                }
 +            } else {
-+                for (int x = cx - player.viewDistance; x < cx + player.viewDistance; ++x) {
-+                    for (int z = cz - player.viewDistance; z < cz + player.viewDistance; ++z) {
++                for (int x = cx - player.viewDistance; x <= cx + player.viewDistance; ++x) {
++                    for (int z = cz - player.viewDistance; z <= cz + player.viewDistance; ++z) {
 +                        if (!this.a(x, z, cx, cz, viewDistance)) {
 +                            this.a(x, z, true).b(player);
 +                        }
