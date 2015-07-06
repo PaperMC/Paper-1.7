@@ -1,4 +1,4 @@
-From 0057af75840c0f83bceb16274cee5783f19a0f6d Mon Sep 17 00:00:00 2001
+From 68c3db9e4448e371854391116f898f5fdbbc65a7 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 19 Oct 2014 15:56:39 -0500
 Subject: [PATCH] Further improve server tick loop
@@ -152,10 +152,10 @@ index fa10ea1..953a88c 100644
                      lastTick = curTime;
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 1548042..ed5bb2e 100644
+index 98bbc4c..b642648 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -1842,6 +1842,17 @@ public final class CraftServer implements Server {
+@@ -1841,6 +1841,17 @@ public final class CraftServer implements Server {
              return org.spigotmc.SpigotConfig.config;
          }
  
@@ -170,9 +170,9 @@ index 1548042..ed5bb2e 100644
 +        }
 +        // PaperSpigot end
 +
-         @Override
-         public void broadcast( BaseComponent component )
-         {
+         /**
+          * Sends the component to the player
+          *
 diff --git a/src/main/java/org/spigotmc/TicksPerSecondCommand.java b/src/main/java/org/spigotmc/TicksPerSecondCommand.java
 index 2b8343d..1780e35 100644
 --- a/src/main/java/org/spigotmc/TicksPerSecondCommand.java

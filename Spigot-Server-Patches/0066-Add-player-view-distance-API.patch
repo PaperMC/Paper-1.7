@@ -1,4 +1,4 @@
-From e12e2eb04817e10c3f8d7059e521477ac033a49b Mon Sep 17 00:00:00 2001
+From 13101d2c6030d66f4f4f617151bbcc2a49c9a0e5 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sun, 21 Jun 2015 18:29:12 -0700
 Subject: [PATCH] Add player view distance API
@@ -53,7 +53,7 @@ index 250c05f..8692f69 100644
          this.playerInteractManager = playerinteractmanager;
          ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
 diff --git a/src/main/java/net/minecraft/server/PlayerChunkMap.java b/src/main/java/net/minecraft/server/PlayerChunkMap.java
-index 6f60cac..4c39755 100644
+index 6f60cac..5010152 100644
 --- a/src/main/java/net/minecraft/server/PlayerChunkMap.java
 +++ b/src/main/java/net/minecraft/server/PlayerChunkMap.java
 @@ -124,8 +124,10 @@ public class PlayerChunkMap {
@@ -156,10 +156,10 @@ index 7b30362..fad950e 100644
                  // Spigot End
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 52760c0..267f487 100644
+index 5899492..826ea3c 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -1455,6 +1455,17 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1466,6 +1466,17 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
          }
          // PaperSpigot end
  
@@ -178,7 +178,7 @@ index 52760c0..267f487 100644
  
      public Player.Spigot spigot()
 diff --git a/src/main/java/org/spigotmc/ActivationRange.java b/src/main/java/org/spigotmc/ActivationRange.java
-index 06145fc..b3d7bc0 100644
+index 0128097..89ce091 100644
 --- a/src/main/java/org/spigotmc/ActivationRange.java
 +++ b/src/main/java/org/spigotmc/ActivationRange.java
 @@ -19,6 +19,7 @@ import net.minecraft.server.EntityFireworks;
