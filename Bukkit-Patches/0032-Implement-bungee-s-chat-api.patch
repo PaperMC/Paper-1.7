@@ -1,0 +1,94 @@
+From fb98bbfb5c9fba95af41f3052c95ab1089511e22 Mon Sep 17 00:00:00 2001
+From: Thinkofdeath <thinkofdeath@spigotmc.org>
+Date: Sun, 7 Sep 2014 12:34:34 +0100
+Subject: [PATCH] Implement bungee's chat api
+
+
+diff --git a/pom.xml b/pom.xml
+index ec56492..4bfca82 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -86,6 +86,16 @@
+             <version>1.8-SNAPSHOT</version>
+             <type>jar</type>
+             <scope>compile</scope>
++            <exclusions>
++                <exclusion>
++                    <groupId>com.google.code.gson</groupId>
++                    <artifactId>gson</artifactId>
++                </exclusion>
++                <exclusion>
++                    <groupId>net.sf.trove4j</groupId>
++                    <artifactId>trove4j</artifactId>
++                </exclusion>
++            </exclusions>
+         </dependency>
+         <dependency>
+             <groupId>org.yaml</groupId>
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index f861214..2057175 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -915,6 +915,27 @@ public interface Server extends PluginMessageRecipient {
+         {
+             throw new UnsupportedOperationException( "Not supported yet." );
+         }
++
++        /**
++         * Sends the component to the player
++         *
++         * @param component the components to send
++         */
++        public void broadcast(net.md_5.bungee.api.chat.BaseComponent component)
++        {
++            throw new UnsupportedOperationException( "Not supported yet." );
++        }
++
++        /**
++         * Sends an array of components as a single message to the
++         * player
++         *
++         * @param components the components to send
++         */
++        public void broadcast(net.md_5.bungee.api.chat.BaseComponent ...components)
++        {
++            throw new UnsupportedOperationException( "Not supported yet." );
++        }
+     }
+ 
+     Spigot spigot();
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index b2ad5b7..152235b 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -1102,6 +1102,27 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+         {
+             throw new UnsupportedOperationException( "Not supported yet." );
+         }
++
++        /**
++         * Sends the component to the player
++         *
++         * @param component the components to send
++         */
++        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent component)
++        {
++            throw new UnsupportedOperationException( "Not supported yet." );
++        }
++
++        /**
++         * Sends an array of components as a single message to the
++         * player
++         *
++         * @param components the components to send
++         */
++        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent ...components)
++        {
++            throw new UnsupportedOperationException( "Not supported yet." );
++        }
+     }
+ 
+     Spigot spigot();
+-- 
+1.9.1
+

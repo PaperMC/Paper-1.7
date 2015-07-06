@@ -1,4 +1,4 @@
-From dbf7e0b50e03150df774881195002269552f4236 Mon Sep 17 00:00:00 2001
+From f042fc6470c0bd0b117f469b2cd08729ade5f32a Mon Sep 17 00:00:00 2001
 From: md_5 <md_5@live.com.au>
 Date: Thu, 4 Jul 2013 20:05:19 +1000
 Subject: [PATCH] Update Depends
@@ -6,10 +6,10 @@ Subject: [PATCH] Update Depends
 - All of these changes have been reviewed to be binary compatible and in general contract compatible with previous versions of the libraries.
 
 diff --git a/pom.xml b/pom.xml
-index 2e5420b..0c9f243 100644
+index 72636a0..ec56492 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -76,21 +76,21 @@
+@@ -90,21 +90,21 @@
          <dependency>
              <groupId>org.yaml</groupId>
              <artifactId>snakeyaml</artifactId>
@@ -34,7 +34,7 @@ index 2e5420b..0c9f243 100644
              <type>jar</type>
              <scope>compile</scope>
          </dependency>
-@@ -104,7 +104,7 @@
+@@ -118,7 +118,7 @@
          <dependency>
              <groupId>commons-lang</groupId>
              <artifactId>commons-lang</artifactId>

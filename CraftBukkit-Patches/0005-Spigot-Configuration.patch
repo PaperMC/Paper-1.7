@@ -1,4 +1,4 @@
-From 590b9e6daca8420d6d7f3baae9380f553408bb28 Mon Sep 17 00:00:00 2001
+From 66cd42cdd7ea425a4c0e71abddca360d00a6de4a Mon Sep 17 00:00:00 2001
 From: md_5 <md_5@live.com.au>
 Date: Sun, 7 Jul 2013 09:32:53 +1000
 Subject: [PATCH] Spigot Configuration
@@ -96,7 +96,7 @@ index 1fb4eeb..9d45f34 100644
          int pollCount = 0;
 diff --git a/src/main/java/org/spigotmc/SpigotConfig.java b/src/main/java/org/spigotmc/SpigotConfig.java
 new file mode 100644
-index 0000000..8ae9862
+index 0000000..6837305
 --- /dev/null
 +++ b/src/main/java/org/spigotmc/SpigotConfig.java
 @@ -0,0 +1,138 @@
@@ -158,8 +158,8 @@ index 0000000..8ae9862
 +
 +        commands = new HashMap<String, Command>();
 +
-+        version = getInt( "config-version", 7 );
-+        set( "config-version", 7 );
++        version = getInt( "config-version", 8 );
++        set( "config-version", 8 );
 +        readConfig( SpigotConfig.class, null );
 +    }
 +
