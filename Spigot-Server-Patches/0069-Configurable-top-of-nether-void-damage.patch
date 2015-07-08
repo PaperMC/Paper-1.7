@@ -1,0 +1,49 @@
+From 304fba452dfda0f3266de221d65b8724ad0ce9e2 Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach.brown@destroystokyo.com>
+Date: Tue, 7 Jul 2015 22:54:57 -0500
+Subject: [PATCH] Configurable top of nether void damage
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index e84a028..f2fc0cd 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -354,7 +354,7 @@ public abstract class Entity {
+             this.fallDistance *= 0.5F;
+         }
+ 
+-        if (this.locY < -64.0D) {
++        if (this.locY < -64.0D || this.paperNetherCheck()) { // PaperSpigot - Configurable top-of-nether void damage
+             this.G();
+         }
+ 
+@@ -1947,4 +1947,11 @@ public abstract class Entity {
+     }
+ 
+     public void i(int i) {}
++
++    /**
++     * PaperSpigot - Checks if the feature is enabled and the entity is above the nether world bedrock height
++     */
++    private boolean paperNetherCheck() {
++        return this.world.paperSpigotConfig.netherVoidTopDamage && this.world.getWorld().getEnvironment() == org.bukkit.World.Environment.NETHER && this.locY >= 128.0D;
++    }
+ }
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index cbfc9b1..7b88afb 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -281,4 +281,10 @@ public class PaperSpigotWorldConfig
+         lavaFlowSpeedNormal = getInt( "lava-flow-speed.normal", 30 );
+         lavaFlowSpeedNether = getInt( "lava-flow-speed.nether", 10 );
+     }
++
++    public boolean netherVoidTopDamage;
++    private void nethervoidTopDamage()
++    {
++        netherVoidTopDamage = getBoolean( "nether-ceiling-void-damage", false );
++    }
+ }
+-- 
+2.4.4.windows.2
+
