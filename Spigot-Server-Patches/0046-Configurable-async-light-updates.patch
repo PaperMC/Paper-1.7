@@ -139,7 +139,7 @@ index dcb5474..cc70492 100644
 +     */
 +    public boolean updateLight(final EnumSkyBlock enumskyblock, final int x, final int y, final int z) {
 +        final Chunk chunk = this.getChunkIfLoaded(x >> 4, z >> 4);
-+        if (chunk == null || (!chunk.world.paperSpigotConfig.useAsyncLighting && !chunk.areNeighborsLoaded(1))) {
++        if (chunk == null || !chunk.areNeighborsLoaded(1)) {
 +            return false;
 +        }
 +
