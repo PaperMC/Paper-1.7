@@ -1,0 +1,37 @@
+From e1d50b9bc094cb14e8c59cfabda12e6193a90860 Mon Sep 17 00:00:00 2001
+From: Sudzzy <originmc@outlook.com>
+Date: Fri, 10 Jul 2015 05:45:18 -0700
+Subject: [PATCH] Disable ice and snow
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index f3b0631..962cd1f 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -363,7 +363,7 @@ public class WorldServer extends World {
+             }
+ 
+             this.methodProfiler.c("iceandsnow");
+-            if (this.random.nextInt(16) == 0) {
++            if (!this.paperSpigotConfig.disableIceAndSnow && this.random.nextInt(16) == 0) { // PaperSpigot - Disable ice and snow
+                 this.k = this.k * 3 + 1013904223;
+                 i1 = this.k >> 2;
+                 j1 = i1 & 15;
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index ada9dcf..305ffbf 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -299,4 +299,10 @@ public class PaperSpigotWorldConfig
+     {
+         disableThunder = getBoolean( "disable-thunder", false );
+     }
++
++    public boolean disableIceAndSnow;
++    private void disableIceAndSnow()
++    {
++        disableIceAndSnow = getBoolean( "disable-ice-and-snow", false );
++    }
+ }
+-- 
+1.9.5.msysgit.1
+

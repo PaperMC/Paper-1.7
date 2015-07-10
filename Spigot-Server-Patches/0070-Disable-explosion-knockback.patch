@@ -1,0 +1,37 @@
+From 506bb21baafa96a9ebc2d97999d481a8292ef814 Mon Sep 17 00:00:00 2001
+From: Sudzzy <originmc@outlook.com>
+Date: Fri, 10 Jul 2015 04:41:36 -0700
+Subject: [PATCH] Disable explosion knockback
+
+
+diff --git a/src/main/java/net/minecraft/server/Explosion.java b/src/main/java/net/minecraft/server/Explosion.java
+index 4e5c7a5..d02d567 100644
+--- a/src/main/java/net/minecraft/server/Explosion.java
++++ b/src/main/java/net/minecraft/server/Explosion.java
+@@ -141,7 +141,7 @@ public class Explosion {
+                     }
+                     CraftEventFactory.entityDamage = null;
+                     // CraftBukkit end
+-                    double d11 = EnchantmentProtection.a(entity, d10);
++                    double d11 = entity instanceof EntityPlayer && world.paperSpigotConfig.disableExplosionKnockback ? 0 : EnchantmentProtection.a(entity, d10); // PaperSpigot - Disable explosion knockback
+ 
+                     entity.motX += d0 * d11;
+                     entity.motY += d1 * d11;
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 7b88afb..271f576 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -287,4 +287,10 @@ public class PaperSpigotWorldConfig
+     {
+         netherVoidTopDamage = getBoolean( "nether-ceiling-void-damage", false );
+     }
++
++    public boolean disableExplosionKnockback;
++    private void disableExplosionKnockback()
++    {
++        disableExplosionKnockback = getBoolean( "disable-explosion-knockback", false );
++    }
+ }
+-- 
+1.9.5.msysgit.1
+
