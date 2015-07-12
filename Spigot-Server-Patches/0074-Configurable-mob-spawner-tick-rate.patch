@@ -21,7 +21,7 @@ index 26fa93e..905cf01 100644
  
      public void g() {
 +        // PaperSpigot start - Configurable mob spawner tick rate
-+        if (spawnDelay > 0 && tickDelay-- > 0) return;
++        if (spawnDelay > 0 && --tickDelay > 0) return;
 +        tickDelay = this.a().paperSpigotConfig.mobSpawnerTickRate;
 +        // PaperSpigot end
          if (this.f()) {
