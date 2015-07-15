@@ -1,14 +1,14 @@
-From f9895b2d54544844d0290001f614b43621e9df3d Mon Sep 17 00:00:00 2001
+From 42d1eeb446fdfc99a654140d5d4923a6d23f0cdb Mon Sep 17 00:00:00 2001
 From: Iceee <andrew@opticgaming.tv>
 Date: Wed, 15 Jul 2015 00:44:50 -0700
 Subject: [PATCH] ChunkMap caching
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 1b57206..477ddb7 100644
+index 1b57206..80ddf5f 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
-@@ -47,6 +47,48 @@ public class Chunk {
+@@ -47,6 +47,57 @@ public class Chunk {
      public long lightUpdateTime;
      // PaperSpigot end
  
@@ -18,6 +18,10 @@ index 1b57206..477ddb7 100644
 +    private int emptySectionBits;
 +
 +    public ChunkMap getChunkMap(int version) {
++        if (!world.paperSpigotConfig.cacheChunkMaps) {
++            return PacketPlayOutMapChunk.a(this, true, '\uffff', version);
++        }
++
 +        boolean isDirty = false;
 +        for (int i = 0; i < sections.length; ++i) {
 +            ChunkSection section = sections[i];
@@ -38,14 +42,19 @@ index 1b57206..477ddb7 100644
 +            }
 +        }
 +
++        if (isDirty) {
++            chunkMap17 = null;
++            chunkMap18 = null;
++        }
++
 +        if (version < 24) {
-+            if (isDirty || chunkMap17 == null) {
++            if (chunkMap17 == null) {
 +                chunkMap17 = PacketPlayOutMapChunk.a(this, true, '\uffff', version);
 +            }
 +
 +            return chunkMap17;
 +        } else {
-+            if (isDirty || chunkMap18 == null) {
++            if (chunkMap18 == null) {
 +                chunkMap18 = PacketPlayOutMapChunk.a(this, true, '\uffff', version);
 +            }
 +
@@ -128,6 +137,21 @@ index b9db43c..1dedcb0 100644
  
              // Spigot start
              world = chunk.world;
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 85b2cda..1ffc24d 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -317,4 +317,10 @@ public class PaperSpigotWorldConfig
+     {
+         mobSpawnerTickRate = getInt( "mob-spawner-tick-rate", 1 );
+     }
++
++    public boolean cacheChunkMaps;
++    private void cacheChunkMaps()
++    {
++        cacheChunkMaps = getBoolean( "cache-chunk-maps", false );
++    }
+ }
 -- 
 1.9.5.msysgit.1
 
