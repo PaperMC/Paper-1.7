@@ -1,4 +1,4 @@
-From dc6466f2467da79c02bcef888b347fe23a10a050 Mon Sep 17 00:00:00 2001
+From 79a199031107dab5e1759591e2a514934ae04eed Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sun, 21 Sep 2014 22:02:02 -0500
 Subject: [PATCH] Player affects spawning API
@@ -17,10 +17,10 @@ index 35b5cfb..114f406 100644
      @Override
      public CraftHumanEntity getBukkitEntity() {
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index 15bf795..6ab5ac3 100644
+index 5a17639..ba7c6e8 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
-@@ -379,7 +379,7 @@ public abstract class EntityInsentient extends EntityLiving {
+@@ -380,7 +380,7 @@ public abstract class EntityInsentient extends EntityLiving {
          if (this.persistent) {
              this.aU = 0;
          } else {

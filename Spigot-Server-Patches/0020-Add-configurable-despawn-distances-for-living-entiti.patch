@@ -1,14 +1,14 @@
-From 106339f4435eb7eba902822d0d54ab0e21c558c2 Mon Sep 17 00:00:00 2001
+From 67751076541342fdfedc7a3d165db6ed3fc646d8 Mon Sep 17 00:00:00 2001
 From: Suddenly <suddenly@suddenly.coffee>
 Date: Mon, 7 Jul 2014 04:11:34 +0100
 Subject: [PATCH] Add configurable despawn distances for living entities
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
-index deb04b5..2d35a8d 100644
+index 4b7a7f1..5a17639 100644
 --- a/src/main/java/net/minecraft/server/EntityInsentient.java
 +++ b/src/main/java/net/minecraft/server/EntityInsentient.java
-@@ -387,13 +387,13 @@ public abstract class EntityInsentient extends EntityLiving {
+@@ -388,13 +388,13 @@ public abstract class EntityInsentient extends EntityLiving {
                  double d2 = entityhuman.locZ - this.locZ;
                  double d3 = d0 * d0 + d1 * d1 + d2 * d2;
  
