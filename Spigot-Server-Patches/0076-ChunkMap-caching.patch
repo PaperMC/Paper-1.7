@@ -1,14 +1,14 @@
-From edd568129f4b067421a0916c81a3e7e294d33676 Mon Sep 17 00:00:00 2001
+From f9895b2d54544844d0290001f614b43621e9df3d Mon Sep 17 00:00:00 2001
 From: Iceee <andrew@opticgaming.tv>
 Date: Wed, 15 Jul 2015 00:44:50 -0700
 Subject: [PATCH] ChunkMap caching
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 1b57206..84a4075 100644
+index 1b57206..477ddb7 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
-@@ -47,6 +47,47 @@ public class Chunk {
+@@ -47,6 +47,48 @@ public class Chunk {
      public long lightUpdateTime;
      // PaperSpigot end
  
@@ -30,6 +30,7 @@ index 1b57206..84a4075 100644
 +                if ((emptySectionBits & (1 << i)) == 1) {
 +                    isDirty = true;
 +                    emptySectionBits &= ~(1 << i);
++                    section.isDirty = false;
 +                } else if (section.isDirty) {
 +                    isDirty = true;
 +                    section.isDirty = false;
