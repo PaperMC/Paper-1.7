@@ -1,11 +1,11 @@
-From aa416600aec5796117b916f70202c8f5309e56b6 Mon Sep 17 00:00:00 2001
+From c3bb8932a1ad55ba7c8476cc6a639e969f2708fa Mon Sep 17 00:00:00 2001
 From: Iceee <andrew@opticgaming.tv>
 Date: Wed, 15 Jul 2015 00:44:50 -0700
 Subject: [PATCH] ChunkMap caching
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 1b57206..37e9fe8 100644
+index 1b57206..e8bdb30 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -47,6 +47,63 @@ public class Chunk {
@@ -18,11 +18,11 @@ index 1b57206..37e9fe8 100644
 +    private int emptySectionBits;
 +
 +    public ChunkMap getChunkMap(boolean groundUpContinuous, int primaryBitMask, int version) {
-+        if (!world.paperSpigotConfig.cacheChunkMaps) {
++        if (!world.paperSpigotConfig.cacheChunkMaps || !groundUpContinuous || (primaryBitMask != 0 && primaryBitMask != '\uffff')) {
 +            return PacketPlayOutMapChunk.a(this, groundUpContinuous, primaryBitMask, version);
 +        }
 +
-+        if (groundUpContinuous && primaryBitMask == 0) {
++        if (primaryBitMask == 0) {
 +            ChunkMap chunkMap = new ChunkMap();
 +            chunkMap.a = new byte[0];
 +            return chunkMap;
