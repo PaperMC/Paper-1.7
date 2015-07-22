@@ -1,0 +1,60 @@
+From 490738af6ed86d94428a3ae680c42c62498643a2 Mon Sep 17 00:00:00 2001
+From: Techcable <Techcable@outlook.com>
+Date: Wed, 22 Jul 2015 03:47:20 -0700
+Subject: [PATCH] Add MicroPlayerMoveEvent
+
+
+diff --git a/src/main/java/org/github/paperspigot/MicroPlayerMoveEvent.java b/src/main/java/org/github/paperspigot/MicroPlayerMoveEvent.java
+new file mode 100644
+index 0000000..5686139
+--- /dev/null
++++ b/src/main/java/org/github/paperspigot/MicroPlayerMoveEvent.java
+@@ -0,0 +1,45 @@
++package org.github.paperspigot;
++
++import org.bukkit.Location;
++import org.bukkit.entity.Player;
++import org.bukkit.event.HandlerList;
++import org.bukkit.event.player.PlayerMoveEvent;
++
++/**
++ * {@link org.bukkit.event.player.PlayerMoveEvent} doesn't fire on every move to improve performance, but some plugins (specifically NCP) need every move event
++ * <p/>
++ * This event is fired when PlayerMoveEvent would be fired but isn't due to the performance optimization
++ * <p/>
++ * <p>
++ * <b>Please only use this if you know what you are doing</b>
++ * PlayerMoveEvent is already one of the most frequently fired events, so make sure you have justification before you listen for PlayerMicroMoveEvent
++ * Listening to MicroPlayerMoveEvent can decrease performance significantly if your handler is not optimized
++ * </p>
++ * <p/>
++ * Fixes <a href=https://hub.spigotmc.org/jira/browse/SPIGOT-745>SPIGOT-745</a>
++ *
++ * @deprecated Please only use this if you know what you are doing
++ */
++@Deprecated
++public class MicroPlayerMoveEvent extends PlayerMoveEvent {
++
++    public MicroPlayerMoveEvent(Player player, Location from, Location to) {
++        super(player, from, to);
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return getHandlerList();
++    }
++
++
++    private static final HandlerList handlerList = new HandlerList();
++
++    public static HandlerList getHandlerList() {
++        return handlerList;
++    }
++
++    public static boolean isListenedFor() {
++        return handlerList.getRegisteredListeners().length == 0;
++    }
++}
+-- 
+1.8.3.msysgit.0
+
