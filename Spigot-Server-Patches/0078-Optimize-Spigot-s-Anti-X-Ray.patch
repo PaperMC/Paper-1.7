@@ -1,4 +1,4 @@
-From 8383099c7e5fbb91cd294ce4cfcfd058d786a232 Mon Sep 17 00:00:00 2001
+From ae50f1d1edb5d66b9c681d04fecd4b5964759a99 Mon Sep 17 00:00:00 2001
 From: Iceee <andrew@opticgaming.tv>
 Date: Tue, 21 Jul 2015 22:48:34 -0700
 Subject: [PATCH] Optimize Spigot's Anti X-Ray
@@ -17,7 +17,7 @@ index 962cd1f..3fc108e 100644
          timings.doChunkMap.startTiming(); // Spigot
          this.manager.flush();
 diff --git a/src/main/java/org/spigotmc/AntiXray.java b/src/main/java/org/spigotmc/AntiXray.java
-index 80e538c..15053a2 100644
+index 80e538c..44d6451 100644
 --- a/src/main/java/org/spigotmc/AntiXray.java
 +++ b/src/main/java/org/spigotmc/AntiXray.java
 @@ -7,6 +7,12 @@ import net.minecraft.server.Blocks;
@@ -44,7 +44,7 @@ index 80e538c..15053a2 100644
  
      public AntiXray(SpigotWorldConfig config)
      {
-@@ -43,11 +53,37 @@ public class AntiXray
+@@ -43,6 +53,25 @@ public class AntiXray
      }
  
      /**
@@ -70,18 +70,20 @@ index 80e538c..15053a2 100644
       * Starts the timings handler, then updates all blocks within the set radius
       * of the given coordinate, revealing them if they are hidden ores.
       */
-     public void updateNearbyBlocks(World world, int x, int y, int z)
+@@ -50,6 +79,13 @@ public class AntiXray
      {
-+        // PaperSpigot start
-+        if ( queueUpdates )
-+        {
-+            pendingUpdates.add( new ChunkPosition( x, y, z ) );
-+            return;
-+        }
-+        // PaperSpigot end
          if ( world.spigotConfig.antiXray )
          {
++            // PaperSpigot start
++            if ( queueUpdates )
++            {
++                pendingUpdates.add( new ChunkPosition( x, y, z ) );
++                return;
++            }
++            // PaperSpigot end
              update.startTiming();
+             updateNearbyBlocks( world, x, y, z, 2, false ); // 2 is the radius, we shouldn't change it as that would make it exponentially slower
+             update.stopTiming();
 -- 
 1.9.5.msysgit.1
 
