@@ -1,18 +1,18 @@
-From e062212e86ea59b5206247305e2482e91ad6c4ae Mon Sep 17 00:00:00 2001
+From 4fb3dc2cf96059cec209227ec2939152eb2f5d9e Mon Sep 17 00:00:00 2001
 From: Techcable <Techcable@outlook.com>
 Date: Thu, 23 Jul 2015 03:18:48 -0700
 Subject: [PATCH] Add PlayerMicroMoveEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index b03531e..c6b82a4 100644
+index b03531e..27a0689 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
 @@ -60,6 +60,7 @@ import org.bukkit.util.NumberConversions;
  // CraftBukkit end
  
  import org.github.paperspigot.PaperSpigotConfig; // PaperSpigot
-+import org.github.paperspigot.event.PlayerMicroMoveEvent; // PaperSpigot
++import org.github.paperspigot.event.player.PlayerMicroMoveEvent; // PaperSpigot
  
  public class PlayerConnection implements PacketPlayInListener {
  

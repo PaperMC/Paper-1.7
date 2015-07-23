@@ -1,16 +1,16 @@
-From 929e7f156702c3079afe8b24a1a8dbd37dbc03d4 Mon Sep 17 00:00:00 2001
+From 12e0aeca1890b88348f88daa71b9c513228c48d0 Mon Sep 17 00:00:00 2001
 From: Techcable <Techcable@outlook.com>
 Date: Thu, 23 Jul 2015 03:19:57 -0700
 Subject: [PATCH] Add PlayerMicroMoveEvent
 
 
-diff --git a/src/main/java/org/github/paperspigot/event/PlayerMicroMoveEvent.java b/src/main/java/org/github/paperspigot/event/PlayerMicroMoveEvent.java
+diff --git a/src/main/java/org/github/paperspigot/event/player/PlayerMicroMoveEvent.java b/src/main/java/org/github/paperspigot/event/player/PlayerMicroMoveEvent.java
 new file mode 100644
-index 0000000..e57a377
+index 0000000..65b56d8
 --- /dev/null
-+++ b/src/main/java/org/github/paperspigot/event/PlayerMicroMoveEvent.java
++++ b/src/main/java/org/github/paperspigot/event/player/PlayerMicroMoveEvent.java
 @@ -0,0 +1,32 @@
-+package org.github.paperspigot.event;
++package org.github.paperspigot.event.player;
 +
 +import org.bukkit.Location;
 +import org.bukkit.entity.Player;
