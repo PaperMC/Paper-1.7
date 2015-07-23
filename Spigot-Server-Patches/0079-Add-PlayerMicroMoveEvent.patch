@@ -1,0 +1,39 @@
+From e062212e86ea59b5206247305e2482e91ad6c4ae Mon Sep 17 00:00:00 2001
+From: Techcable <Techcable@outlook.com>
+Date: Thu, 23 Jul 2015 03:18:48 -0700
+Subject: [PATCH] Add PlayerMicroMoveEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index b03531e..c6b82a4 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -60,6 +60,7 @@ import org.bukkit.util.NumberConversions;
+ // CraftBukkit end
+ 
+ import org.github.paperspigot.PaperSpigotConfig; // PaperSpigot
++import org.github.paperspigot.event.PlayerMicroMoveEvent; // PaperSpigot
+ 
+ public class PlayerConnection implements PacketPlayInListener {
+ 
+@@ -238,7 +239,7 @@ public class PlayerConnection implements PacketPlayInListener {
+             double delta = Math.pow(this.lastPosX - to.getX(), 2) + Math.pow(this.lastPosY - to.getY(), 2) + Math.pow(this.lastPosZ - to.getZ(), 2);
+             float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
+ 
+-            if ((delta > 1f / 256 || deltaAngle > 10f) && (this.checkMovement && !this.player.dead)) {
++            if ((delta > 0 || deltaAngle > 0) && (this.checkMovement && !this.player.dead)) { // PaperSpigot
+                 this.lastPosX = to.getX();
+                 this.lastPosY = to.getY();
+                 this.lastPosZ = to.getZ();
+@@ -247,7 +248,7 @@ public class PlayerConnection implements PacketPlayInListener {
+ 
+                 // Skip the first time we do this
+                 if (true) { // Spigot - don't skip any move events
+-                    PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
++                    PlayerMoveEvent event = (delta > 1f / 256 || deltaAngle > 10f) ? new PlayerMoveEvent(player, from, to) : new PlayerMicroMoveEvent(player, from, to); // PaperSpigot - PlayerMicroMoveEvent
+                     this.server.getPluginManager().callEvent(event);
+ 
+                     // If the event is cancelled we move the player back to their old location.
+-- 
+1.9.5.msysgit.1
+
