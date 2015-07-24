@@ -1,0 +1,97 @@
+From 2afafdeac2e0c6a342cf3609f196dcdfbed8fc26 Mon Sep 17 00:00:00 2001
+From: Antony Riley <antony@cyberiantiger.org>
+Date: Thu, 23 Jul 2015 21:22:49 -0700
+Subject: [PATCH] Fix NullPointerException and broken logic in
+ Potion.fromDamage(int)
+
+
+diff --git a/src/main/java/org/bukkit/potion/Potion.java b/src/main/java/org/bukkit/potion/Potion.java
+index a358c29..ceac7ac 100644
+--- a/src/main/java/org/bukkit/potion/Potion.java
++++ b/src/main/java/org/bukkit/potion/Potion.java
+@@ -397,7 +397,7 @@ public class Potion {
+         if ((damage & SPLASH_BIT) > 0) {
+             potion = potion.splash();
+         }
+-        if ((damage & EXTENDED_BIT) > 0) {
++        if ((type == null || !type.isInstant()) && (damage & EXTENDED_BIT) > 0) {
+             potion = potion.extend();
+         }
+         return potion;
+diff --git a/src/test/java/org/bukkit/potion/PotionTest.java b/src/test/java/org/bukkit/potion/PotionTest.java
+index 58252ae..f08e98a 100644
+--- a/src/test/java/org/bukkit/potion/PotionTest.java
++++ b/src/test/java/org/bukkit/potion/PotionTest.java
+@@ -6,9 +6,46 @@ import static org.hamcrest.Matchers.is;
+ import org.bukkit.Material;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.inventory.ItemStack;
++import org.junit.BeforeClass;
+ import org.junit.Test;
+ 
+ public class PotionTest {
++    @BeforeClass
++    public static void setup() {
++        PotionEffectType.registerPotionEffectType(new PotionEffectType(19) {
++            @Override
++            public double getDurationModifier() {
++                return 1;
++            }
++
++            @Override
++            public String getName() {
++                return "Poison";
++            }
++
++            @Override
++            public boolean isInstant() {
++                return false;
++            }
++        });
++        PotionEffectType.registerPotionEffectType(new PotionEffectType(6) {
++            @Override
++            public double getDurationModifier() {
++                return 1;
++            }
++
++            @Override
++            public String getName() {
++                return "Heal";
++            }
++
++            @Override
++            public boolean isInstant() {
++                return false;
++            }
++        });
++    }
++
+     @Test
+     public void applyToItemStack() {
+         Potion potion = new Potion(PotionType.POISON);
+@@ -44,22 +81,6 @@ public class PotionTest {
+ 
+     @Test
+     public void setExtended() {
+-        PotionEffectType.registerPotionEffectType(new PotionEffectType(19){
+-            @Override
+-            public double getDurationModifier() {
+-                return 1;
+-            }
+-
+-            @Override
+-            public String getName() {
+-                return "Poison";
+-            }
+-
+-            @Override
+-            public boolean isInstant() {
+-                return false;
+-            }
+-        });
+         Potion potion = new Potion(PotionType.POISON);
+         assertFalse(potion.hasExtendedDuration());
+         potion.setHasExtendedDuration(true);
+-- 
+1.9.5.msysgit.1
+
