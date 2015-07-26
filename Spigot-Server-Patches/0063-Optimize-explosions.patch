@@ -1,4 +1,4 @@
-From 1ac2f9328cfd3b28db13d73b2490a961d18456f7 Mon Sep 17 00:00:00 2001
+From 00c8100bf90155a61a0b8f20b296925819a76672 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sat, 13 Jun 2015 19:47:27 -0700
 Subject: [PATCH] Optimize explosions
@@ -110,10 +110,10 @@ index 3646258..4e5c7a5 100644
 +    // PaperSpigot end
  }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 692e74f..31dea6d 100644
+index 8e379cf..51cf79a 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -779,6 +779,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
+@@ -784,6 +784,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                  worldserver.timings.tracker.stopTiming(); // Spigot
                  this.methodProfiler.b();
                  this.methodProfiler.b();
@@ -122,7 +122,7 @@ index 692e74f..31dea6d 100644
  
              // this.h[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 6af85f8..9379e24 100644
+index 88bc051..5b94a18 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
@@ -158,5 +158,5 @@ index 91d4fc2..ec27f79 100644
 +    }
  }
 -- 
-1.9.5.msysgit.1
+2.4.5.windows.1
 

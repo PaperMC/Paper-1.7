@@ -1,4 +1,4 @@
-From 68c3db9e4448e371854391116f898f5fdbbc65a7 Mon Sep 17 00:00:00 2001
+From 858ec4993dff5b6642cdecb571ee5986e0b68e3e Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 19 Oct 2014 15:56:39 -0500
 Subject: [PATCH] Further improve server tick loop
@@ -12,7 +12,7 @@ Previous implementation did not calculate TPS correctly.
 Switch to a realistic rolling average and factor in std deviation as an extra reporting variable
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index fa10ea1..953a88c 100644
+index fa10ea1..d687498 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -102,17 +102,11 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
@@ -34,7 +34,7 @@ index fa10ea1..953a88c 100644
  
      public MinecraftServer(OptionSet options, Proxy proxy) { // CraftBukkit - signature file -> OptionSet
          net.minecraft.util.io.netty.util.ResourceLeakDetector.setEnabled( false ); // Spigot - disable
-@@ -446,12 +440,53 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
+@@ -446,12 +440,54 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
          this.isRunning = false;
      }
  
@@ -51,6 +51,7 @@ index fa10ea1..953a88c 100644
 +    public final RollingAverage tps1 = new RollingAverage(60);
 +    public final RollingAverage tps5 = new RollingAverage(60*5);
 +    public final RollingAverage tps15 = new RollingAverage(60*15);
++    public double[] recentTps = new double[ 3 ]; // PaperSpigot - Fine have your darn compat with bad plugins
 +
 +    public static class RollingAverage {
 +        private final int size;
@@ -93,14 +94,13 @@ index fa10ea1..953a88c 100644
   
      public void run() {
          try {
-@@ -464,26 +499,45 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
+@@ -464,26 +500,49 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                  this.a(this.q);
  
                  // Spigot start
--                Arrays.fill( recentTps, 20 );
--                long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
 +                // PaperSpigot start - Further improve tick loop
-+                //Arrays.fill( recentTps, 20 );
+                 Arrays.fill( recentTps, 20 );
+-                long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
 +                //long lastTick = System.nanoTime(), catchupTime = 0, curTime, wait, tickSection = lastTick;
 +                long start = System.nanoTime(), lastTick = start - TICK_TIME, catchupTime = 0, curTime, wait, tickSection = start;
 +                // PaperSpigot end
@@ -146,6 +146,10 @@ index fa10ea1..953a88c 100644
 +                        tps1.add(currentTps, diff);
 +                        tps5.add(currentTps, diff);
 +                        tps15.add(currentTps, diff);
++                        // Backwards compat with bad plugins
++                        recentTps[0] = tps1.getAverage();
++                        recentTps[1] = tps5.getAverage();
++                        recentTps[2] = tps15.getAverage();
                          tickSection = curTime;
 +                        // PaperSpigot end
                      }
@@ -218,5 +222,5 @@ index 2b8343d..1780e35 100644
          return ( ( tps > 18.0 ) ? ChatColor.GREEN : ( tps > 16.0 ) ? ChatColor.YELLOW : ChatColor.RED ).toString()
                  + ( ( tps > 20.0 ) ? "*" : "" ) + Math.min( Math.round( tps * 100.0 ) / 100.0, 20.0 );
 -- 
-1.9.1
+2.4.5.windows.1
 
