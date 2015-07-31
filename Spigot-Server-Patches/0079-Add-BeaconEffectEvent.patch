@@ -1,4 +1,4 @@
-From ba53a499d8a67c934d3fb9900a0d7057539a9085 Mon Sep 17 00:00:00 2001
+From 84470f330138bab984a6832856e81222deb3adc4 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Thu, 23 Jul 2015 11:45:46 -0700
 Subject: [PATCH] Add BeaconEffectEvent
@@ -62,5 +62,5 @@ index 198f908..cfc5c4e 100644
              }
          }
 -- 
-1.9.5.msysgit.1
+2.4.5.windows.1
 

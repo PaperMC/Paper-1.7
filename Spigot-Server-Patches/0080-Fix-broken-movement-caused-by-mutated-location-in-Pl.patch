@@ -1,23 +1,23 @@
-From 876f2bb430c64b4c026a3f35f32b46aba3145573 Mon Sep 17 00:00:00 2001
-From: Byteflux <byte@byteflux.net>
-Date: Thu, 23 Jul 2015 20:47:46 -0700
+From 57e4aa482499df5b72b1071b03c780d8e51f0e10 Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach.brown@destroystokyo.com>
+Date: Thu, 30 Jul 2015 22:56:03 -0500
 Subject: [PATCH] Fix broken movement caused by mutated location in
  PlayerMoveEvent
 
 
 diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
-index 27a0689..f4213d8 100644
+index b03531e..b531835 100644
 --- a/src/main/java/net/minecraft/server/PlayerConnection.java
 +++ b/src/main/java/net/minecraft/server/PlayerConnection.java
-@@ -248,6 +248,7 @@ public class PlayerConnection implements PacketPlayInListener {
+@@ -247,6 +247,7 @@ public class PlayerConnection implements PacketPlayInListener {
  
                  // Skip the first time we do this
                  if (true) { // Spigot - don't skip any move events
 +                    Location oldTo = to.clone(); // PaperSpigot
-                     PlayerMoveEvent event = (delta > 1f / 256 || deltaAngle > 10f) ? new PlayerMoveEvent(player, from, to) : new PlayerMicroMoveEvent(player, from, to); // PaperSpigot - PlayerMicroMoveEvent
+                     PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
                      this.server.getPluginManager().callEvent(event);
  
-@@ -260,7 +261,7 @@ public class PlayerConnection implements PacketPlayInListener {
+@@ -259,7 +260,7 @@ public class PlayerConnection implements PacketPlayInListener {
                      /* If a Plugin has changed the To destination then we teleport the Player
                      there to avoid any 'Moved wrongly' or 'Moved too quickly' errors.
                      We only do this if the Event was not cancelled. */
@@ -27,5 +27,5 @@ index 27a0689..f4213d8 100644
                          return;
                      }
 -- 
-1.9.5.msysgit.1
+2.4.5.windows.1
 

@@ -1,4 +1,4 @@
-From e331fda7062ca77c0c1163414e2a2634a9c4bb45 Mon Sep 17 00:00:00 2001
+From c49747923b57240b7d88446fe1b8dd58df29c4c9 Mon Sep 17 00:00:00 2001
 From: Sudzzy <originmc@outlook.com>
 Date: Thu, 23 Jul 2015 21:56:49 -0700
 Subject: [PATCH] Configurable container update tick rate
@@ -46,5 +46,5 @@ index 1ffc24d..a5fad09 100644
 +    }
  }
 -- 
-1.9.5.msysgit.1
+2.4.5.windows.1
 
