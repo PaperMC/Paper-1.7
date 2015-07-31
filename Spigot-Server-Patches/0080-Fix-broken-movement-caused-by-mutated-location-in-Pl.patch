@@ -1,5 +1,5 @@
-From 57e4aa482499df5b72b1071b03c780d8e51f0e10 Mon Sep 17 00:00:00 2001
-From: Zach Brown <zach.brown@destroystokyo.com>
+From 0c743a318b8b06046e480f33931ce04a168c825a Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
 Date: Thu, 30 Jul 2015 22:56:03 -0500
 Subject: [PATCH] Fix broken movement caused by mutated location in
  PlayerMoveEvent
