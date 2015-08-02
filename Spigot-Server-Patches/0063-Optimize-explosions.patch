@@ -1,4 +1,4 @@
-From 00c8100bf90155a61a0b8f20b296925819a76672 Mon Sep 17 00:00:00 2001
+From 0dd46e45d42611a6756abcf09f29e0f9121847d1 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sat, 13 Jun 2015 19:47:27 -0700
 Subject: [PATCH] Optimize explosions
@@ -110,7 +110,7 @@ index 3646258..4e5c7a5 100644
 +    // PaperSpigot end
  }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 8e379cf..51cf79a 100644
+index 9f67e40..a9b7d5c 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -784,6 +784,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
@@ -122,7 +122,7 @@ index 8e379cf..51cf79a 100644
  
              // this.h[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 88bc051..5b94a18 100644
+index 0591201..3b4dbdc 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
@@ -137,7 +137,7 @@ index 88bc051..5b94a18 100644
 @@ -122,6 +124,7 @@ public abstract class World implements IBlockAccess {
      public static String blockLocation;
      public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
-     private ExecutorService lightingExecutor; // PaperSpigot - Asynchronous lighting updates
+     public ExecutorService lightingExecutor; // PaperSpigot - Asynchronous lighting updates
 +    public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<Explosion.CacheKey, Float>(); // PaperSpigot - Optimize explosions
  
      public static long chunkToKey(int x, int z)
@@ -158,5 +158,5 @@ index 91d4fc2..ec27f79 100644
 +    }
  }
 -- 
-2.4.5.windows.1
+1.9.5.msysgit.1
 
