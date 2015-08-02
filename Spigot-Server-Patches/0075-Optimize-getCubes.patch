@@ -1,0 +1,45 @@
+From 2a67778336a52eb0b2ef9cbec53804f341bb0279 Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Sun, 12 Jul 2015 11:22:46 -0700
+Subject: [PATCH] Optimize getCubes()
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 818ea6a..b94e2cd 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -1254,11 +1254,12 @@ public abstract class World implements IBlockAccess {
+             int cx = chunkx << 4;
+             for ( int chunkz = ( i1 >> 4 ); chunkz <= ( ( j1 - 1 ) >> 4 ); chunkz++ )
+             {
+-                if ( !this.isChunkLoaded( chunkx, chunkz ) )
++                Chunk chunk = this.getChunkIfLoaded( chunkx, chunkz );
++                if ( chunk == null )
+                 {
+                     // PaperSpigot start
+                     if (entity.loadChunks) {
+-                        entity.world.chunkProvider.getChunkAt(chunkx, chunkz);
++                        chunk = entity.world.chunkProvider.getChunkAt(chunkx, chunkz);
+                     } else {
+                         entity.inUnloadedChunk = true; // PaperSpigot - Remove entities in unloaded chunks
+                         continue;
+@@ -1266,7 +1267,6 @@ public abstract class World implements IBlockAccess {
+                     // PaperSpigot end
+                 }
+                 int cz = chunkz << 4;
+-                Chunk chunk = this.getChunkAt( chunkx, chunkz );
+                 // Compute ranges within chunk
+                 int xstart = ( i < cx ) ? cx : i;
+                 int xend = ( j < ( cx + 16 ) ) ? j : ( cx + 16 );
+@@ -1299,6 +1299,8 @@ public abstract class World implements IBlockAccess {
+         }
+         // Spigot end
+ 
++        if (entity instanceof EntityItem) return this.L; // PaperSpigot - Optimize item movement
++
+         double d0 = 0.25D;
+         List list = this.getEntities(entity, axisalignedbb.grow(d0, d0, d0));
+ 
+-- 
+1.9.5.msysgit.1
+
