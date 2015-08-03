@@ -1,11 +1,11 @@
-From c3bb8932a1ad55ba7c8476cc6a639e969f2708fa Mon Sep 17 00:00:00 2001
+From 2efaa737288b3693f60c99e45ddc001fb3ef38b7 Mon Sep 17 00:00:00 2001
 From: Iceee <andrew@opticgaming.tv>
 Date: Wed, 15 Jul 2015 00:44:50 -0700
 Subject: [PATCH] ChunkMap caching
 
 
 diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
-index 1b57206..e8bdb30 100644
+index f28429e..667b1f8 100644
 --- a/src/main/java/net/minecraft/server/Chunk.java
 +++ b/src/main/java/net/minecraft/server/Chunk.java
 @@ -47,6 +47,63 @@ public class Chunk {

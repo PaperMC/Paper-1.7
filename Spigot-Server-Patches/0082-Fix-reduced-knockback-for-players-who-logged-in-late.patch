@@ -1,4 +1,4 @@
-From 3fcde38b184d070c6b14c77fbddceaab56157ded Mon Sep 17 00:00:00 2001
+From 605ca16cdedf904b7f3fb8fe12fdb669185ebe23 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sun, 2 Aug 2015 16:56:49 -0700
 Subject: [PATCH] Fix reduced knockback for players who logged in later
@@ -49,29 +49,51 @@ index d429613..3ce0082 100644
                              this.b(entity);
                          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 826ea3c..cea2c56 100644
+index 826ea3c..ddc5b78 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -59,6 +59,7 @@ import org.bukkit.metadata.MetadataValue;
- import org.bukkit.plugin.Plugin;
+@@ -60,6 +60,11 @@ import org.bukkit.plugin.Plugin;
  import org.bukkit.plugin.messaging.StandardMessenger;
  import org.bukkit.scoreboard.Scoreboard;
-+import org.bukkit.util.Vector; // PaperSpigot
  
++// PaperSpigot start
++import org.bukkit.util.Vector;
++import org.bukkit.event.player.PlayerVelocityEvent;
++// PaperSpigot end
++
  @DelegateDeserialization(CraftOfflinePlayer.class)
  public class CraftPlayer extends CraftHumanEntity implements Player {
-@@ -1336,6 +1337,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+     private long firstPlayed = 0;
+@@ -1336,6 +1341,34 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
          // Spigot end
      }
  
 +    @Override
 +    public void setVelocity(Vector vel) {
-+        // Send the new velocity to the player's client immediately, so it isn't affected by
-+        // any movement packets from this player that may be processed before the end of the tick.
-+        // Without this, player velocity changes tend to be very inconsistent.
-+        super.setVelocity(vel);
-+        this.getHandle().playerConnection.sendPacket(new PacketPlayOutEntityVelocity(this.getHandle()));
-+        this.getHandle().velocityChanged = false;
++        // To be consistent with old behavior, set the velocity before firing the event
++        this.setVelocityDirect(vel);
++
++        PlayerVelocityEvent event = new PlayerVelocityEvent(this, vel.clone());
++        this.getServer().getPluginManager().callEvent(event);
++
++        if (!event.isCancelled()) {
++            // Set the velocity again in case it was changed by event handlers
++            this.setVelocityDirect(event.getVelocity());
++
++            // Send the new velocity to the player's client immediately, so it isn't affected by
++            // any movement packets from this player that may be processed before the end of the tick.
++            // Without this, player velocity changes tend to be very inconsistent.
++            this.getHandle().playerConnection.sendPacket(new PacketPlayOutEntityVelocity(this.getHandle()));
++        }
++
++        // Note that cancelling the event does not restore the old velocity, it only prevents
++        // the packet from sending. Again, this is to be consistent with old behavior.
++    }
++
++    public void setVelocityDirect(Vector vel) {
++        entity.motX = vel.getX();
++        entity.motY = vel.getY();
++        entity.motZ = vel.getZ();
 +    }
 +
      // Spigot start
