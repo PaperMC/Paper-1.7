@@ -1,4 +1,4 @@
-From dcd61092c3df10ea13926775fbffefa27d987797 Mon Sep 17 00:00:00 2001
+From c3ece8451973b59e0a3933df92999c5900316ef5 Mon Sep 17 00:00:00 2001
 From: Zach Brown <zach.brown@destroystokyo.com>
 Date: Thu, 2 Apr 2015 15:22:20 -0500
 Subject: [PATCH] Backport EntityActivationRange fixes
