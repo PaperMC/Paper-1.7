@@ -1,11 +1,11 @@
-From 605ca16cdedf904b7f3fb8fe12fdb669185ebe23 Mon Sep 17 00:00:00 2001
+From 8ee374c69227eb2990130ef4bb71ab1864c877d3 Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Sun, 2 Aug 2015 16:56:49 -0700
 Subject: [PATCH] Fix reduced knockback for players who logged in later
 
 
 diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
-index d429613..3ce0082 100644
+index d429613..31e85de 100644
 --- a/src/main/java/net/minecraft/server/EntityHuman.java
 +++ b/src/main/java/net/minecraft/server/EntityHuman.java
 @@ -948,6 +948,13 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
@@ -34,7 +34,7 @@ index d429613..3ce0082 100644
 +                        // were generated. And because this glitch is also likely to make server-side velocity very
 +                        // inconsistent, we simply reverse the knockback after sending it so that KB, like most other
 +                        // things, doesn't affect server velocity at all.
-+                        if (entity instanceof EntityPlayer && entity.velocityChanged) {
++                        if (this.getWorld().paperSpigotConfig.fixKnockbackForLoggedInLater && entity instanceof EntityPlayer && entity.velocityChanged) {
 +                            EntityPlayer attackedPlayer = (EntityPlayer) entity;
 +
 +                            attackedPlayer.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(attackedPlayer));
@@ -99,6 +99,21 @@ index 826ea3c..ddc5b78 100644
      // Spigot start
      private final Player.Spigot spigot = new Player.Spigot()
      {
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index a5fad09..a825441 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -329,4 +329,10 @@ public class PaperSpigotWorldConfig
+     {
+         containerUpdateTickRate = getInt( "container-update-tick-rate", 1 );
+     }
++
++    public boolean fixKnockbackForLoggedInLater;
++    private void fixKnockbackForLoggedInLater()
++    {
++        fixKnockbackForLoggedInLater = getBoolean( "fix-knockback-for-players-who-joined-later", false );
++    }
+ }
 -- 
-1.9.5.msysgit.1
+2.5.0
 
