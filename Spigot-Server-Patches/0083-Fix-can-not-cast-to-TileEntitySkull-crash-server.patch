@@ -1,0 +1,29 @@
+From e1e099ddb9c418ed58602f13f64cad469c5b007a Mon Sep 17 00:00:00 2001
+From: caoli5288 <caoli5288@gmail.com>
+Date: Mon, 3 Aug 2015 17:39:13 +0800
+Subject: [PATCH] Fix can not cast to TileEntitySkull crash server
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockSkull.java b/src/main/java/net/minecraft/server/BlockSkull.java
+index 3075dbc..9dbf367 100644
+--- a/src/main/java/net/minecraft/server/BlockSkull.java
++++ b/src/main/java/net/minecraft/server/BlockSkull.java
+@@ -82,8 +82,13 @@ public class BlockSkull extends BlockContainer {
+     public void dropNaturally(World world, int i, int j, int k, int l, float f, int i1) {
+         if (world.random.nextFloat() < f) {
+             ItemStack itemstack = new ItemStack(Items.SKULL, 1, this.getDropData(world, i, j, k));
+-            TileEntitySkull tileentityskull = (TileEntitySkull) world.getTileEntity(i, j, k);
+-
++            // Paper start
++            TileEntity tile = world.getTileEntity(i, j, k);
++            if (!(tile instanceof TileEntitySkull)) {
++                return;
++            }
++            TileEntitySkull tileentityskull = (TileEntitySkull) tile;
++            // Paper end
+             if (tileentityskull.getSkullType() == 3 && tileentityskull.getGameProfile() != null) {
+                 itemstack.setTag(new NBTTagCompound());
+                 NBTTagCompound nbttagcompound = new NBTTagCompound();
+-- 
+2.4.3
+
