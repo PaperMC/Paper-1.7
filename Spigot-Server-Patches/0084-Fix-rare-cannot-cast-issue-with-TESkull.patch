@@ -1,0 +1,29 @@
+From d6aa8d05cd4fef57a286366feb452d8d86d15fc1 Mon Sep 17 00:00:00 2001
+From: caoli5288 <caoli5288@gmail.com>
+Date: Tue, 4 Aug 2015 21:49:02 -0500
+Subject: [PATCH] Fix rare cannot cast issue with TESkull
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockSkull.java b/src/main/java/net/minecraft/server/BlockSkull.java
+index 3075dbc..c0baa7d 100644
+--- a/src/main/java/net/minecraft/server/BlockSkull.java
++++ b/src/main/java/net/minecraft/server/BlockSkull.java
+@@ -82,7 +82,14 @@ public class BlockSkull extends BlockContainer {
+     public void dropNaturally(World world, int i, int j, int k, int l, float f, int i1) {
+         if (world.random.nextFloat() < f) {
+             ItemStack itemstack = new ItemStack(Items.SKULL, 1, this.getDropData(world, i, j, k));
+-            TileEntitySkull tileentityskull = (TileEntitySkull) world.getTileEntity(i, j, k);
++
++            // PaperSpigot start - Fix rare cannot cast issue with TESkull
++            TileEntity tileEntity = world.getTileEntity(i, j, k);
++            if (!(tileEntity instanceof TileEntitySkull)) {
++                return;
++            }
++            TileEntitySkull tileentityskull = (TileEntitySkull) tileEntity;
++            // PaperSpigot end
+ 
+             if (tileentityskull.getSkullType() == 3 && tileentityskull.getGameProfile() != null) {
+                 itemstack.setTag(new NBTTagCompound());
+-- 
+2.5.0
+
