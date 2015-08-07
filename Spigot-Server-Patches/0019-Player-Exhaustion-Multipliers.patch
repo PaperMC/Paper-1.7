@@ -1,4 +1,4 @@
-From 2995d3803828301dbbcd87421ecc6881ed3b8ff6 Mon Sep 17 00:00:00 2001
+From 43ccc031e5d2dc0addec5857fd339b553d2453ff Mon Sep 17 00:00:00 2001
 From: gsand <gsandowns@gmail.com>
 Date: Sun, 17 Aug 2014 16:40:54 -0500
 Subject: [PATCH] Player Exhaustion Multipliers
@@ -38,7 +38,7 @@ index a0e4855..35b5cfb 100644
              } else if (this.h_()) {
                  if (d1 > 0.0D) {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 1d01f89..df84df5 100644
+index 4346fcd..2ba7353 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 @@ -121,4 +121,12 @@ public class PaperSpigotWorldConfig
@@ -55,5 +55,5 @@ index 1d01f89..df84df5 100644
 +    }
  }
 -- 
-1.9.1
+2.4.6.windows.1
 

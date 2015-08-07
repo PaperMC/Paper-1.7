@@ -1,4 +1,4 @@
-From 0dd46e45d42611a6756abcf09f29e0f9121847d1 Mon Sep 17 00:00:00 2001
+From 230493108b055afa130c7f447e56dda6dae50764 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sat, 13 Jun 2015 19:47:27 -0700
 Subject: [PATCH] Optimize explosions
@@ -122,7 +122,7 @@ index 9f67e40..a9b7d5c 100644
  
              // this.h[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index 0591201..3b4dbdc 100644
+index fc680ab..3f47d01 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -14,6 +14,8 @@ import java.util.concurrent.Callable;
@@ -137,13 +137,13 @@ index 0591201..3b4dbdc 100644
 @@ -122,6 +124,7 @@ public abstract class World implements IBlockAccess {
      public static String blockLocation;
      public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
-     public ExecutorService lightingExecutor; // PaperSpigot - Asynchronous lighting updates
+     public ExecutorService lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build()); // PaperSpigot - Asynchronous lighting updates
 +    public final Map<Explosion.CacheKey, Float> explosionDensityCache = new HashMap<Explosion.CacheKey, Float>(); // PaperSpigot - Optimize explosions
  
      public static long chunkToKey(int x, int z)
      {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 91d4fc2..ec27f79 100644
+index 917e330..8c544c6 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 @@ -259,4 +259,10 @@ public class PaperSpigotWorldConfig
@@ -158,5 +158,5 @@ index 91d4fc2..ec27f79 100644
 +    }
  }
 -- 
-1.9.5.msysgit.1
+2.4.6.windows.1
 

@@ -1,4 +1,4 @@
-From 28f6accf4a053b0ddd21e87089d15edab3144b3e Mon Sep 17 00:00:00 2001
+From caefb5b2050a93cf24b89ec4d0d76a3849a9b1ea Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Wed, 24 Jun 2015 02:56:49 -0700
 Subject: [PATCH] Configurable async light updates
@@ -87,7 +87,7 @@ index 22330c3..8aff010 100644
              ChunkCoordinates chunkcoordinates = this.world.getSpawn();
              int k = i * 16 + 8 - chunkcoordinates.x;
 diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
-index dcb5474..a24b405 100644
+index dcb5474..ed2428d 100644
 --- a/src/main/java/net/minecraft/server/World.java
 +++ b/src/main/java/net/minecraft/server/World.java
 @@ -11,6 +11,13 @@ import java.util.Set;
@@ -108,7 +108,7 @@ index dcb5474..a24b405 100644
      public static boolean haveWeSilencedAPhysicsCrash;
      public static String blockLocation;
      public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
-+    public ExecutorService lightingExecutor; // PaperSpigot - Asynchronous lighting updates
++    public ExecutorService lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build()); // PaperSpigot - Asynchronous lighting updates
  
      public static long chunkToKey(int x, int z)
      {
@@ -148,7 +148,7 @@ index dcb5474..a24b405 100644
              // CraftBukkit end
              return false;
          } else {
-@@ -2536,11 +2544,68 @@ public abstract class World implements IBlockAccess {
+@@ -2536,11 +2544,64 @@ public abstract class World implements IBlockAccess {
                  }
              }
  
@@ -178,10 +178,6 @@ index dcb5474..a24b405 100644
 +
 +        if (!chunk.world.paperSpigotConfig.useAsyncLighting) {
 +            return this.c(enumskyblock, x, y, z, chunk, null);
-+        }
-+
-+        if (lightingExecutor == null) {
-+            lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build());
 +        }
 +
 +        chunk.pendingLightUpdates.incrementAndGet();
@@ -218,7 +214,7 @@ index dcb5474..a24b405 100644
          return false;
      }
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
-index 44d271a..ddd33e8 100644
+index e9ce8f7..fc7b7c4 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
 @@ -206,4 +206,11 @@ public class PaperSpigotWorldConfig
@@ -234,5 +230,5 @@ index 44d271a..ddd33e8 100644
 +    }
  }
 -- 
-1.9.5.msysgit.1
+2.4.6.windows.1
 

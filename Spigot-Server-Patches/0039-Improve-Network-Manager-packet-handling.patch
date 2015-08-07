@@ -1,4 +1,4 @@
-From d0c4db66e27ad9074640269d3be2aa37f2f0f44d Mon Sep 17 00:00:00 2001
+From 102b8aeedc30785675fddf6f6915e9a9b39b54c7 Mon Sep 17 00:00:00 2001
 From: Aikar <aikar@aikar.co>
 Date: Sun, 19 Oct 2014 16:01:51 -0500
 Subject: [PATCH] Improve Network Manager packet handling
@@ -7,7 +7,7 @@ Removes an unnecessary "peek at head of queue", and also makes the number of pac
 processed per player per tick configurable, so larger servers can slow down incoming processing.
 
 diff --git a/src/main/java/net/minecraft/server/NetworkManager.java b/src/main/java/net/minecraft/server/NetworkManager.java
-index 76a5403..5a5604c 100644
+index d3a4390..2d5982e 100644
 --- a/src/main/java/net/minecraft/server/NetworkManager.java
 +++ b/src/main/java/net/minecraft/server/NetworkManager.java
 @@ -154,11 +154,12 @@ public class NetworkManager extends SimpleChannelInboundHandler {
@@ -40,7 +40,7 @@ index 76a5403..5a5604c 100644
                  // CraftBukkit start
                  if (!this.isConnected() || !this.m.config().isAutoRead()) {
 diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
-index 0091cbf..e23430b 100644
+index 1736cbd..614dc24 100644
 --- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 +++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
 @@ -171,4 +171,10 @@ public class PaperSpigotConfig
@@ -55,5 +55,5 @@ index 0091cbf..e23430b 100644
 +    }
  }
 -- 
-1.9.1
+2.4.6.windows.1
 
