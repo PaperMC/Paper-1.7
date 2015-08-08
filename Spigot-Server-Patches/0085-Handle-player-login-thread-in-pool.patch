@@ -50,7 +50,7 @@ index bd254de..77dbe23 100644
 +    		Runtime.getRuntime().availableProcessors() * 2, 
 +    		60, TimeUnit.SECONDS, 
 +    		new LinkedBlockingQueue(),
-+    		new ThreadFactoryBuilder().setNameFormat("User Authenticator #").build());
++    		new ThreadFactoryBuilder().setNameFormat("User Authenticator #%d").build());
 +    // PaperSpigot end
  
      public LoginListener(MinecraftServer minecraftserver, NetworkManager networkmanager) {
