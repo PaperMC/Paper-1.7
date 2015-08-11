@@ -1,0 +1,22 @@
+From f7a510e8c37ab7a7289f7bbec2f68e00a839ba9c Mon Sep 17 00:00:00 2001
+From: Iceee <andrew@opticgaming.tv>
+Date: Tue, 11 Aug 2015 01:34:19 -0500
+Subject: [PATCH] Fix lava/water some times creating air instead of cobblestone
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
+index da76b53..b64bf17 100644
+--- a/src/main/java/net/minecraft/server/BlockFluids.java
++++ b/src/main/java/net/minecraft/server/BlockFluids.java
+@@ -212,7 +212,7 @@ public abstract class BlockFluids extends Block {
+ 
+                     if (l == 0) {
+                         world.setTypeUpdate(i, j, k, Blocks.OBSIDIAN);
+-                    } else if (l <= 4) {
++                    } else if (l > 0) { // PaperSpigot
+                         world.setTypeUpdate(i, j, k, Blocks.COBBLESTONE);
+                     }
+ 
+-- 
+2.5.0
+
