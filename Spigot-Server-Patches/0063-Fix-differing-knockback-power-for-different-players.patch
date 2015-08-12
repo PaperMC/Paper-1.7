@@ -1,0 +1,83 @@
+From 4a8f09fcf6d3299c369e0cee8271abf4b4a3447e Mon Sep 17 00:00:00 2001
+From: ichbinjoe <joe@ibj.io>
+Date: Tue, 11 Aug 2015 23:47:10 -0400
+Subject: [PATCH] Fix differing knockback power for different players
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index d429613..6955510 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -330,7 +330,7 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
+     public void setPassengerOf(Entity entity) {
+         // CraftBukkit end
+         if (this.vehicle != null && entity == null) {
+-            world.getServer().getPluginManager().callEvent( new org.spigotmc.event.entity.EntityDismountEvent( this.getBukkitEntity(), this.vehicle.getBukkitEntity() ) ); // Spigot
++            world.getServer().getPluginManager().callEvent(new org.spigotmc.event.entity.EntityDismountEvent(this.getBukkitEntity(), this.vehicle.getBukkitEntity())); // Spigot
+             // CraftBukkit start - use parent method instead to correctly fire VehicleExitEvent
+             Entity originalVehicle = this.vehicle;
+             // First statement moved down, second statement handled in parent method.
+@@ -948,6 +948,12 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
+                         // CraftBukkit end
+                     }
+ 
++                    //PaperSpigot start - Save entity velocity vector before a possible knockback
++                    double victimMotX = entity.motX;
++                    double victimMotY = entity.motY;
++                    double victimMotZ = entity.motZ;
++                    //PaperSpigot end
++
+                     boolean flag2 = entity.damageEntity(DamageSource.playerAttack(this), f);
+ 
+                     if (flag2) {
+@@ -958,6 +964,19 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
+                             this.setSprinting(false);
+                         }
+ 
++                        //PaperSpigot start - Immediately send a velocity change to the attacked player, and revert before a Player movement packet can disrupt the sending of a velocity change packet
++                        if(entity.velocityChanged && entity instanceof EntityPlayer){
++                            EntityPlayer entityPlayer = ((EntityPlayer) entity);
++
++                            entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityVelocity(entityPlayer));
++                            entityPlayer.velocityChanged = false;
++                            entityPlayer.motX = victimMotX;
++                            entityPlayer.motY = victimMotY;
++                            entityPlayer.motZ = victimMotZ;
++
++                        }
++                        //PaperSpigot end
++
+                         if (flag) {
+                             this.b(entity);
+                         }
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 52760c0..0096164 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -59,6 +59,7 @@ import org.bukkit.metadata.MetadataValue;
+ import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.messaging.StandardMessenger;
+ import org.bukkit.scoreboard.Scoreboard;
++import org.bukkit.util.Vector;
+ 
+ @DelegateDeserialization(CraftOfflinePlayer.class)
+ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -455,6 +456,15 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+     }
+ 
+     @Override
++    public void setVelocity(Vector vel) {
++        super.setVelocity(vel);
++        //PaperSpigot start - Immediately send a new velocity to the player.
++        this.getHandle().playerConnection.sendPacket(new PacketPlayOutEntityVelocity(this.getHandle()));
++        this.getHandle().velocityChanged = false;
++        //PaperSpigot end
++    }
++
++    @Override
+     public boolean teleport(Location location, PlayerTeleportEvent.TeleportCause cause) {
+         EntityPlayer entity = getHandle();
+ 
+-- 
+1.9.5.msysgit.1
+
