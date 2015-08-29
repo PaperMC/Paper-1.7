@@ -1,4 +1,4 @@
-From 13101d2c6030d66f4f4f617151bbcc2a49c9a0e5 Mon Sep 17 00:00:00 2001
+From ce8c771a46de87b3186351210fb2d21616b589b0 Mon Sep 17 00:00:00 2001
 From: Byteflux <byte@byteflux.net>
 Date: Sun, 21 Jun 2015 18:29:12 -0700
 Subject: [PATCH] Add player view distance API
@@ -33,7 +33,7 @@ index 0671659..d0a565f 100644
                  double deltaZ = this.locZ - player.locZ;
                  double distanceSquared = deltaX * deltaX + deltaZ * deltaZ;
 diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
-index 250c05f..8692f69 100644
+index 250c05f..42af771 100644
 --- a/src/main/java/net/minecraft/server/EntityPlayer.java
 +++ b/src/main/java/net/minecraft/server/EntityPlayer.java
 @@ -67,6 +67,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
@@ -48,7 +48,7 @@ index 250c05f..8692f69 100644
  
      public EntityPlayer(MinecraftServer minecraftserver, WorldServer worldserver, GameProfile gameprofile, PlayerInteractManager playerinteractmanager) {
          super(worldserver, gameprofile);
-+        this.viewDistance = worldserver.getServer().getViewDistance(); // PaperSpigot - Player view distance API
++        this.viewDistance = world.spigotConfig.viewDistance; // PaperSpigot - Player view distance API
          playerinteractmanager.player = this;
          this.playerInteractManager = playerinteractmanager;
          ChunkCoordinates chunkcoordinates = worldserver.getSpawn();
@@ -206,5 +206,5 @@ index 0128097..89ce091 100644
              growBB( animalBB, player.boundingBox, animalActivationRange, 256, animalActivationRange );
              growBB( monsterBB, player.boundingBox, monsterActivationRange, 256, monsterActivationRange );
 -- 
-1.9.5.msysgit.1
+2.5.0.windows.1
 
