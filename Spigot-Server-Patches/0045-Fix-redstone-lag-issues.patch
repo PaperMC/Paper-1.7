@@ -1,0 +1,78 @@
+From d84d3e7459299e8cf7e7b60958972e05856c60a5 Mon Sep 17 00:00:00 2001
+From: Iceee <andrew@opticgaming.tv>
+Date: Thu, 12 Jun 2014 13:37:35 -0500
+Subject: [PATCH] Fix redstone lag issues
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 91f036b..d0e73a5 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -527,6 +527,7 @@ public class WorldServer extends World {
+         if (i != this.M.size()) {
+             throw new IllegalStateException("TickNextTick list out of synch");
+         } else {
++            /* PaperSpigot start - Fix redstone lag issues
+             if (i > 1000) {
+                 // CraftBukkit start - If the server has too much to process over time, try to alleviate that
+                 if (i > 20 * 1000) {
+@@ -535,7 +536,12 @@ public class WorldServer extends World {
+                     i = 1000;
+                 }
+                 // CraftBukkit end
++            } */
++
++            if (i > paperSpigotConfig.tickNextTickListCap) {
++                i = paperSpigotConfig.tickNextTickListCap;
+             }
++            // PaperSpigot end
+ 
+             this.methodProfiler.a("cleaning");
+ 
+@@ -552,6 +558,24 @@ public class WorldServer extends World {
+                 this.V.add(nextticklistentry);
+             }
+ 
++            // PaperSpigot start - Allow redstone ticks to bypass the tickNextTickListCap
++            if (paperSpigotConfig.tickNextTickListCapIgnoresRedstone) {
++                Iterator<NextTickListEntry> iterator = this.N.iterator();
++                while (iterator.hasNext()) {
++                    NextTickListEntry next = iterator.next();
++                    if (!flag && next.d > this.worldData.getTime()) {
++                        break;
++                    }
++
++                    if (next.a().isPowerSource() || next.a() instanceof IContainer) {
++                        iterator.remove();
++                        this.M.remove(next);
++                        this.V.add(next);
++                    }
++                }
++            }
++            // PaperSpigot end
++
+             this.methodProfiler.b();
+             this.methodProfiler.a("ticking");
+             Iterator iterator = this.V.iterator();
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 686b457..44d271a 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -196,4 +196,14 @@ public class PaperSpigotWorldConfig
+         boatsDropBoats = getBoolean( "game-mechanics.boats-drop-boats", false );
+         lessPickyTorches = getBoolean( "game-mechanics.less-picky-torch-placement", false );
+     }
++
++    public int tickNextTickListCap;
++    public boolean tickNextTickListCapIgnoresRedstone;
++    private void tickNextTickListCap()
++    {
++        tickNextTickListCap = getInt( "tick-next-tick-list-cap", 10000 ); // Higher values will be friendlier to vanilla style mechanics (to a point) but may hurt performance
++        tickNextTickListCapIgnoresRedstone = getBoolean("tick-next-tick-list-cap-ignores-redstone", false); // Redstone TickNextTicks will always bypass the preceding cap.
++        log( "WorldServer TickNextTickList cap set at " + tickNextTickListCap );
++        log( "WorldServer TickNextTickList cap always processes redstone: " + tickNextTickListCapIgnoresRedstone );
++    }
+ }
+-- 
+2.3.5
+

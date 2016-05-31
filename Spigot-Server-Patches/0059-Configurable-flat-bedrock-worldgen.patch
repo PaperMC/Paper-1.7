@@ -1,0 +1,71 @@
+From 12befe414f17a122c6b2ae70f160617b5e5ba1ea Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Wed, 6 May 2015 15:02:54 -0700
+Subject: [PATCH] Configurable flat bedrock worldgen
+
+
+diff --git a/src/main/java/net/minecraft/server/BiomeBase.java b/src/main/java/net/minecraft/server/BiomeBase.java
+index 1372955..201c845 100644
+--- a/src/main/java/net/minecraft/server/BiomeBase.java
++++ b/src/main/java/net/minecraft/server/BiomeBase.java
+@@ -263,7 +263,7 @@ public abstract class BiomeBase {
+         for (int l1 = 255; l1 >= 0; --l1) {
+             int i2 = (j1 * 16 + i1) * k1 + l1;
+ 
+-            if (l1 <= 0 + random.nextInt(5)) {
++            if (l1 <= (world.paperSpigotConfig.generateFlatBedrock ? 0 : random.nextInt(5))) { // PaperSpigot - Configurable flat bedrock worldgen
+                 ablock[i2] = Blocks.BEDROCK;
+             } else {
+                 Block block2 = ablock[i2];
+diff --git a/src/main/java/net/minecraft/server/BiomeMesa.java b/src/main/java/net/minecraft/server/BiomeMesa.java
+index 7a184e2..8b1a69d 100644
+--- a/src/main/java/net/minecraft/server/BiomeMesa.java
++++ b/src/main/java/net/minecraft/server/BiomeMesa.java
+@@ -97,7 +97,7 @@ public class BiomeMesa extends BiomeBase {
+                 ablock[i2] = Blocks.STONE;
+             }
+ 
+-            if (l1 <= 0 + random.nextInt(5)) {
++            if (l1 <= (world.paperSpigotConfig.generateFlatBedrock ? 0 : random.nextInt(5))) { // PaperSpigot - Configurable flat bedrock worldgen
+                 ablock[i2] = Blocks.BEDROCK;
+             } else {
+                 Block block2 = ablock[i2];
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderHell.java b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+index bb70599..b851249 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderHell.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+@@ -124,7 +124,10 @@ public class ChunkProviderHell implements IChunkProvider {
+                 for (int k1 = 127; k1 >= 0; --k1) {
+                     int l1 = (l * 16 + k) * 128 + k1;
+ 
+-                    if (k1 < 127 - this.i.nextInt(5) && k1 > 0 + this.i.nextInt(5)) {
++                    // PaperSpigot start - Configurable flat bedrock worldgen
++                    if (k1 < 127 - (o.paperSpigotConfig.generateFlatBedrock ? 0 : this.i.nextInt(5)) &&
++                            k1 > (o.paperSpigotConfig.generateFlatBedrock ? 0 : this.i.nextInt(5))) {
++                    // PaperSpigot end
+                         Block block2 = ablock[l1];
+ 
+                         if (block2 != null && block2.getMaterial() != Material.AIR) {
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 1133f06..f8a95f9 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -224,6 +224,7 @@ public class PaperSpigotWorldConfig
+     public boolean generateStronghold;
+     public boolean generateTemple;
+     public boolean generateVillage;
++    public boolean generateFlatBedrock;
+     private void generatorSettings()
+     {
+         generateCanyon = getBoolean( "generator-settings.canyon", true );
+@@ -234,6 +235,7 @@ public class PaperSpigotWorldConfig
+         generateStronghold = getBoolean( "generator-settings.stronghold", true );
+         generateTemple = getBoolean( "generator-settings.temple", true );
+         generateVillage = getBoolean( "generator-settings.village", true );
++        generateFlatBedrock = getBoolean( "generator-settings.flat-bedrock", false );
+     }
+ 
+     public boolean loadUnloadedEnderPearls;
+-- 
+1.9.5.msysgit.1
+

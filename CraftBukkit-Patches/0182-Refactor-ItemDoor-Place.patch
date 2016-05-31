@@ -1,0 +1,29 @@
+From 1baf0b8ef94760b7e0dc1807a1f0f446231808f7 Mon Sep 17 00:00:00 2001
+From: md_5 <git@md-5.net>
+Date: Tue, 30 Sep 2014 21:43:15 +1000
+Subject: [PATCH] Refactor ItemDoor Place
+
+
+diff --git a/src/main/java/net/minecraft/server/ItemDoor.java b/src/main/java/net/minecraft/server/ItemDoor.java
+index ee8568b..f585aa8 100644
+--- a/src/main/java/net/minecraft/server/ItemDoor.java
++++ b/src/main/java/net/minecraft/server/ItemDoor.java
+@@ -71,9 +71,11 @@ public class ItemDoor extends Item {
+             flag2 = true;
+         }
+ 
+-        world.setTypeAndData(i, j, k, block, l, 2);
+-        world.setTypeAndData(i, j + 1, k, block, 8 | (flag2 ? 1 : 0), 2);
+-        world.applyPhysics(i, j, k, block);
+-        world.applyPhysics(i, j + 1, k, block);
++        // Spigot start - update physics after the block multi place event
++        world.setTypeAndData(i, j, k, block, l, 3);
++        world.setTypeAndData(i, j + 1, k, block, 8 | (flag2 ? 1 : 0), 3);
++        // world.applyPhysics(i, j, k, block);
++        // world.applyPhysics(i, j + 1, k, block);
++        // Spigot end
+     }
+ }
+-- 
+1.9.1
+

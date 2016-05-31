@@ -1,0 +1,31 @@
+From cfdf8d54a02a09ce2ae034d051851f982111b8d1 Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Wed, 18 Mar 2015 04:13:38 -0700
+Subject: [PATCH] Add FallingBlock and TNT source location API
+
+
+diff --git a/src/main/java/org/bukkit/entity/FallingBlock.java b/src/main/java/org/bukkit/entity/FallingBlock.java
+index 1edd6e0..799c43a 100644
+--- a/src/main/java/org/bukkit/entity/FallingBlock.java
++++ b/src/main/java/org/bukkit/entity/FallingBlock.java
+@@ -45,4 +45,6 @@ public interface FallingBlock extends Entity {
+      * @param drop true to break into an item when obstructed
+      */
+     void setDropItem(boolean drop);
++
++    org.bukkit.Location getSourceLoc(); // PaperSpigot - Add FallingBlock and TNT source location API
+ }
+diff --git a/src/main/java/org/bukkit/entity/TNTPrimed.java b/src/main/java/org/bukkit/entity/TNTPrimed.java
+index 3ce322d..cc3ddca 100644
+--- a/src/main/java/org/bukkit/entity/TNTPrimed.java
++++ b/src/main/java/org/bukkit/entity/TNTPrimed.java
+@@ -35,4 +35,6 @@ public interface TNTPrimed extends Explosive {
+      * @return the source of this primed TNT
+      */
+     public Entity getSource();
++
++    org.bukkit.Location getSourceLoc(); // PaperSpigot - Add FallingBlock and TNT source location API
+ }
+-- 
+1.9.4.msysgit.2
+

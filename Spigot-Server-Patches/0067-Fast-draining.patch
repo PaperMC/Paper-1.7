@@ -1,0 +1,101 @@
+From c24682fe0ffd2669b512de0da98fb7ed71c48fe1 Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Tue, 23 Jun 2015 23:32:56 -0700
+Subject: [PATCH] Fast draining
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index cc45d60..2b5866f 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -73,7 +73,7 @@ public class BlockFlowing extends BlockFluids {
+                 }
+             }
+ 
+-            if (this.material == Material.LAVA && l < 8 && j1 < 8 && j1 > l && random.nextInt(4) != 0) {
++            if (!world.paperSpigotConfig.fastDrainLava && this.material == Material.LAVA && l < 8 && j1 < 8 && j1 > l && random.nextInt(4) != 0) { // PaperSpigot
+                 i1 *= 4;
+             }
+ 
+@@ -83,7 +83,7 @@ public class BlockFlowing extends BlockFluids {
+                 }
+             } else {
+                 l = j1;
+-                if (j1 < 0) {
++                if (j1 < 0 || canFastDrain(world, i, j, k)) { // PaperSpigot - Fast draining
+                     world.setAir(i, j, k);
+                 } else {
+                     world.setData(i, j, k, j1, 2);
+@@ -319,4 +319,52 @@ public class BlockFlowing extends BlockFluids {
+         }
+         return super.a(world);
+     }
++
++    /**
++     * PaperSpigot - Data check method for fast draining
++     */
++    public int getData(World world, int x, int y, int z) {
++        int data = this.e(world, x, y, z);
++        return data < 8 ? data : 0;
++    }
++
++    /**
++     * PaperSpigot - Checks surrounding blocks to determine if block can be fast drained
++     */
++    public boolean canFastDrain(World world, int x, int y, int z) {
++        boolean result = false;
++        int data = getData(world, x, y, z);
++        if (this.material == Material.WATER) {
++            if (world.paperSpigotConfig.fastDrainWater) {
++                result = true;
++                if (getData(world, x, y - 1, z) < 0) {
++                    result = false;
++                } else if (world.getType(x, y, z - 1).getMaterial() == Material.WATER && getData(world, x, y, z - 1) < data) {
++                    result = false;
++                } else if (world.getType(x, y, z + 1).getMaterial() == Material.WATER && getData(world, x, y, z + 1) < data) {
++                    result = false;
++                } else if (world.getType(x - 1, y, z).getMaterial() == Material.WATER && getData(world, x - 1, y, z) < data) {
++                    result = false;
++                } else if (world.getType(x + 1, y, z).getMaterial() == Material.WATER && getData(world, x + 1, y, z) < data) {
++                    result = false;
++                }
++            }
++        } else if (this.material == Material.LAVA) {
++            if (world.paperSpigotConfig.fastDrainLava) {
++                result = true;
++                if (getData(world, x, y - 1, z) < 0 || world.getType(x, y + 1, z).getMaterial() != Material.AIR) {
++                    result = false;
++                } else if (world.getType(x, y, z - 1).getMaterial() == Material.LAVA && getData(world, x, y, z - 1) < data) {
++                    result = false;
++                } else if (world.getType(x, y, z + 1).getMaterial() == Material.LAVA && getData(world, x, y, z + 1) < data) {
++                    result = false;
++                } else if (world.getType(x - 1, y, z).getMaterial() == Material.LAVA && getData(world, x - 1, y, z) < data) {
++                    result = false;
++                } else if (world.getType(x + 1, y, z).getMaterial() == Material.LAVA && getData(world, x + 1, y, z) < data) {
++                    result = false;
++                }
++            }
++        }
++        return result;
++    }
+ }
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index ec27f79..0aea207 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -265,4 +265,12 @@ public class PaperSpigotWorldConfig
+     {
+         optimizeExplosions = getBoolean( "optimize-explosions", false );
+     }
++
++    public boolean fastDrainLava;
++    public boolean fastDrainWater;
++    private void fastDraining()
++    {
++        fastDrainLava = getBoolean( "fast-drain.lava", false );
++        fastDrainWater = getBoolean( "fast-drain.water", false );
++    }
+ }
+-- 
+1.9.5.msysgit.1
+

@@ -1,0 +1,218 @@
+From 61a51e8ee40829d73dd441dbd6dd8d9be154887c Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Thu, 2 Apr 2015 21:58:49 -0700
+Subject: [PATCH] Generator Settings
+
+
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderFlat.java b/src/main/java/net/minecraft/server/ChunkProviderFlat.java
+index 0f75182..a0bf8f2 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderFlat.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderFlat.java
+@@ -26,7 +26,7 @@ public class ChunkProviderFlat implements IChunkProvider {
+         if (flag) {
+             Map map = this.e.b();
+ 
+-            if (map.containsKey("village")) {
++            if (world.paperSpigotConfig.generateVillage && map.containsKey("village")) { // PaperSpigot
+                 Map map1 = (Map) map.get("village");
+ 
+                 if (!map1.containsKey("size")) {
+@@ -36,15 +36,15 @@ public class ChunkProviderFlat implements IChunkProvider {
+                 this.f.add(new WorldGenVillage(map1));
+             }
+ 
+-            if (map.containsKey("biome_1")) {
++            if (world.paperSpigotConfig.generateTemple && map.containsKey("biome_1")) { // PaperSpigot
+                 this.f.add(new WorldGenLargeFeature((Map) map.get("biome_1")));
+             }
+ 
+-            if (map.containsKey("mineshaft")) {
++            if (world.paperSpigotConfig.generateMineshaft && map.containsKey("mineshaft")) { // PaperSpigot
+                 this.f.add(new WorldGenMineshaft((Map) map.get("mineshaft")));
+             }
+ 
+-            if (map.containsKey("stronghold")) {
++            if (world.paperSpigotConfig.generateStronghold && map.containsKey("stronghold")) { // PaperSpigot
+                 this.f.add(new WorldGenStronghold((Map) map.get("stronghold")));
+             }
+         }
+@@ -58,7 +58,7 @@ public class ChunkProviderFlat implements IChunkProvider {
+             this.j = new WorldGenLakes(Blocks.STATIONARY_LAVA);
+         }
+ 
+-        this.h = this.e.b().containsKey("dungeon");
++        this.h = world.paperSpigotConfig.generateDungeon && this.e.b().containsKey("dungeon");
+         Iterator iterator = this.e.c().iterator();
+ 
+         while (iterator.hasNext()) {
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+index 813df4d..251bf48 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -149,13 +149,17 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         this.a(i, j, ablock);
+         this.z = this.n.getWorldChunkManager().getBiomeBlock(this.z, i * 16, j * 16, 16, 16);
+         this.a(i, j, ablock, abyte, this.z);
+-        this.t.a(this, this.n, i, j, ablock);
+-        this.y.a(this, this.n, i, j, ablock);
++        // PaperSpigot start
++        if (this.n.paperSpigotConfig.generateCaves) this.t.a(this, this.n, i, j, ablock);
++        if (this.n.paperSpigotConfig.generateCanyon) this.y.a(this, this.n, i, j, ablock);
++        // PaperSpigot end
+         if (this.o) {
+-            this.w.a(this, this.n, i, j, ablock);
+-            this.v.a(this, this.n, i, j, ablock);
+-            this.u.a(this, this.n, i, j, ablock);
+-            this.x.a(this, this.n, i, j, ablock);
++            // PaperSpigot start
++            if (this.n.paperSpigotConfig.generateMineshaft) this.w.a(this, this.n, i, j, ablock);
++            if (this.n.paperSpigotConfig.generateVillage) this.v.a(this, this.n, i, j, ablock);
++            if (this.n.paperSpigotConfig.generateStronghold) this.u.a(this, this.n, i, j, ablock);
++            if (this.n.paperSpigotConfig.generateTemple) this.x.a(this, this.n, i, j, ablock);
++            // PaperSpigot end
+         }
+ 
+         Chunk chunk = new Chunk(this.n, ablock, abyte, i, j);
+@@ -294,10 +298,12 @@ public class ChunkProviderGenerate implements IChunkProvider {
+         boolean flag = false;
+ 
+         if (this.o) {
+-            this.w.a(this.n, this.i, i, j);
+-            flag = this.v.a(this.n, this.i, i, j);
+-            this.u.a(this.n, this.i, i, j);
+-            this.x.a(this.n, this.i, i, j);
++            // PaperSpigot start
++            if (this.n.paperSpigotConfig.generateMineshaft) this.w.a(this.n, this.i, i, j);
++            if (this.n.paperSpigotConfig.generateVillage) flag = this.v.a(this.n, this.i, i, j);
++            if (this.n.paperSpigotConfig.generateStronghold) this.u.a(this.n, this.i, i, j);
++            if (this.n.paperSpigotConfig.generateTemple) this.x.a(this.n, this.i, i, j);
++            // PaperSpigot end
+         }
+ 
+         int k1;
+@@ -320,13 +326,17 @@ public class ChunkProviderGenerate implements IChunkProvider {
+             }
+         }
+ 
+-        for (k1 = 0; k1 < 8; ++k1) {
+-            l1 = k + this.i.nextInt(16) + 8;
+-            i2 = this.i.nextInt(256);
+-            int j2 = l + this.i.nextInt(16) + 8;
++        // PaperSpigot start
++        if (this.n.paperSpigotConfig.generateDungeon) {
++            for (k1 = 0; k1 < 8; ++k1) {
++                l1 = k + this.i.nextInt(16) + 8;
++                i2 = this.i.nextInt(256);
++                int j2 = l + this.i.nextInt(16) + 8;
+ 
+-            (new WorldGenDungeons()).generate(this.n, this.i, l1, i2, j2);
++                (new WorldGenDungeons()).generate(this.n, this.i, l1, i2, j2);
++            }
+         }
++        // PaperSpigot end
+ 
+         biomebase.a(this.n, this.i, k, l);
+         SpawnerCreature.a(this.n, biomebase, k + 8, l + 8, 16, 16, this.i);
+@@ -383,10 +393,12 @@ public class ChunkProviderGenerate implements IChunkProvider {
+ 
+     public void recreateStructures(int i, int j) {
+         if (this.o) {
+-            this.w.a(this, this.n, i, j, (Block[]) null);
+-            this.v.a(this, this.n, i, j, (Block[]) null);
+-            this.u.a(this, this.n, i, j, (Block[]) null);
+-            this.x.a(this, this.n, i, j, (Block[]) null);
++            // PaperSpigot start
++            if (this.n.paperSpigotConfig.generateMineshaft) this.w.a(this, this.n, i, j, (Block[]) null);
++            if (this.n.paperSpigotConfig.generateVillage) this.v.a(this, this.n, i, j, (Block[]) null);
++            if (this.n.paperSpigotConfig.generateStronghold) this.u.a(this, this.n, i, j, (Block[]) null);
++            if (this.n.paperSpigotConfig.generateTemple) this.x.a(this, this.n, i, j, (Block[]) null);
++            // PaperSpigot end
+         }
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderHell.java b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+index ef4894e..bb70599 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderHell.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+@@ -183,8 +183,10 @@ public class ChunkProviderHell implements IChunkProvider {
+ 
+         this.a(i, j, ablock);
+         this.b(i, j, ablock);
+-        this.t.a(this, this.o, i, j, ablock);
+-        this.c.a(this, this.o, i, j, ablock);
++        // PaperSpigot start
++        if (this.o.paperSpigotConfig.generateCaves) this.t.a(this, this.o, i, j, ablock);
++        if (this.o.paperSpigotConfig.generateFortress) this.c.a(this, this.o, i, j, ablock);
++        // PaperSpigot end
+         Chunk chunk = new Chunk(this.o, ablock, i, j);
+         BiomeBase[] abiomebase = this.o.getWorldChunkManager().getBiomeBlock((BiomeBase[]) null, i * 16, j * 16, 16, 16);
+         byte[] abyte = chunk.m();
+@@ -321,7 +323,7 @@ public class ChunkProviderHell implements IChunkProvider {
+         int k = i * 16;
+         int l = j * 16;
+ 
+-        this.c.a(this.o, this.i, i, j);
++        if (this.o.paperSpigotConfig.generateFortress) this.c.a(this.o, this.i, i, j); // PaperSpigot
+ 
+         int i1;
+         int j1;
+@@ -440,6 +442,6 @@ public class ChunkProviderHell implements IChunkProvider {
+     }
+ 
+     public void recreateStructures(int i, int j) {
+-        this.c.a(this, this.o, i, j, (Block[]) null);
++        if (this.o.paperSpigotConfig.generateFortress) this.c.a(this, this.o, i, j, (Block[]) null); // PaperSpigot
+     }
+ }
+diff --git a/src/main/java/net/minecraft/server/StructureGenerator.java b/src/main/java/net/minecraft/server/StructureGenerator.java
+index f835b01..6d0cea8 100644
+--- a/src/main/java/net/minecraft/server/StructureGenerator.java
++++ b/src/main/java/net/minecraft/server/StructureGenerator.java
+@@ -62,6 +62,7 @@ public abstract class StructureGenerator extends WorldGenBase {
+     }
+ 
+     public boolean b(int i, int j, int k) {
++        if (this.c == null) return false; // PaperSpigot
+         this.a(this.c);
+         return this.c(i, j, k) != null;
+     }
+@@ -89,6 +90,7 @@ public abstract class StructureGenerator extends WorldGenBase {
+     }
+ 
+     public boolean d(int i, int j, int k) {
++        if (this.c == null) return false; // PaperSpigot
+         this.a(this.c);
+         Iterator iterator = this.d.values().iterator();
+ 
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index e7a2b74..8be9740 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -215,4 +215,24 @@ public class PaperSpigotWorldConfig
+         useAsyncLighting = getBoolean( "use-async-lighting", false );
+         log( "World async lighting: " + useAsyncLighting );
+     }
++
++    public boolean generateCanyon;
++    public boolean generateCaves;
++    public boolean generateDungeon;
++    public boolean generateFortress;
++    public boolean generateMineshaft;
++    public boolean generateStronghold;
++    public boolean generateTemple;
++    public boolean generateVillage;
++    private void generatorSettings()
++    {
++        generateCanyon = getBoolean( "generator-settings.canyon", true );
++        generateCaves = getBoolean( "generator-settings.caves", true );
++        generateDungeon = getBoolean( "generator-settings.dungeon", true );
++        generateFortress = getBoolean( "generator-settings.fortress", true );
++        generateMineshaft = getBoolean( "generator-settings.mineshaft", true );
++        generateStronghold = getBoolean( "generator-settings.stronghold", true );
++        generateTemple = getBoolean( "generator-settings.temple", true );
++        generateVillage = getBoolean( "generator-settings.village", true );
++    }
+ }
+-- 
+1.9.5.msysgit.1
+

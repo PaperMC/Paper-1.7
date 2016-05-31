@@ -1,0 +1,49 @@
+From ea494071e73e53d6d9991476be7dda7013d35ead Mon Sep 17 00:00:00 2001
+From: Thinkofdeath <thinkofdeath@spigotmc.org>
+Date: Tue, 4 Aug 2015 21:44:02 -0500
+Subject: [PATCH] Backport ping MOTD fix
+
+
+diff --git a/src/main/java/net/minecraft/server/PacketStatusListener.java b/src/main/java/net/minecraft/server/PacketStatusListener.java
+index f1571f1..0464e23 100644
+--- a/src/main/java/net/minecraft/server/PacketStatusListener.java
++++ b/src/main/java/net/minecraft/server/PacketStatusListener.java
+@@ -33,7 +33,21 @@ public class PacketStatusListener implements PacketStatusInListener {
+ 
+     public void a() {}
+ 
++    // PaperSpigot start - Readability for ping MOTD fix backport
++    private static final int WAITING = 0;
++    private static final int PING = 1;
++    private static final int DONE = 2;
++    private int state = WAITING;
++    // PaperSpigot end
++
+     public void a(PacketStatusInStart packetstatusinstart) {
++        // PaperSpigot start - Backport ping MOTD fix
++        if (this.state != WAITING) {
++            this.networkManager.close(null);
++            return;
++        }
++        this.state = PING;
++        // PaperSpigot end
+         // CraftBukkit start - fire ping event
+         final Object[] players = minecraftServer.getPlayerList().players.toArray();
+         class ServerListPingEvent extends org.bukkit.event.server.ServerListPingEvent {
+@@ -130,6 +144,13 @@ public class PacketStatusListener implements PacketStatusInListener {
+     }
+ 
+     public void a(PacketStatusInPing packetstatusinping) {
++        // PaperSpigot start - Backport ping MOTD fix
++        if (this.state != PING) {
++            this.networkManager.close(null);
++            return;
++        }
++        this.state = DONE;
++        // PaperSpigot end
+         this.networkManager.handle(new PacketStatusOutPong(packetstatusinping.c()), new GenericFutureListener[0]);
+     }
+ }
+-- 
+2.5.0
+

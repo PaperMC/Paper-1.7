@@ -1,0 +1,89 @@
+From ae50f1d1edb5d66b9c681d04fecd4b5964759a99 Mon Sep 17 00:00:00 2001
+From: Iceee <andrew@opticgaming.tv>
+Date: Tue, 21 Jul 2015 22:48:34 -0700
+Subject: [PATCH] Optimize Spigot's Anti X-Ray
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index 962cd1f..3fc108e 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -210,6 +210,7 @@ public class WorldServer extends World {
+         timings.doTickTiles.startTiming(); // Spigot
+         this.g();
+         timings.doTickTiles.stopTiming(); // Spigot
++        spigotConfig.antiXrayInstance.flushUpdates(this); // PaperSpigot
+         this.methodProfiler.c("chunkMap");
+         timings.doChunkMap.startTiming(); // Spigot
+         this.manager.flush();
+diff --git a/src/main/java/org/spigotmc/AntiXray.java b/src/main/java/org/spigotmc/AntiXray.java
+index 80e538c..44d6451 100644
+--- a/src/main/java/org/spigotmc/AntiXray.java
++++ b/src/main/java/org/spigotmc/AntiXray.java
+@@ -7,6 +7,12 @@ import net.minecraft.server.Blocks;
+ import net.minecraft.server.World;
+ import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+ 
++// PaperSpigot start
++import net.minecraft.server.ChunkPosition;
++import java.util.HashSet;
++import java.util.Set;
++// PaperSpigot end
++
+ public class AntiXray
+ {
+ 
+@@ -17,6 +23,10 @@ public class AntiXray
+     private final boolean[] obfuscateBlocks = new boolean[ Short.MAX_VALUE ];
+     // Used to select a random replacement ore
+     private final byte[] replacementOres;
++    // PaperSpigot start
++    public boolean queueUpdates = true;
++    public final Set<ChunkPosition> pendingUpdates = new HashSet<ChunkPosition>();
++    // PaperSpigot end
+ 
+     public AntiXray(SpigotWorldConfig config)
+     {
+@@ -43,6 +53,25 @@ public class AntiXray
+     }
+ 
+     /**
++     * PaperSpigot - Flush queued block updates for world.
++     */
++    public void flushUpdates(World world)
++    {
++        if ( world.spigotConfig.antiXray && !pendingUpdates.isEmpty() )
++        {
++            queueUpdates = false;
++
++            for ( ChunkPosition position : pendingUpdates )
++            {
++                updateNearbyBlocks( world, position.x, position.y, position.z );
++            }
++
++            pendingUpdates.clear();
++            queueUpdates = true;
++        }
++    }
++
++    /**
+      * Starts the timings handler, then updates all blocks within the set radius
+      * of the given coordinate, revealing them if they are hidden ores.
+      */
+@@ -50,6 +79,13 @@ public class AntiXray
+     {
+         if ( world.spigotConfig.antiXray )
+         {
++            // PaperSpigot start
++            if ( queueUpdates )
++            {
++                pendingUpdates.add( new ChunkPosition( x, y, z ) );
++                return;
++            }
++            // PaperSpigot end
+             update.startTiming();
+             updateNearbyBlocks( world, x, y, z, 2, false ); // 2 is the radius, we shouldn't change it as that would make it exponentially slower
+             update.stopTiming();
+-- 
+1.9.5.msysgit.1
+

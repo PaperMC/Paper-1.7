@@ -1,0 +1,74 @@
+From 18b4c7a4221dd9ec0d97087b0b4aa2d7c6c3f648 Mon Sep 17 00:00:00 2001
+From: Sudzzy <originmc@outlook.com>
+Date: Sun, 12 Jul 2015 02:34:24 -0700
+Subject: [PATCH] Configurable mob spawner tick rate
+
+
+diff --git a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+index 26fa93e..905cf01 100644
+--- a/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
++++ b/src/main/java/net/minecraft/server/MobSpawnerAbstract.java
+@@ -26,6 +26,7 @@ public abstract class MobSpawnerAbstract {
+     private int maxNearbyEntities = 6;
+     private int requiredPlayerRange = 16;
+     private int spawnRange = 4;
++    private int tickDelay = 0;
+ 
+     public MobSpawnerAbstract() {}
+ 
+@@ -50,6 +51,10 @@ public abstract class MobSpawnerAbstract {
+     }
+ 
+     public void g() {
++        // PaperSpigot start - Configurable mob spawner tick rate
++        if (spawnDelay > 0 && --tickDelay > 0) return;
++        tickDelay = this.a().paperSpigotConfig.mobSpawnerTickRate;
++        // PaperSpigot end
+         if (this.f()) {
+             double d0;
+ 
+@@ -61,23 +66,22 @@ public abstract class MobSpawnerAbstract {
+                 this.a().addParticle("smoke", d1, d2, d0, 0.0D, 0.0D, 0.0D);
+                 this.a().addParticle("flame", d1, d2, d0, 0.0D, 0.0D, 0.0D);
+                 if (this.spawnDelay > 0) {
+-                    --this.spawnDelay;
++                    this.spawnDelay -= tickDelay; // PaperSpigot
+                 }
+ 
+                 this.d = this.c;
+                 this.c = (this.c + (double) (1000.0F / ((float) this.spawnDelay + 200.0F))) % 360.0D;
+             } else {
+-                if (this.spawnDelay == -1) {
++                if (this.spawnDelay < -tickDelay) { // PaperSpigot
+                     this.j();
+                 }
+ 
+                 if (this.spawnDelay > 0) {
+-                    --this.spawnDelay;
++                    this.spawnDelay -= tickDelay; // PaperSpigot
+                     return;
+                 }
+ 
+                 boolean flag = false;
+-
+                 for (int i = 0; i < this.spawnCount; ++i) {
+                     Entity entity = EntityTypes.createEntityByName(this.getMobName(), this.a());
+ 
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 09a0e2c..85b2cda 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -311,4 +311,10 @@ public class PaperSpigotWorldConfig
+     {
+         disableMoodSounds = getBoolean( "disable-mood-sounds", false );
+     }
++
++    public int mobSpawnerTickRate;
++    private void mobSpawnerTickRate()
++    {
++        mobSpawnerTickRate = getInt( "mob-spawner-tick-rate", 1 );
++    }
+ }
+-- 
+1.9.5.msysgit.1
+

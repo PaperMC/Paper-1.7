@@ -1,0 +1,39 @@
+From 36b2067e54b4dbe083ec56bb657563cae93eaf03 Mon Sep 17 00:00:00 2001
+From: Roman Alexander <romanalexander@users.noreply.github.com>
+Date: Fri, 27 Mar 2015 00:52:24 -0400
+Subject: [PATCH] Toggleable player crits, helps mitigate hacked clients.
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 114f406..d429613 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -926,7 +926,7 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
+                 }
+ 
+                 if (f > 0.0F || f1 > 0.0F) {
+-                    boolean flag = this.fallDistance > 0.0F && !this.onGround && !this.h_() && !this.M() && !this.hasEffect(MobEffectList.BLINDNESS) && this.vehicle == null && entity instanceof EntityLiving;
++                    boolean flag = !world.paperSpigotConfig.disablePlayerCrits && this.fallDistance > 0.0F && !this.onGround && !this.h_() && !this.M() && !this.hasEffect(MobEffectList.BLINDNESS) && this.vehicle == null && entity instanceof EntityLiving;
+ 
+                     if (flag && f > 0.0F) {
+                         f *= 1.5F;
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 4b719ec..5402805 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -191,10 +191,12 @@ public class PaperSpigotWorldConfig
+ 
+     public boolean boatsDropBoats;
+     public boolean lessPickyTorches;
++    public boolean disablePlayerCrits;
+     private void mechanicsChanges()
+     {
+         boatsDropBoats = getBoolean( "game-mechanics.boats-drop-boats", false );
+         lessPickyTorches = getBoolean( "game-mechanics.less-picky-torch-placement", false );
++        disablePlayerCrits = getBoolean( "game-mechanics.disable-player-crits", false);
+     }
+ 
+     public int tickNextTickListCap;
+-- 
+1.9.5.msysgit.0
+

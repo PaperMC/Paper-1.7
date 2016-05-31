@@ -1,0 +1,31 @@
+From 0c743a318b8b06046e480f33931ce04a168c825a Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Thu, 30 Jul 2015 22:56:03 -0500
+Subject: [PATCH] Fix broken movement caused by mutated location in
+ PlayerMoveEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index b03531e..b531835 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -247,6 +247,7 @@ public class PlayerConnection implements PacketPlayInListener {
+ 
+                 // Skip the first time we do this
+                 if (true) { // Spigot - don't skip any move events
++                    Location oldTo = to.clone(); // PaperSpigot
+                     PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
+                     this.server.getPluginManager().callEvent(event);
+ 
+@@ -259,7 +260,7 @@ public class PlayerConnection implements PacketPlayInListener {
+                     /* If a Plugin has changed the To destination then we teleport the Player
+                     there to avoid any 'Moved wrongly' or 'Moved too quickly' errors.
+                     We only do this if the Event was not cancelled. */
+-                    if (!to.equals(event.getTo()) && !event.isCancelled()) {
++                    if (!oldTo.equals(event.getTo()) && !event.isCancelled()) { // PaperSpigot
+                         this.player.getBukkitEntity().teleport(event.getTo(), PlayerTeleportEvent.TeleportCause.UNKNOWN);
+                         return;
+                     }
+-- 
+2.4.5.windows.1
+

@@ -1,0 +1,29 @@
+From 923f0c3e19ca3caeed6465f4131e7d1890800f97 Mon Sep 17 00:00:00 2001
+From: Michael Himing <mhiming@gmail.com>
+Date: Wed, 29 Apr 2015 00:58:22 +1000
+Subject: [PATCH] Better container checks
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index 4bca04b..5a8aabb 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -1264,6 +1264,7 @@ public class PlayerConnection implements PacketPlayInListener {
+         if (this.player.dead) return; // CraftBukkit
+ 
+         this.player.v();
++        if (!this.player.activeContainer.a(this.player)) return; // PaperSpigot - check if player is able to use this container
+         if (this.player.activeContainer.windowId == packetplayinwindowclick.c() && this.player.activeContainer.c(this.player)) {
+             // CraftBukkit start - Call InventoryClickEvent
+             if (packetplayinwindowclick.d() < -1 && packetplayinwindowclick.d() != -999) {
+@@ -1668,6 +1669,7 @@ public class PlayerConnection implements PacketPlayInListener {
+ 
+     public void a(PacketPlayInTransaction packetplayintransaction) {
+         if (this.player.dead) return; // CraftBukkit
++        if (!this.player.activeContainer.a(this.player)) return; // PaperSpigot - check if player is able to use this container
+         Short oshort = (Short) this.n.get(this.player.activeContainer.windowId);
+ 
+         if (oshort != null && packetplayintransaction.d() == oshort.shortValue() && this.player.activeContainer.windowId == packetplayintransaction.c() && !this.player.activeContainer.c(this.player)) {
+-- 
+1.9.4.msysgit.2
+

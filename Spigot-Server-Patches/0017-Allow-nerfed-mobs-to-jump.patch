@@ -1,0 +1,46 @@
+From a743490bdba51cd9b36c8003e5ec45f3bb9a48e7 Mon Sep 17 00:00:00 2001
+From: Zach Brown <Zbob750@live.com>
+Date: Sun, 29 Jun 2014 13:32:36 -0500
+Subject: [PATCH] Allow nerfed mobs to jump
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityInsentient.java b/src/main/java/net/minecraft/server/EntityInsentient.java
+index 5e255ea..4b7a7f1 100644
+--- a/src/main/java/net/minecraft/server/EntityInsentient.java
++++ b/src/main/java/net/minecraft/server/EntityInsentient.java
+@@ -34,6 +34,7 @@ public abstract class EntityInsentient extends EntityLiving {
+     private boolean bv;
+     private Entity bw;
+     private NBTTagCompound bx;
++    public PathfinderGoalFloat goalFloat; // PaperSpigot
+ 
+     public EntityInsentient(World world) {
+         super(world);
+@@ -408,6 +409,12 @@ public abstract class EntityInsentient extends EntityLiving {
+         // Spigot Start
+         if ( this.fromMobSpawner )
+         {
++            // PaperSpigot start - Allow nerfed mobs to jump
++            if (goalFloat != null) {
++                if (goalFloat.a()) goalFloat.e();
++                this.bm.b();
++            }
++            // PaperSpigot end
+             return;
+         }
+         // Spigot End
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalFloat.java b/src/main/java/net/minecraft/server/PathfinderGoalFloat.java
+index b91d74b..897c68c 100644
+--- a/src/main/java/net/minecraft/server/PathfinderGoalFloat.java
++++ b/src/main/java/net/minecraft/server/PathfinderGoalFloat.java
+@@ -6,6 +6,7 @@ public class PathfinderGoalFloat extends PathfinderGoal {
+ 
+     public PathfinderGoalFloat(EntityInsentient entityinsentient) {
+         this.a = entityinsentient;
++        entityinsentient.goalFloat = this; // PaperSpigot
+         this.a(4);
+         entityinsentient.getNavigation().e(true);
+     }
+-- 
+1.9.1
+

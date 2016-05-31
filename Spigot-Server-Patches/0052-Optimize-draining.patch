@@ -1,0 +1,29 @@
+From 2eab92c30612b58c0ce9a2fe210697f7621062bd Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Fri, 10 Apr 2015 02:24:20 -0700
+Subject: [PATCH] Optimize draining
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index 6409391..4224478 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -88,7 +88,14 @@ public class BlockFlowing extends BlockFluids {
+                 } else {
+                     world.setData(i, j, k, j1, 2);
+                     world.a(i, j, k, this, i1);
+-                    world.applyPhysics(i, j, k, this);
++                    // PaperSpigot start - Optimize draining
++                    world.e(i - 1, j, k, this);
++                    world.e(i + 1, j, k, this);
++                    world.e(i, j + 1, k, this);
++                    world.e(i, j, k - 1, this);
++                    world.e(i, j, k + 1, this);
++                    world.spigotConfig.antiXrayInstance.updateNearbyBlocks(world, i, j, k); // Spigot
++                    // PaperSpigot end
+                 }
+             }
+         } else {
+-- 
+1.9.5.msysgit.1
+

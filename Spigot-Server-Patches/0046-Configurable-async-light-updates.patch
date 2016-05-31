@@ -1,0 +1,234 @@
+From caefb5b2050a93cf24b89ec4d0d76a3849a9b1ea Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Wed, 24 Jun 2015 02:56:49 -0700
+Subject: [PATCH] Configurable async light updates
+
+
+diff --git a/src/main/java/net/minecraft/server/Chunk.java b/src/main/java/net/minecraft/server/Chunk.java
+index 86a13e7..f28429e 100644
+--- a/src/main/java/net/minecraft/server/Chunk.java
++++ b/src/main/java/net/minecraft/server/Chunk.java
+@@ -8,6 +8,7 @@ import java.util.List;
+ import java.util.Map;
+ import java.util.Random;
+ import java.util.concurrent.Callable;
++import java.util.concurrent.atomic.AtomicInteger; // PaperSpigot
+ 
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+@@ -41,6 +42,10 @@ public class Chunk {
+     public long s;
+     private int x;
+     protected net.minecraft.util.gnu.trove.map.hash.TObjectIntHashMap<Class> entityCount = new net.minecraft.util.gnu.trove.map.hash.TObjectIntHashMap<Class>(); // Spigot
++    // PaperSpigot start - Asynchronous light updates
++    public AtomicInteger pendingLightUpdates = new AtomicInteger();
++    public long lightUpdateTime;
++    // PaperSpigot end
+ 
+     // CraftBukkit start - Neighbor loaded cache for chunk lighting and entity ticking
+     private int neighbors = 0x1 << 12;
+@@ -295,7 +300,7 @@ public class Chunk {
+     private void c(int i, int j, int k, int l) {
+         if (l > k && this.world.areChunksLoaded(i, 0, j, 16)) {
+             for (int i1 = k; i1 < l; ++i1) {
+-                this.world.c(EnumSkyBlock.SKY, i, i1, j);
++                this.world.updateLight(EnumSkyBlock.SKY, i, i1, j); // PaperSpigot - Asynchronous lighting updates
+             }
+ 
+             this.n = true;
+@@ -973,7 +978,7 @@ public class Chunk {
+ 
+     public void b(boolean flag) {
+         if (this.w && !this.world.worldProvider.g && !flag) {
+-            this.c(this.world.isStatic);
++            this.recheckGaps(this.world.isStatic); // PaperSpigot - Asynchronous lighting updates
+         }
+ 
+         this.m = true;
+@@ -982,6 +987,23 @@ public class Chunk {
+         }
+     }
+ 
++    /**
++     * PaperSpigot - Recheck gaps asynchronously.
++     */
++    public void recheckGaps(final boolean isStatic) {
++        if (!world.paperSpigotConfig.useAsyncLighting) {
++            this.c(isStatic);
++            return;
++        }
++
++        world.lightingExecutor.submit(new Runnable() {
++            @Override
++            public void run() {
++                Chunk.this.c(isStatic);
++            }
++        });
++    }
++
+     public boolean isReady() {
+         // Spigot Start
+         /*
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderServer.java b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+index 22330c3..8aff010 100644
+--- a/src/main/java/net/minecraft/server/ChunkProviderServer.java
++++ b/src/main/java/net/minecraft/server/ChunkProviderServer.java
+@@ -55,6 +55,12 @@ public class ChunkProviderServer implements IChunkProvider {
+     }
+ 
+     public void queueUnload(int i, int j) {
++        // PaperSpigot start - Asynchronous lighting updates
++        Chunk chunk = this.chunks.get(LongHash.toLong(i, j));
++        if (chunk != null && chunk.world.paperSpigotConfig.useAsyncLighting && (chunk.pendingLightUpdates.get() > 0 || chunk.world.getTime() - chunk.lightUpdateTime < 20)) {
++            return;
++        }
++        // PaperSpigot end
+         if (this.world.worldProvider.e()) {
+             ChunkCoordinates chunkcoordinates = this.world.getSpawn();
+             int k = i * 16 + 8 - chunkcoordinates.x;
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index dcb5474..ed2428d 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -11,6 +11,13 @@ import java.util.Set;
+ import java.util.UUID;
+ import java.util.concurrent.Callable;
+ 
++// PaperSpigot start
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
++import net.minecraft.util.com.google.common.util.concurrent.ThreadFactoryBuilder;
++import org.bukkit.craftbukkit.CraftChunk;
++// PaperSpigot end
++
+ // CraftBukkit start
+ import org.bukkit.Bukkit;
+ import org.bukkit.block.BlockState;
+@@ -114,6 +121,7 @@ public abstract class World implements IBlockAccess {
+     public static boolean haveWeSilencedAPhysicsCrash;
+     public static String blockLocation;
+     public List<TileEntity> triggerHoppersList = new ArrayList<TileEntity>(); // Spigot, When altHopperTicking, tile entities being added go through here.
++    public ExecutorService lightingExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("PaperSpigot - Lighting Thread").build()); // PaperSpigot - Asynchronous lighting updates
+ 
+     public static long chunkToKey(int x, int z)
+     {
+@@ -614,7 +622,7 @@ public abstract class World implements IBlockAccess {
+ 
+         if (!this.worldProvider.g) {
+             for (i1 = k; i1 <= l; ++i1) {
+-                this.c(EnumSkyBlock.SKY, i, i1, j);
++                this.updateLight(EnumSkyBlock.SKY, i, i1, j); // PaperSpigot - Asynchronous lighting updates
+             }
+         }
+ 
+@@ -2380,10 +2388,10 @@ public abstract class World implements IBlockAccess {
+         boolean flag = false;
+ 
+         if (!this.worldProvider.g) {
+-            flag |= this.c(EnumSkyBlock.SKY, i, j, k);
++            flag |= this.updateLight(EnumSkyBlock.SKY, i, j, k); // PaperSpigot - Asynchronous lighting updates
+         }
+ 
+-        flag |= this.c(EnumSkyBlock.BLOCK, i, j, k);
++        flag |= this.updateLight(EnumSkyBlock.BLOCK, i, j, k); // PaperSpigot - Asynchronous lighting updates
+         return flag;
+     }
+ 
+@@ -2428,10 +2436,10 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
+-    public boolean c(EnumSkyBlock enumskyblock, int i, int j, int k) {
++    public boolean c(EnumSkyBlock enumskyblock, int i, int j, int k, Chunk chunk, List<Chunk> neighbors) { // PaperSpigot
+         // CraftBukkit start - Use neighbor cache instead of looking up
+-        Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
+-        if (chunk == null || !chunk.areNeighborsLoaded(1) /* !this.areChunksLoaded(i, j, k, 17)*/) {
++        //Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
++        if (chunk == null /*|| !chunk.areNeighborsLoaded(1)*/ /* !this.areChunksLoaded(i, j, k, 17)*/) {
+             // CraftBukkit end
+             return false;
+         } else {
+@@ -2536,11 +2544,64 @@ public abstract class World implements IBlockAccess {
+                 }
+             }
+ 
++            // PaperSpigot start - Asynchronous light updates
++            if (chunk.world.paperSpigotConfig.useAsyncLighting) {
++                chunk.pendingLightUpdates.decrementAndGet();
++                if (neighbors != null) {
++                    for (Chunk neighbor : neighbors) {
++                        neighbor.pendingLightUpdates.decrementAndGet();
++                    }
++                }
++            }
++            // PaperSpigot end
+             this.methodProfiler.b();
+             return true;
+         }
+     }
+ 
++    /**
++     * PaperSpigot - Asynchronous lighting updates
++     */
++    public boolean updateLight(final EnumSkyBlock enumskyblock, final int x, final int y, final int z) {
++        final Chunk chunk = this.getChunkIfLoaded(x >> 4, z >> 4);
++        if (chunk == null || !chunk.areNeighborsLoaded(1)) {
++            return false;
++        }
++
++        if (!chunk.world.paperSpigotConfig.useAsyncLighting) {
++            return this.c(enumskyblock, x, y, z, chunk, null);
++        }
++
++        chunk.pendingLightUpdates.incrementAndGet();
++        chunk.lightUpdateTime = chunk.world.getTime();
++
++        final List<Chunk> neighbors = new ArrayList<Chunk>();
++        for (int cx = (x >> 4) - 1; cx <= (x >> 4) + 1; ++cx) {
++            for (int cz = (z >> 4) - 1; cz <= (z >> 4) + 1; ++cz) {
++                if (cx != x >> 4 && cz != z >> 4) {
++                    Chunk neighbor = this.getChunkIfLoaded(cx, cz);
++                    if (neighbor != null) {
++                        neighbor.pendingLightUpdates.incrementAndGet();
++                        neighbor.lightUpdateTime = chunk.world.getTime();
++                        neighbors.add(neighbor);
++                    }
++                }
++            }
++        }
++
++        if (!Bukkit.isPrimaryThread()) {
++            return this.c(enumskyblock, x, y, z, chunk, neighbors);
++        }
++
++        lightingExecutor.submit(new Runnable() {
++            @Override
++            public void run() {
++                World.this.c(enumskyblock, x, y, z, chunk, neighbors);
++            }
++        });
++        return true;
++    }
++
+     public boolean a(boolean flag) {
+         return false;
+     }
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index e9ce8f7..fc7b7c4 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -206,4 +206,11 @@ public class PaperSpigotWorldConfig
+         log( "WorldServer TickNextTickList cap set at " + tickNextTickListCap );
+         log( "WorldServer TickNextTickList cap always processes redstone: " + tickNextTickListCapIgnoresRedstone );
+     }
++
++    public boolean useAsyncLighting;
++    private void useAsyncLighting()
++    {
++        useAsyncLighting = getBoolean( "use-async-lighting", false );
++        log( "World async lighting: " + useAsyncLighting );
++    }
+ }
+-- 
+2.4.6.windows.1
+

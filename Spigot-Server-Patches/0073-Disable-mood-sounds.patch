@@ -1,0 +1,37 @@
+From 417e8852252f6bff341cdc9d7d8d2b212fdaaa86 Mon Sep 17 00:00:00 2001
+From: Sudzzy <originmc@outlook.com>
+Date: Fri, 10 Jul 2015 05:55:13 -0700
+Subject: [PATCH] Disable mood sounds
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index bb4c63a..23cd356 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -2319,7 +2319,7 @@ public abstract class World implements IBlockAccess {
+ 
+     protected void a(int i, int j, Chunk chunk) {
+         this.methodProfiler.c("moodSound");
+-        if (this.K == 0 && !this.isStatic) {
++        if (!this.paperSpigotConfig.disableMoodSounds && this.K == 0 && !this.isStatic) { // PaperSpigot - Disable mood sounds
+             this.k = this.k * 3 + 1013904223;
+             int k = this.k >> 2;
+             int l = k & 15;
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 305ffbf..09a0e2c 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -305,4 +305,10 @@ public class PaperSpigotWorldConfig
+     {
+         disableIceAndSnow = getBoolean( "disable-ice-and-snow", false );
+     }
++
++    public boolean disableMoodSounds;
++    private void disableMoodSounds()
++    {
++        disableMoodSounds = getBoolean( "disable-mood-sounds", false );
++    }
+ }
+-- 
+1.9.5.msysgit.1
+

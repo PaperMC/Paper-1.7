@@ -1,9 +1,1013 @@
-From 5fad8a996eeca6952e2db084f9ddb41ae4f65fa9 Mon Sep 17 00:00:00 2001
+From b2b4c53c8956650542c2e0b8bc581646188a14db Mon Sep 17 00:00:00 2001
 From: Zach Brown <Zbob750@live.com>
 Date: Tue, 22 Jul 2014 21:05:53 -0500
 Subject: [PATCH] mc-dev imports
 
 
+diff --git a/src/main/java/net/minecraft/server/BiomeBase.java b/src/main/java/net/minecraft/server/BiomeBase.java
+new file mode 100644
+index 0000000..1372955
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BiomeBase.java
+@@ -0,0 +1,391 @@
++package net.minecraft.server;
++
++import net.minecraft.util.com.google.common.collect.Sets;
++import org.apache.logging.log4j.LogManager;
++import org.apache.logging.log4j.Logger;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Random;
++import java.util.Set;
++
++public abstract class BiomeBase {
++
++    private static final Logger aC = LogManager.getLogger();
++    protected static final BiomeTemperature a = new BiomeTemperature(0.1F, 0.2F);
++    protected static final BiomeTemperature b = new BiomeTemperature(-0.5F, 0.0F);
++    protected static final BiomeTemperature c = new BiomeTemperature(-1.0F, 0.1F);
++    protected static final BiomeTemperature d = new BiomeTemperature(-1.8F, 0.1F);
++    protected static final BiomeTemperature e = new BiomeTemperature(0.125F, 0.05F);
++    protected static final BiomeTemperature f = new BiomeTemperature(0.2F, 0.2F);
++    protected static final BiomeTemperature g = new BiomeTemperature(0.45F, 0.3F);
++    protected static final BiomeTemperature h = new BiomeTemperature(1.5F, 0.025F);
++    protected static final BiomeTemperature i = new BiomeTemperature(1.0F, 0.5F);
++    protected static final BiomeTemperature j = new BiomeTemperature(0.0F, 0.025F);
++    protected static final BiomeTemperature k = new BiomeTemperature(0.1F, 0.8F);
++    protected static final BiomeTemperature l = new BiomeTemperature(0.2F, 0.3F);
++    protected static final BiomeTemperature m = new BiomeTemperature(-0.2F, 0.1F);
++    private static final BiomeBase[] biomes = new BiomeBase[256];
++    public static final Set n = Sets.newHashSet();
++    public static final BiomeBase OCEAN = (new BiomeOcean(0)).b(112).a("Ocean").a(c);
++    public static final BiomeBase PLAINS = (new BiomePlains(1)).b(9286496).a("Plains");
++    public static final BiomeBase DESERT = (new BiomeDesert(2)).b(16421912).a("Desert").b().a(2.0F, 0.0F).a(e);
++    public static final BiomeBase EXTREME_HILLS = (new BiomeBigHills(3, false)).b(6316128).a("Extreme Hills").a(i).a(0.2F, 0.3F);
++    public static final BiomeBase FOREST = (new BiomeForest(4, 0)).b(353825).a("Forest");
++    public static final BiomeBase TAIGA = (new BiomeTaiga(5, 0)).b(747097).a("Taiga").a(5159473).a(0.25F, 0.8F).a(f);
++    public static final BiomeBase SWAMPLAND = (new BiomeSwamp(6)).b(522674).a("Swampland").a(9154376).a(m).a(0.8F, 0.9F);
++    public static final BiomeBase RIVER = (new BiomeRiver(7)).b(255).a("River").a(b);
++    public static final BiomeBase HELL = (new BiomeHell(8)).b(16711680).a("Hell").b().a(2.0F, 0.0F);
++    public static final BiomeBase SKY = (new BiomeTheEnd(9)).b(8421631).a("Sky").b();
++    public static final BiomeBase FROZEN_OCEAN = (new BiomeOcean(10)).b(9474208).a("FrozenOcean").c().a(c).a(0.0F, 0.5F);
++    public static final BiomeBase FROZEN_RIVER = (new BiomeRiver(11)).b(10526975).a("FrozenRiver").c().a(b).a(0.0F, 0.5F);
++    public static final BiomeBase ICE_PLAINS = (new BiomeIcePlains(12, false)).b(16777215).a("Ice Plains").c().a(0.0F, 0.5F).a(e);
++    public static final BiomeBase ICE_MOUNTAINS = (new BiomeIcePlains(13, false)).b(10526880).a("Ice Mountains").c().a(g).a(0.0F, 0.5F);
++    public static final BiomeBase MUSHROOM_ISLAND = (new BiomeMushrooms(14)).b(16711935).a("MushroomIsland").a(0.9F, 1.0F).a(l);
++    public static final BiomeBase MUSHROOM_SHORE = (new BiomeMushrooms(15)).b(10486015).a("MushroomIslandShore").a(0.9F, 1.0F).a(j);
++    public static final BiomeBase BEACH = (new BiomeBeach(16)).b(16440917).a("Beach").a(0.8F, 0.4F).a(j);
++    public static final BiomeBase DESERT_HILLS = (new BiomeDesert(17)).b(13786898).a("DesertHills").b().a(2.0F, 0.0F).a(g);
++    public static final BiomeBase FOREST_HILLS = (new BiomeForest(18, 0)).b(2250012).a("ForestHills").a(g);
++    public static final BiomeBase TAIGA_HILLS = (new BiomeTaiga(19, 0)).b(1456435).a("TaigaHills").a(5159473).a(0.25F, 0.8F).a(g);
++    public static final BiomeBase SMALL_MOUNTAINS = (new BiomeBigHills(20, true)).b(7501978).a("Extreme Hills Edge").a(i.a()).a(0.2F, 0.3F);
++    public static final BiomeBase JUNGLE = (new BiomeJungle(21, false)).b(5470985).a("Jungle").a(5470985).a(0.95F, 0.9F);
++    public static final BiomeBase JUNGLE_HILLS = (new BiomeJungle(22, false)).b(2900485).a("JungleHills").a(5470985).a(0.95F, 0.9F).a(g);
++    public static final BiomeBase JUNGLE_EDGE = (new BiomeJungle(23, true)).b(6458135).a("JungleEdge").a(5470985).a(0.95F, 0.8F);
++    public static final BiomeBase DEEP_OCEAN = (new BiomeOcean(24)).b(48).a("Deep Ocean").a(d);
++    public static final BiomeBase STONE_BEACH = (new BiomeStoneBeach(25)).b(10658436).a("Stone Beach").a(0.2F, 0.3F).a(k);
++    public static final BiomeBase COLD_BEACH = (new BiomeBeach(26)).b(16445632).a("Cold Beach").a(0.05F, 0.3F).a(j).c();
++    public static final BiomeBase BIRCH_FOREST = (new BiomeForest(27, 2)).a("Birch Forest").b(3175492);
++    public static final BiomeBase BIRCH_FOREST_HILLS = (new BiomeForest(28, 2)).a("Birch Forest Hills").b(2055986).a(g);
++    public static final BiomeBase ROOFED_FOREST = (new BiomeForest(29, 3)).b(4215066).a("Roofed Forest");
++    public static final BiomeBase COLD_TAIGA = (new BiomeTaiga(30, 0)).b(3233098).a("Cold Taiga").a(5159473).c().a(-0.5F, 0.4F).a(f).c(16777215);
++    public static final BiomeBase COLD_TAIGA_HILLS = (new BiomeTaiga(31, 0)).b(2375478).a("Cold Taiga Hills").a(5159473).c().a(-0.5F, 0.4F).a(g).c(16777215);
++    public static final BiomeBase MEGA_TAIGA = (new BiomeTaiga(32, 1)).b(5858897).a("Mega Taiga").a(5159473).a(0.3F, 0.8F).a(f);
++    public static final BiomeBase MEGA_TAIGA_HILLS = (new BiomeTaiga(33, 1)).b(4542270).a("Mega Taiga Hills").a(5159473).a(0.3F, 0.8F).a(g);
++    public static final BiomeBase EXTREME_HILLS_PLUS = (new BiomeBigHills(34, true)).b(5271632).a("Extreme Hills+").a(i).a(0.2F, 0.3F);
++    public static final BiomeBase SAVANNA = (new BiomeSavanna(35)).b(12431967).a("Savanna").a(1.2F, 0.0F).b().a(e);
++    public static final BiomeBase SAVANNA_PLATEAU = (new BiomeSavanna(36)).b(10984804).a("Savanna Plateau").a(1.0F, 0.0F).b().a(h);
++    public static final BiomeBase MESA = (new BiomeMesa(37, false, false)).b(14238997).a("Mesa");
++    public static final BiomeBase MESA_PLATEAU_F = (new BiomeMesa(38, false, true)).b(11573093).a("Mesa Plateau F").a(h);
++    public static final BiomeBase MESA_PLATEAU = (new BiomeMesa(39, false, false)).b(13274213).a("Mesa Plateau").a(h);
++    protected static final NoiseGenerator3 ac;
++    protected static final NoiseGenerator3 ad;
++    protected static final WorldGenTallPlant ae;
++    public String af;
++    public int ag;
++    public int ah;
++    public Block ai;
++    public int aj;
++    public Block ak;
++    public int al;
++    public float am;
++    public float an;
++    public float temperature;
++    public float humidity;
++    public int aq;
++    public BiomeDecorator ar;
++    protected List as;
++    protected List at;
++    protected List au;
++    protected List av;
++    protected boolean aw;
++    protected boolean ax;
++    public final int id;
++    protected WorldGenTrees az;
++    protected WorldGenBigTree aA;
++    protected WorldGenSwampTree aB;
++
++    protected BiomeBase(int i) {
++        this.ai = Blocks.GRASS;
++        this.aj = 0;
++        this.ak = Blocks.DIRT;
++        this.al = 5169201;
++        this.am = a.a;
++        this.an = a.b;
++        this.temperature = 0.5F;
++        this.humidity = 0.5F;
++        this.aq = 16777215;
++        this.as = new ArrayList();
++        this.at = new ArrayList();
++        this.au = new ArrayList();
++        this.av = new ArrayList();
++        this.ax = true;
++        this.az = new WorldGenTrees(false);
++        this.aA = new WorldGenBigTree(false);
++        this.aB = new WorldGenSwampTree();
++        this.id = i;
++        biomes[i] = this;
++        this.ar = this.a();
++        this.at.add(new BiomeMeta(EntitySheep.class, 12, 4, 4));
++        this.at.add(new BiomeMeta(EntityPig.class, 10, 4, 4));
++        this.at.add(new BiomeMeta(EntityChicken.class, 10, 4, 4));
++        this.at.add(new BiomeMeta(EntityCow.class, 8, 4, 4));
++        this.as.add(new BiomeMeta(EntitySpider.class, 100, 4, 4));
++        this.as.add(new BiomeMeta(EntityZombie.class, 100, 4, 4));
++        this.as.add(new BiomeMeta(EntitySkeleton.class, 100, 4, 4));
++        this.as.add(new BiomeMeta(EntityCreeper.class, 100, 4, 4));
++        this.as.add(new BiomeMeta(EntitySlime.class, 100, 4, 4));
++        this.as.add(new BiomeMeta(EntityEnderman.class, 10, 1, 4));
++        this.as.add(new BiomeMeta(EntityWitch.class, 5, 1, 1));
++        this.au.add(new BiomeMeta(EntitySquid.class, 10, 4, 4));
++        this.av.add(new BiomeMeta(EntityBat.class, 10, 8, 8));
++    }
++
++    protected BiomeDecorator a() {
++        return new BiomeDecorator();
++    }
++
++    protected BiomeBase a(float f, float f1) {
++        if (f > 0.1F && f < 0.2F) {
++            throw new IllegalArgumentException("Please avoid temperatures in the range 0.1 - 0.2 because of snow");
++        } else {
++            this.temperature = f;
++            this.humidity = f1;
++            return this;
++        }
++    }
++
++    protected final BiomeBase a(BiomeTemperature biometemperature) {
++        this.am = biometemperature.a;
++        this.an = biometemperature.b;
++        return this;
++    }
++
++    protected BiomeBase b() {
++        this.ax = false;
++        return this;
++    }
++
++    public WorldGenTreeAbstract a(Random random) {
++        return (WorldGenTreeAbstract) (random.nextInt(10) == 0 ? this.aA : this.az);
++    }
++
++    public WorldGenerator b(Random random) {
++        return new WorldGenGrass(Blocks.LONG_GRASS, 1);
++    }
++
++    public String a(Random random, int i, int j, int k) {
++        return random.nextInt(3) > 0 ? BlockFlowers.b[0] : BlockFlowers.a[0];
++    }
++
++    protected BiomeBase c() {
++        this.aw = true;
++        return this;
++    }
++
++    protected BiomeBase a(String s) {
++        this.af = s;
++        return this;
++    }
++
++    protected BiomeBase a(int i) {
++        this.al = i;
++        return this;
++    }
++
++    protected BiomeBase b(int i) {
++        this.a(i, false);
++        return this;
++    }
++
++    protected BiomeBase c(int i) {
++        this.ah = i;
++        return this;
++    }
++
++    protected BiomeBase a(int i, boolean flag) {
++        this.ag = i;
++        if (flag) {
++            this.ah = (i & 16711422) >> 1;
++        } else {
++            this.ah = i;
++        }
++
++        return this;
++    }
++
++    public List getMobs(EnumCreatureType enumcreaturetype) {
++        return enumcreaturetype == EnumCreatureType.MONSTER ? this.as : (enumcreaturetype == EnumCreatureType.CREATURE ? this.at : (enumcreaturetype == EnumCreatureType.WATER_CREATURE ? this.au : (enumcreaturetype == EnumCreatureType.AMBIENT ? this.av : null)));
++    }
++
++    public boolean d() {
++        return this.j();
++    }
++
++    public boolean e() {
++        return this.j() ? false : this.ax;
++    }
++
++    public boolean f() {
++        return this.humidity > 0.85F;
++    }
++
++    public float g() {
++        return 0.1F;
++    }
++
++    public final int h() {
++        return (int) (this.humidity * 65536.0F);
++    }
++
++    public final float a(int i, int j, int k) {
++        if (j > 64) {
++            float f = (float) ac.a((double) i * 1.0D / 8.0D, (double) k * 1.0D / 8.0D) * 4.0F;
++
++            return this.temperature - (f + (float) j - 64.0F) * 0.05F / 30.0F;
++        } else {
++            return this.temperature;
++        }
++    }
++
++    public void a(World world, Random random, int i, int j) {
++        this.ar.a(world, random, this, i, j);
++    }
++
++    public boolean j() {
++        return this.aw;
++    }
++
++    public void a(World world, Random random, Block[] ablock, byte[] abyte, int i, int j, double d0) {
++        this.b(world, random, ablock, abyte, i, j, d0);
++    }
++
++    public final void b(World world, Random random, Block[] ablock, byte[] abyte, int i, int j, double d0) {
++        boolean flag = true;
++        Block block = this.ai;
++        byte b0 = (byte) (this.aj & 255);
++        Block block1 = this.ak;
++        int k = -1;
++        int l = (int) (d0 / 3.0D + 3.0D + random.nextDouble() * 0.25D);
++        int i1 = i & 15;
++        int j1 = j & 15;
++        int k1 = ablock.length / 256;
++
++        for (int l1 = 255; l1 >= 0; --l1) {
++            int i2 = (j1 * 16 + i1) * k1 + l1;
++
++            if (l1 <= 0 + random.nextInt(5)) {
++                ablock[i2] = Blocks.BEDROCK;
++            } else {
++                Block block2 = ablock[i2];
++
++                if (block2 != null && block2.getMaterial() != Material.AIR) {
++                    if (block2 == Blocks.STONE) {
++                        if (k == -1) {
++                            if (l <= 0) {
++                                block = null;
++                                b0 = 0;
++                                block1 = Blocks.STONE;
++                            } else if (l1 >= 59 && l1 <= 64) {
++                                block = this.ai;
++                                b0 = (byte) (this.aj & 255);
++                                block1 = this.ak;
++                            }
++
++                            if (l1 < 63 && (block == null || block.getMaterial() == Material.AIR)) {
++                                if (this.a(i, l1, j) < 0.15F) {
++                                    block = Blocks.ICE;
++                                    b0 = 0;
++                                } else {
++                                    block = Blocks.STATIONARY_WATER;
++                                    b0 = 0;
++                                }
++                            }
++
++                            k = l;
++                            if (l1 >= 62) {
++                                ablock[i2] = block;
++                                abyte[i2] = b0;
++                            } else if (l1 < 56 - l) {
++                                block = null;
++                                block1 = Blocks.STONE;
++                                ablock[i2] = Blocks.GRAVEL;
++                            } else {
++                                ablock[i2] = block1;
++                            }
++                        } else if (k > 0) {
++                            --k;
++                            ablock[i2] = block1;
++                            if (k == 0 && block1 == Blocks.SAND) {
++                                k = random.nextInt(4) + Math.max(0, l1 - 63);
++                                block1 = Blocks.SANDSTONE;
++                            }
++                        }
++                    }
++                } else {
++                    k = -1;
++                }
++            }
++        }
++    }
++
++    protected BiomeBase k() {
++        return new BiomeBaseSub(this.id + 128, this);
++    }
++
++    public Class l() {
++        return this.getClass();
++    }
++
++    public boolean a(BiomeBase biomebase) {
++        return biomebase == this ? true : (biomebase == null ? false : this.l() == biomebase.l());
++    }
++
++    public EnumTemperature m() {
++        return (double) this.temperature < 0.2D ? EnumTemperature.COLD : ((double) this.temperature < 1.0D ? EnumTemperature.MEDIUM : EnumTemperature.WARM);
++    }
++
++    public static BiomeBase[] getBiomes() {
++        return biomes;
++    }
++
++    public static BiomeBase getBiome(int i) {
++        if (i >= 0 && i <= biomes.length) {
++            return biomes[i];
++        } else {
++            aC.warn("Biome ID is out of bounds: " + i + ", defaulting to 0 (Ocean)");
++            return OCEAN;
++        }
++    }
++
++    static {
++        PLAINS.k();
++        DESERT.k();
++        FOREST.k();
++        TAIGA.k();
++        SWAMPLAND.k();
++        ICE_PLAINS.k();
++        JUNGLE.k();
++        JUNGLE_EDGE.k();
++        COLD_TAIGA.k();
++        SAVANNA.k();
++        SAVANNA_PLATEAU.k();
++        MESA.k();
++        MESA_PLATEAU_F.k();
++        MESA_PLATEAU.k();
++        BIRCH_FOREST.k();
++        BIRCH_FOREST_HILLS.k();
++        ROOFED_FOREST.k();
++        MEGA_TAIGA.k();
++        EXTREME_HILLS.k();
++        EXTREME_HILLS_PLUS.k();
++        biomes[MEGA_TAIGA_HILLS.id + 128] = biomes[MEGA_TAIGA.id + 128];
++        BiomeBase[] abiomebase = biomes;
++        int i = abiomebase.length;
++
++        for (int j = 0; j < i; ++j) {
++            BiomeBase biomebase = abiomebase[j];
++
++            if (biomebase != null && biomebase.id < 128) {
++                n.add(biomebase);
++            }
++        }
++
++        n.remove(HELL);
++        n.remove(SKY);
++        n.remove(FROZEN_OCEAN);
++        n.remove(SMALL_MOUNTAINS);
++        ac = new NoiseGenerator3(new Random(1234L), 1);
++        ad = new NoiseGenerator3(new Random(2345L), 1);
++        ae = new WorldGenTallPlant();
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/BiomeMesa.java b/src/main/java/net/minecraft/server/BiomeMesa.java
+new file mode 100644
+index 0000000..7a184e2
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BiomeMesa.java
+@@ -0,0 +1,279 @@
++package net.minecraft.server;
++
++import java.util.Arrays;
++import java.util.Random;
++
++public class BiomeMesa extends BiomeBase {
++
++    private byte[] aC;
++    private long aD;
++    private NoiseGenerator3 aE;
++    private NoiseGenerator3 aF;
++    private NoiseGenerator3 aG;
++    private boolean aH;
++    private boolean aI;
++
++    public BiomeMesa(int i, boolean flag, boolean flag1) {
++        super(i);
++        this.aH = flag;
++        this.aI = flag1;
++        this.b();
++        this.a(2.0F, 0.0F);
++        this.at.clear();
++        this.ai = Blocks.SAND;
++        this.aj = 1;
++        this.ak = Blocks.STAINED_HARDENED_CLAY;
++        this.ar.x = -999;
++        this.ar.A = 20;
++        this.ar.C = 3;
++        this.ar.D = 5;
++        this.ar.y = 0;
++        this.at.clear();
++        if (flag1) {
++            this.ar.x = 5;
++        }
++    }
++
++    public WorldGenTreeAbstract a(Random random) {
++        return this.az;
++    }
++
++    public void a(World world, Random random, int i, int j) {
++        super.a(world, random, i, j);
++    }
++
++    public void a(World world, Random random, Block[] ablock, byte[] abyte, int i, int j, double d0) {
++        if (this.aC == null || this.aD != world.getSeed()) {
++            this.a(world.getSeed());
++        }
++
++        if (this.aE == null || this.aF == null || this.aD != world.getSeed()) {
++            Random random1 = new Random(this.aD);
++
++            this.aE = new NoiseGenerator3(random1, 4);
++            this.aF = new NoiseGenerator3(random1, 1);
++        }
++
++        this.aD = world.getSeed();
++        double d1 = 0.0D;
++        int k;
++        int l;
++
++        if (this.aH) {
++            k = (i & -16) + (j & 15);
++            l = (j & -16) + (i & 15);
++            double d2 = Math.min(Math.abs(d0), this.aE.a((double) k * 0.25D, (double) l * 0.25D));
++
++            if (d2 > 0.0D) {
++                double d3 = 0.001953125D;
++                double d4 = Math.abs(this.aF.a((double) k * d3, (double) l * d3));
++
++                d1 = d2 * d2 * 2.5D;
++                double d5 = Math.ceil(d4 * 50.0D) + 14.0D;
++
++                if (d1 > d5) {
++                    d1 = d5;
++                }
++
++                d1 += 64.0D;
++            }
++        }
++
++        k = i & 15;
++        l = j & 15;
++        boolean flag = true;
++        Block block = Blocks.STAINED_HARDENED_CLAY;
++        Block block1 = this.ak;
++        int i1 = (int) (d0 / 3.0D + 3.0D + random.nextDouble() * 0.25D);
++        boolean flag1 = Math.cos(d0 / 3.0D * 3.141592653589793D) > 0.0D;
++        int j1 = -1;
++        boolean flag2 = false;
++        int k1 = ablock.length / 256;
++
++        for (int l1 = 255; l1 >= 0; --l1) {
++            int i2 = (l * 16 + k) * k1 + l1;
++
++            if ((ablock[i2] == null || ablock[i2].getMaterial() == Material.AIR) && l1 < (int) d1) {
++                ablock[i2] = Blocks.STONE;
++            }
++
++            if (l1 <= 0 + random.nextInt(5)) {
++                ablock[i2] = Blocks.BEDROCK;
++            } else {
++                Block block2 = ablock[i2];
++
++                if (block2 != null && block2.getMaterial() != Material.AIR) {
++                    if (block2 == Blocks.STONE) {
++                        byte b0;
++
++                        if (j1 == -1) {
++                            flag2 = false;
++                            if (i1 <= 0) {
++                                block = null;
++                                block1 = Blocks.STONE;
++                            } else if (l1 >= 59 && l1 <= 64) {
++                                block = Blocks.STAINED_HARDENED_CLAY;
++                                block1 = this.ak;
++                            }
++
++                            if (l1 < 63 && (block == null || block.getMaterial() == Material.AIR)) {
++                                block = Blocks.STATIONARY_WATER;
++                            }
++
++                            j1 = i1 + Math.max(0, l1 - 63);
++                            if (l1 >= 62) {
++                                if (this.aI && l1 > 86 + i1 * 2) {
++                                    if (flag1) {
++                                        ablock[i2] = Blocks.DIRT;
++                                        abyte[i2] = 1;
++                                    } else {
++                                        ablock[i2] = Blocks.GRASS;
++                                    }
++                                } else if (l1 > 66 + i1) {
++                                    b0 = 16;
++                                    if (l1 >= 64 && l1 <= 127) {
++                                        if (!flag1) {
++                                            b0 = this.d(i, l1, j);
++                                        }
++                                    } else {
++                                        b0 = 1;
++                                    }
++
++                                    if (b0 < 16) {
++                                        ablock[i2] = Blocks.STAINED_HARDENED_CLAY;
++                                        abyte[i2] = (byte) b0;
++                                    } else {
++                                        ablock[i2] = Blocks.HARDENED_CLAY;
++                                    }
++                                } else {
++                                    ablock[i2] = this.ai;
++                                    abyte[i2] = (byte) this.aj;
++                                    flag2 = true;
++                                }
++                            } else {
++                                ablock[i2] = block1;
++                                if (block1 == Blocks.STAINED_HARDENED_CLAY) {
++                                    abyte[i2] = 1;
++                                }
++                            }
++                        } else if (j1 > 0) {
++                            --j1;
++                            if (flag2) {
++                                ablock[i2] = Blocks.STAINED_HARDENED_CLAY;
++                                abyte[i2] = 1;
++                            } else {
++                                b0 = this.d(i, l1, j);
++                                if (b0 < 16) {
++                                    ablock[i2] = Blocks.STAINED_HARDENED_CLAY;
++                                    abyte[i2] = b0;
++                                } else {
++                                    ablock[i2] = Blocks.HARDENED_CLAY;
++                                }
++                            }
++                        }
++                    }
++                } else {
++                    j1 = -1;
++                }
++            }
++        }
++    }
++
++    private void a(long i) {
++        this.aC = new byte[64];
++        Arrays.fill(this.aC, (byte) 16);
++        Random random = new Random(i);
++
++        this.aG = new NoiseGenerator3(random, 1);
++
++        int j;
++
++        for (j = 0; j < 64; ++j) {
++            j += random.nextInt(5) + 1;
++            if (j < 64) {
++                this.aC[j] = 1;
++            }
++        }
++
++        j = random.nextInt(4) + 2;
++
++        int k;
++        int l;
++        int i1;
++        int j1;
++
++        for (k = 0; k < j; ++k) {
++            l = random.nextInt(3) + 1;
++            i1 = random.nextInt(64);
++
++            for (j1 = 0; i1 + j1 < 64 && j1 < l; ++j1) {
++                this.aC[i1 + j1] = 4;
++            }
++        }
++
++        k = random.nextInt(4) + 2;
++
++        int k1;
++
++        for (l = 0; l < k; ++l) {
++            i1 = random.nextInt(3) + 2;
++            j1 = random.nextInt(64);
++
++            for (k1 = 0; j1 + k1 < 64 && k1 < i1; ++k1) {
++                this.aC[j1 + k1] = 12;
++            }
++        }
++
++        l = random.nextInt(4) + 2;
++
++        for (i1 = 0; i1 < l; ++i1) {
++            j1 = random.nextInt(3) + 1;
++            k1 = random.nextInt(64);
++
++            for (int l1 = 0; k1 + l1 < 64 && l1 < j1; ++l1) {
++                this.aC[k1 + l1] = 14;
++            }
++        }
++
++        i1 = random.nextInt(3) + 3;
++        j1 = 0;
++
++        for (k1 = 0; k1 < i1; ++k1) {
++            byte b0 = 1;
++
++            j1 += random.nextInt(16) + 4;
++
++            for (int i2 = 0; j1 + i2 < 64 && i2 < b0; ++i2) {
++                this.aC[j1 + i2] = 0;
++                if (j1 + i2 > 1 && random.nextBoolean()) {
++                    this.aC[j1 + i2 - 1] = 8;
++                }
++
++                if (j1 + i2 < 63 && random.nextBoolean()) {
++                    this.aC[j1 + i2 + 1] = 8;
++                }
++            }
++        }
++    }
++
++    private byte d(int i, int j, int k) {
++        int l = (int) Math.round(this.aG.a((double) i * 1.0D / 512.0D, (double) i * 1.0D / 512.0D) * 2.0D);
++
++        return this.aC[(j + l + 64) % 64];
++    }
++
++    protected BiomeBase k() {
++        boolean flag = this.id == BiomeBase.MESA.id;
++        BiomeMesa biomemesa = new BiomeMesa(this.id + 128, flag, this.aI);
++
++        if (!flag) {
++            biomemesa.a(g);
++            biomemesa.a(this.af + " M");
++        } else {
++            biomemesa.a(this.af + " (Bryce)");
++        }
++
++        biomemesa.a(this.ag, true);
++        return biomemesa;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/BlockFalling.java b/src/main/java/net/minecraft/server/BlockFalling.java
+new file mode 100644
+index 0000000..473fc31
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BlockFalling.java
+@@ -0,0 +1,78 @@
++package net.minecraft.server;
++
++import java.util.Random;
++
++public class BlockFalling extends Block {
++
++    public static boolean instaFall;
++
++    public BlockFalling() {
++        super(Material.SAND);
++        this.a(CreativeModeTab.b);
++    }
++
++    public BlockFalling(Material material) {
++        super(material);
++    }
++
++    public void onPlace(World world, int i, int j, int k) {
++        world.a(i, j, k, this, this.a(world));
++    }
++
++    public void doPhysics(World world, int i, int j, int k, Block block) {
++        world.a(i, j, k, this, this.a(world));
++    }
++
++    public void a(World world, int i, int j, int k, Random random) {
++        if (!world.isStatic) {
++            this.m(world, i, j, k);
++        }
++    }
++
++    private void m(World world, int i, int j, int k) {
++        if (canFall(world, i, j - 1, k) && j >= 0) {
++            byte b0 = 32;
++
++            if (!instaFall && world.b(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) {
++                if (!world.isStatic) {
++                    EntityFallingBlock entityfallingblock = new EntityFallingBlock(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), this, world.getData(i, j, k));
++
++                    this.a(entityfallingblock);
++                    world.addEntity(entityfallingblock);
++                }
++            } else {
++                world.setAir(i, j, k);
++
++                while (canFall(world, i, j - 1, k) && j > 0) {
++                    --j;
++                }
++
++                if (j > 0) {
++                    world.setTypeUpdate(i, j, k, this);
++                }
++            }
++        }
++    }
++
++    protected void a(EntityFallingBlock entityfallingblock) {}
++
++    public int a(World world) {
++        return 2;
++    }
++
++    public static boolean canFall(World world, int i, int j, int k) {
++        Block block = world.getType(i, j, k);
++
++        if (block.material == Material.AIR) {
++            return true;
++        } else if (block == Blocks.FIRE) {
++            return true;
++        } else {
++            Material material = block.material;
++
++            return material == Material.WATER ? true : material == Material.LAVA;
++        }
++    }
++
++    public void a(World world, int i, int j, int k, int l) {}
++}
+diff --git a/src/main/java/net/minecraft/server/BlockFluids.java b/src/main/java/net/minecraft/server/BlockFluids.java
+new file mode 100644
+index 0000000..6c37a50
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BlockFluids.java
+@@ -0,0 +1,232 @@
++package net.minecraft.server;
++
++import java.util.Random;
++
++public abstract class BlockFluids extends Block {
++
++    protected BlockFluids(Material material) {
++        super(material);
++        float f = 0.0F;
++        float f1 = 0.0F;
++
++        this.a(0.0F + f1, 0.0F + f, 0.0F + f1, 1.0F + f1, 1.0F + f, 1.0F + f1);
++        this.a(true);
++    }
++
++    public boolean b(IBlockAccess iblockaccess, int i, int j, int k) {
++        return this.material != Material.LAVA;
++    }
++
++    public static float b(int i) {
++        if (i >= 8) {
++            i = 0;
++        }
++
++        return (float) (i + 1) / 9.0F;
++    }
++
++    protected int e(World world, int i, int j, int k) {
++        return world.getType(i, j, k).getMaterial() == this.material ? world.getData(i, j, k) : -1;
++    }
++
++    protected int e(IBlockAccess iblockaccess, int i, int j, int k) {
++        if (iblockaccess.getType(i, j, k).getMaterial() != this.material) {
++            return -1;
++        } else {
++            int l = iblockaccess.getData(i, j, k);
++
++            if (l >= 8) {
++                l = 0;
++            }
++
++            return l;
++        }
++    }
++
++    public boolean d() {
++        return false;
++    }
++
++    public boolean c() {
++        return false;
++    }
++
++    public boolean a(int i, boolean flag) {
++        return flag && i == 0;
++    }
++
++    public boolean d(IBlockAccess iblockaccess, int i, int j, int k, int l) {
++        Material material = iblockaccess.getType(i, j, k).getMaterial();
++
++        return material == this.material ? false : (l == 1 ? true : (material == Material.ICE ? false : super.d(iblockaccess, i, j, k, l)));
++    }
++
++    public AxisAlignedBB a(World world, int i, int j, int k) {
++        return null;
++    }
++
++    public int b() {
++        return 4;
++    }
++
++    public Item getDropType(int i, Random random, int j) {
++        return null;
++    }
++
++    public int a(Random random) {
++        return 0;
++    }
++
++    private Vec3D f(IBlockAccess iblockaccess, int i, int j, int k) {
++        Vec3D vec3d = Vec3D.a(0.0D, 0.0D, 0.0D);
++        int l = this.e(iblockaccess, i, j, k);
++
++        for (int i1 = 0; i1 < 4; ++i1) {
++            int j1 = i;
++            int k1 = k;
++
++            if (i1 == 0) {
++                j1 = i - 1;
++            }
++
++            if (i1 == 1) {
++                k1 = k - 1;
++            }
++
++            if (i1 == 2) {
++                ++j1;
++            }
++
++            if (i1 == 3) {
++                ++k1;
++            }
++
++            int l1 = this.e(iblockaccess, j1, j, k1);
++            int i2;
++
++            if (l1 < 0) {
++                if (!iblockaccess.getType(j1, j, k1).getMaterial().isSolid()) {
++                    l1 = this.e(iblockaccess, j1, j - 1, k1);
++                    if (l1 >= 0) {
++                        i2 = l1 - (l - 8);
++                        vec3d = vec3d.add((double) ((j1 - i) * i2), (double) ((j - j) * i2), (double) ((k1 - k) * i2));
++                    }
++                }
++            } else if (l1 >= 0) {
++                i2 = l1 - l;
++                vec3d = vec3d.add((double) ((j1 - i) * i2), (double) ((j - j) * i2), (double) ((k1 - k) * i2));
++            }
++        }
++
++        if (iblockaccess.getData(i, j, k) >= 8) {
++            boolean flag = false;
++
++            if (flag || this.d(iblockaccess, i, j, k - 1, 2)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i, j, k + 1, 3)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i - 1, j, k, 4)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i + 1, j, k, 5)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i, j + 1, k - 1, 2)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i, j + 1, k + 1, 3)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i - 1, j + 1, k, 4)) {
++                flag = true;
++            }
++
++            if (flag || this.d(iblockaccess, i + 1, j + 1, k, 5)) {
++                flag = true;
++            }
++
++            if (flag) {
++                vec3d = vec3d.a().add(0.0D, -6.0D, 0.0D);
++            }
++        }
++
++        vec3d = vec3d.a();
++        return vec3d;
++    }
++
++    public void a(World world, int i, int j, int k, Entity entity, Vec3D vec3d) {
++        Vec3D vec3d1 = this.f((IBlockAccess) world, i, j, k);
++
++        vec3d.a += vec3d1.a;
++        vec3d.b += vec3d1.b;
++        vec3d.c += vec3d1.c;
++    }
++
++    public int a(World world) {
++        return this.material == Material.WATER ? 5 : (this.material == Material.LAVA ? (world.worldProvider.g ? 10 : 30) : 0);
++    }
++
++    public void onPlace(World world, int i, int j, int k) {
++        this.n(world, i, j, k);
++    }
++
++    public void doPhysics(World world, int i, int j, int k, Block block) {
++        this.n(world, i, j, k);
++    }
++
++    private void n(World world, int i, int j, int k) {
++        if (world.getType(i, j, k) == this) {
++            if (this.material == Material.LAVA) {
++                boolean flag = false;
++
++                if (flag || world.getType(i, j, k - 1).getMaterial() == Material.WATER) {
++                    flag = true;
++                }
++
++                if (flag || world.getType(i, j, k + 1).getMaterial() == Material.WATER) {
++                    flag = true;
++                }
++
++                if (flag || world.getType(i - 1, j, k).getMaterial() == Material.WATER) {
++                    flag = true;
++                }
++
++                if (flag || world.getType(i + 1, j, k).getMaterial() == Material.WATER) {
++                    flag = true;
++                }
++
++                if (flag || world.getType(i, j + 1, k).getMaterial() == Material.WATER) {
++                    flag = true;
++                }
++
++                if (flag) {
++                    int l = world.getData(i, j, k);
++
++                    if (l == 0) {
++                        world.setTypeUpdate(i, j, k, Blocks.OBSIDIAN);
++                    } else if (l <= 4) {
++                        world.setTypeUpdate(i, j, k, Blocks.COBBLESTONE);
++                    }
++
++                    this.fizz(world, i, j, k);
++                }
++            }
++        }
++    }
++
++    protected void fizz(World world, int i, int j, int k) {
++        world.makeSound((double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), "random.fizz", 0.5F, 2.6F + (world.random.nextFloat() - world.random.nextFloat()) * 0.8F);
++
++        for (int l = 0; l < 8; ++l) {
++            world.addParticle("largesmoke", (double) i + Math.random(), (double) j + 1.2D, (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
++        }
++    }
++}
 diff --git a/src/main/java/net/minecraft/server/BlockMinecartTrackAbstract.java b/src/main/java/net/minecraft/server/BlockMinecartTrackAbstract.java
 new file mode 100644
 index 0000000..d36aacb
@@ -155,6 +1159,1312 @@ index 0000000..d36aacb
 +        }
 +    }
 +}
+diff --git a/src/main/java/net/minecraft/server/BlockTorch.java b/src/main/java/net/minecraft/server/BlockTorch.java
+new file mode 100644
+index 0000000..d95aff2
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/BlockTorch.java
+@@ -0,0 +1,167 @@
++package net.minecraft.server;
++
++import java.util.Random;
++
++public class BlockTorch extends Block {
++
++    protected BlockTorch() {
++        super(Material.ORIENTABLE);
++        this.a(true);
++        this.a(CreativeModeTab.c);
++    }
++
++    public AxisAlignedBB a(World world, int i, int j, int k) {
++        return null;
++    }
++
++    public boolean c() {
++        return false;
++    }
++
++    public boolean d() {
++        return false;
++    }
++
++    public int b() {
++        return 2;
++    }
++
++    private boolean m(World world, int i, int j, int k) {
++        if (World.a((IBlockAccess) world, i, j, k)) {
++            return true;
++        } else {
++            Block block = world.getType(i, j, k);
++
++            return block == Blocks.FENCE || block == Blocks.NETHER_FENCE || block == Blocks.GLASS || block == Blocks.COBBLE_WALL;
++        }
++    }
++
++    public boolean canPlace(World world, int i, int j, int k) {
++        return world.c(i - 1, j, k, true) ? true : (world.c(i + 1, j, k, true) ? true : (world.c(i, j, k - 1, true) ? true : (world.c(i, j, k + 1, true) ? true : this.m(world, i, j - 1, k))));
++    }
++
++    public int getPlacedData(World world, int i, int j, int k, int l, float f, float f1, float f2, int i1) {
++        int j1 = i1;
++
++        if (l == 1 && this.m(world, i, j - 1, k)) {
++            j1 = 5;
++        }
++
++        if (l == 2 && world.c(i, j, k + 1, true)) {
++            j1 = 4;
++        }
++
++        if (l == 3 && world.c(i, j, k - 1, true)) {
++            j1 = 3;
++        }
++
++        if (l == 4 && world.c(i + 1, j, k, true)) {
++            j1 = 2;
++        }
++
++        if (l == 5 && world.c(i - 1, j, k, true)) {
++            j1 = 1;
++        }
++
++        return j1;
++    }
++
++    public void a(World world, int i, int j, int k, Random random) {
++        super.a(world, i, j, k, random);
++        if (world.getData(i, j, k) == 0) {
++            this.onPlace(world, i, j, k);
++        }
++    }
++
++    public void onPlace(World world, int i, int j, int k) {
++        if (world.getData(i, j, k) == 0) {
++            if (world.c(i - 1, j, k, true)) {
++                world.setData(i, j, k, 1, 2);
++            } else if (world.c(i + 1, j, k, true)) {
++                world.setData(i, j, k, 2, 2);
++            } else if (world.c(i, j, k - 1, true)) {
++                world.setData(i, j, k, 3, 2);
++            } else if (world.c(i, j, k + 1, true)) {
++                world.setData(i, j, k, 4, 2);
++            } else if (this.m(world, i, j - 1, k)) {
++                world.setData(i, j, k, 5, 2);
++            }
++        }
++
++        this.e(world, i, j, k);
++    }
++
++    public void doPhysics(World world, int i, int j, int k, Block block) {
++        this.b(world, i, j, k, block);
++    }
++
++    protected boolean b(World world, int i, int j, int k, Block block) {
++        if (this.e(world, i, j, k)) {
++            int l = world.getData(i, j, k);
++            boolean flag = false;
++
++            if (!world.c(i - 1, j, k, true) && l == 1) {
++                flag = true;
++            }
++
++            if (!world.c(i + 1, j, k, true) && l == 2) {
++                flag = true;
++            }
++
++            if (!world.c(i, j, k - 1, true) && l == 3) {
++                flag = true;
++            }
++
++            if (!world.c(i, j, k + 1, true) && l == 4) {
++                flag = true;
++            }
++
++            if (!this.m(world, i, j - 1, k) && l == 5) {
++                flag = true;
++            }
++
++            if (flag) {
++                this.b(world, i, j, k, world.getData(i, j, k), 0);
++                world.setAir(i, j, k);
++                return true;
++            } else {
++                return false;
++            }
++        } else {
++            return true;
++        }
++    }
++
++    protected boolean e(World world, int i, int j, int k) {
++        if (!this.canPlace(world, i, j, k)) {
++            if (world.getType(i, j, k) == this) {
++                this.b(world, i, j, k, world.getData(i, j, k), 0);
++                world.setAir(i, j, k);
++            }
++
++            return false;
++        } else {
++            return true;
++        }
++    }
++
++    public MovingObjectPosition a(World world, int i, int j, int k, Vec3D vec3d, Vec3D vec3d1) {
++        int l = world.getData(i, j, k) & 7;
++        float f = 0.15F;
++
++        if (l == 1) {
++            this.a(0.0F, 0.2F, 0.5F - f, f * 2.0F, 0.8F, 0.5F + f);
++        } else if (l == 2) {
++            this.a(1.0F - f * 2.0F, 0.2F, 0.5F - f, 1.0F, 0.8F, 0.5F + f);
++        } else if (l == 3) {
++            this.a(0.5F - f, 0.2F, 0.0F, 0.5F + f, 0.8F, f * 2.0F);
++        } else if (l == 4) {
++            this.a(0.5F - f, 0.2F, 1.0F - f * 2.0F, 0.5F + f, 0.8F, 1.0F);
++        } else {
++            f = 0.1F;
++            this.a(0.5F - f, 0.0F, 0.5F - f, 0.5F + f, 0.6F, 0.5F + f);
++        }
++
++        return super.a(world, i, j, k, vec3d, vec3d1);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderFlat.java b/src/main/java/net/minecraft/server/ChunkProviderFlat.java
+new file mode 100644
+index 0000000..0f75182
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/ChunkProviderFlat.java
+@@ -0,0 +1,238 @@
++package net.minecraft.server;
++
++import java.util.ArrayList;
++import java.util.Iterator;
++import java.util.List;
++import java.util.Map;
++import java.util.Random;
++
++public class ChunkProviderFlat implements IChunkProvider {
++
++    private World a;
++    private Random b;
++    private final Block[] c = new Block[256];
++    private final byte[] d = new byte[256];
++    private final WorldGenFlatInfo e;
++    private final List f = new ArrayList();
++    private final boolean g;
++    private final boolean h;
++    private WorldGenLakes i;
++    private WorldGenLakes j;
++
++    public ChunkProviderFlat(World world, long i, boolean flag, String s) {
++        this.a = world;
++        this.b = new Random(i);
++        this.e = WorldGenFlatInfo.a(s);
++        if (flag) {
++            Map map = this.e.b();
++
++            if (map.containsKey("village")) {
++                Map map1 = (Map) map.get("village");
++
++                if (!map1.containsKey("size")) {
++                    map1.put("size", "1");
++                }
++
++                this.f.add(new WorldGenVillage(map1));
++            }
++
++            if (map.containsKey("biome_1")) {
++                this.f.add(new WorldGenLargeFeature((Map) map.get("biome_1")));
++            }
++
++            if (map.containsKey("mineshaft")) {
++                this.f.add(new WorldGenMineshaft((Map) map.get("mineshaft")));
++            }
++
++            if (map.containsKey("stronghold")) {
++                this.f.add(new WorldGenStronghold((Map) map.get("stronghold")));
++            }
++        }
++
++        this.g = this.e.b().containsKey("decoration");
++        if (this.e.b().containsKey("lake")) {
++            this.i = new WorldGenLakes(Blocks.STATIONARY_WATER);
++        }
++
++        if (this.e.b().containsKey("lava_lake")) {
++            this.j = new WorldGenLakes(Blocks.STATIONARY_LAVA);
++        }
++
++        this.h = this.e.b().containsKey("dungeon");
++        Iterator iterator = this.e.c().iterator();
++
++        while (iterator.hasNext()) {
++            WorldGenFlatLayerInfo worldgenflatlayerinfo = (WorldGenFlatLayerInfo) iterator.next();
++
++            for (int j = worldgenflatlayerinfo.d(); j < worldgenflatlayerinfo.d() + worldgenflatlayerinfo.a(); ++j) {
++                this.c[j] = worldgenflatlayerinfo.b();
++                this.d[j] = (byte) worldgenflatlayerinfo.c();
++            }
++        }
++    }
++
++    public Chunk getChunkAt(int i, int j) {
++        return this.getOrCreateChunk(i, j);
++    }
++
++    public Chunk getOrCreateChunk(int i, int j) {
++        Chunk chunk = new Chunk(this.a, i, j);
++
++        int k;
++
++        for (int l = 0; l < this.c.length; ++l) {
++            Block block = this.c[l];
++
++            if (block != null) {
++                k = l >> 4;
++                ChunkSection chunksection = chunk.getSections()[k];
++
++                if (chunksection == null) {
++                    chunksection = new ChunkSection(l, !this.a.worldProvider.g);
++                    chunk.getSections()[k] = chunksection;
++                }
++
++                for (int i1 = 0; i1 < 16; ++i1) {
++                    for (int j1 = 0; j1 < 16; ++j1) {
++                        chunksection.setTypeId(i1, l & 15, j1, block);
++                        chunksection.setData(i1, l & 15, j1, this.d[l]);
++                    }
++                }
++            }
++        }
++
++        chunk.initLighting();
++        BiomeBase[] abiomebase = this.a.getWorldChunkManager().getBiomeBlock((BiomeBase[]) null, i * 16, j * 16, 16, 16);
++        byte[] abyte = chunk.m();
++
++        for (k = 0; k < abyte.length; ++k) {
++            abyte[k] = (byte) abiomebase[k].id;
++        }
++
++        Iterator iterator = this.f.iterator();
++
++        while (iterator.hasNext()) {
++            WorldGenBase worldgenbase = (WorldGenBase) iterator.next();
++
++            worldgenbase.a(this, this.a, i, j, (Block[]) null);
++        }
++
++        chunk.initLighting();
++        return chunk;
++    }
++
++    public boolean isChunkLoaded(int i, int j) {
++        return true;
++    }
++
++    public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
++        int k = i * 16;
++        int l = j * 16;
++        BiomeBase biomebase = this.a.getBiome(k + 16, l + 16);
++        boolean flag = false;
++
++        this.b.setSeed(this.a.getSeed());
++        long i1 = this.b.nextLong() / 2L * 2L + 1L;
++        long j1 = this.b.nextLong() / 2L * 2L + 1L;
++
++        this.b.setSeed((long) i * i1 + (long) j * j1 ^ this.a.getSeed());
++        Iterator iterator = this.f.iterator();
++
++        while (iterator.hasNext()) {
++            StructureGenerator structuregenerator = (StructureGenerator) iterator.next();
++            boolean flag1 = structuregenerator.a(this.a, this.b, i, j);
++
++            if (structuregenerator instanceof WorldGenVillage) {
++                flag |= flag1;
++            }
++        }
++
++        int k1;
++        int l1;
++        int i2;
++
++        if (this.i != null && !flag && this.b.nextInt(4) == 0) {
++            l1 = k + this.b.nextInt(16) + 8;
++            k1 = this.b.nextInt(256);
++            i2 = l + this.b.nextInt(16) + 8;
++            this.i.generate(this.a, this.b, l1, k1, i2);
++        }
++
++        if (this.j != null && !flag && this.b.nextInt(8) == 0) {
++            l1 = k + this.b.nextInt(16) + 8;
++            k1 = this.b.nextInt(this.b.nextInt(248) + 8);
++            i2 = l + this.b.nextInt(16) + 8;
++            if (k1 < 63 || this.b.nextInt(10) == 0) {
++                this.j.generate(this.a, this.b, l1, k1, i2);
++            }
++        }
++
++        if (this.h) {
++            for (l1 = 0; l1 < 8; ++l1) {
++                k1 = k + this.b.nextInt(16) + 8;
++                i2 = this.b.nextInt(256);
++                int j2 = l + this.b.nextInt(16) + 8;
++
++                (new WorldGenDungeons()).generate(this.a, this.b, k1, i2, j2);
++            }
++        }
++
++        if (this.g) {
++            biomebase.a(this.a, this.b, k, l);
++        }
++    }
++
++    public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
++        return true;
++    }
++
++    public void c() {}
++
++    public boolean unloadChunks() {
++        return false;
++    }
++
++    public boolean canSave() {
++        return true;
++    }
++
++    public String getName() {
++        return "FlatLevelSource";
++    }
++
++    public List getMobsFor(EnumCreatureType enumcreaturetype, int i, int j, int k) {
++        BiomeBase biomebase = this.a.getBiome(i, k);
++
++        return biomebase.getMobs(enumcreaturetype);
++    }
++
++    public ChunkPosition findNearestMapFeature(World world, String s, int i, int j, int k) {
++        if ("Stronghold".equals(s)) {
++            Iterator iterator = this.f.iterator();
++
++            while (iterator.hasNext()) {
++                StructureGenerator structuregenerator = (StructureGenerator) iterator.next();
++
++                if (structuregenerator instanceof WorldGenStronghold) {
++                    return structuregenerator.getNearestGeneratedFeature(world, i, j, k);
++                }
++            }
++        }
++
++        return null;
++    }
++
++    public int getLoadedChunks() {
++        return 0;
++    }
++
++    public void recreateStructures(int i, int j) {
++        Iterator iterator = this.f.iterator();
++
++        while (iterator.hasNext()) {
++            StructureGenerator structuregenerator = (StructureGenerator) iterator.next();
++
++            structuregenerator.a(this, this.a, i, j, (Block[]) null);
++        }
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderGenerate.java b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+new file mode 100644
+index 0000000..813df4d
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/ChunkProviderGenerate.java
+@@ -0,0 +1,392 @@
++package net.minecraft.server;
++
++import java.util.List;
++import java.util.Random;
++
++public class ChunkProviderGenerate implements IChunkProvider {
++
++    private Random i;
++    private NoiseGeneratorOctaves j;
++    private NoiseGeneratorOctaves k;
++    private NoiseGeneratorOctaves l;
++    private NoiseGenerator3 m;
++    public NoiseGeneratorOctaves a;
++    public NoiseGeneratorOctaves b;
++    public NoiseGeneratorOctaves c;
++    private World n;
++    private final boolean o;
++    private WorldType p;
++    private final double[] q;
++    private final float[] r;
++    private double[] s = new double[256];
++    private WorldGenBase t = new WorldGenCaves();
++    private WorldGenStronghold u = new WorldGenStronghold();
++    private WorldGenVillage v = new WorldGenVillage();
++    private WorldGenMineshaft w = new WorldGenMineshaft();
++    private WorldGenLargeFeature x = new WorldGenLargeFeature();
++    private WorldGenBase y = new WorldGenCanyon();
++    private BiomeBase[] z;
++    double[] d;
++    double[] e;
++    double[] f;
++    double[] g;
++    int[][] h = new int[32][32];
++
++    public ChunkProviderGenerate(World world, long i, boolean flag) {
++        this.n = world;
++        this.o = flag;
++        this.p = world.getWorldData().getType();
++        this.i = new Random(i);
++        this.j = new NoiseGeneratorOctaves(this.i, 16);
++        this.k = new NoiseGeneratorOctaves(this.i, 16);
++        this.l = new NoiseGeneratorOctaves(this.i, 8);
++        this.m = new NoiseGenerator3(this.i, 4);
++        this.a = new NoiseGeneratorOctaves(this.i, 10);
++        this.b = new NoiseGeneratorOctaves(this.i, 16);
++        this.c = new NoiseGeneratorOctaves(this.i, 8);
++        this.q = new double[825];
++        this.r = new float[25];
++
++        for (int j = -2; j <= 2; ++j) {
++            for (int k = -2; k <= 2; ++k) {
++                float f = 10.0F / MathHelper.c((float) (j * j + k * k) + 0.2F);
++
++                this.r[j + 2 + (k + 2) * 5] = f;
++            }
++        }
++    }
++
++    public void a(int i, int j, Block[] ablock) {
++        byte b0 = 63;
++
++        this.z = this.n.getWorldChunkManager().getBiomes(this.z, i * 4 - 2, j * 4 - 2, 10, 10);
++        this.a(i * 4, 0, j * 4);
++
++        for (int k = 0; k < 4; ++k) {
++            int l = k * 5;
++            int i1 = (k + 1) * 5;
++
++            for (int j1 = 0; j1 < 4; ++j1) {
++                int k1 = (l + j1) * 33;
++                int l1 = (l + j1 + 1) * 33;
++                int i2 = (i1 + j1) * 33;
++                int j2 = (i1 + j1 + 1) * 33;
++
++                for (int k2 = 0; k2 < 32; ++k2) {
++                    double d0 = 0.125D;
++                    double d1 = this.q[k1 + k2];
++                    double d2 = this.q[l1 + k2];
++                    double d3 = this.q[i2 + k2];
++                    double d4 = this.q[j2 + k2];
++                    double d5 = (this.q[k1 + k2 + 1] - d1) * d0;
++                    double d6 = (this.q[l1 + k2 + 1] - d2) * d0;
++                    double d7 = (this.q[i2 + k2 + 1] - d3) * d0;
++                    double d8 = (this.q[j2 + k2 + 1] - d4) * d0;
++
++                    for (int l2 = 0; l2 < 8; ++l2) {
++                        double d9 = 0.25D;
++                        double d10 = d1;
++                        double d11 = d2;
++                        double d12 = (d3 - d1) * d9;
++                        double d13 = (d4 - d2) * d9;
++
++                        for (int i3 = 0; i3 < 4; ++i3) {
++                            int j3 = i3 + k * 4 << 12 | 0 + j1 * 4 << 8 | k2 * 8 + l2;
++                            short short1 = 256;
++
++                            j3 -= short1;
++                            double d14 = 0.25D;
++                            double d15 = (d11 - d10) * d14;
++                            double d16 = d10 - d15;
++
++                            for (int k3 = 0; k3 < 4; ++k3) {
++                                if ((d16 += d15) > 0.0D) {
++                                    ablock[j3 += short1] = Blocks.STONE;
++                                } else if (k2 * 8 + l2 < b0) {
++                                    ablock[j3 += short1] = Blocks.STATIONARY_WATER;
++                                } else {
++                                    ablock[j3 += short1] = null;
++                                }
++                            }
++
++                            d10 += d12;
++                            d11 += d13;
++                        }
++
++                        d1 += d5;
++                        d2 += d6;
++                        d3 += d7;
++                        d4 += d8;
++                    }
++                }
++            }
++        }
++    }
++
++    public void a(int i, int j, Block[] ablock, byte[] abyte, BiomeBase[] abiomebase) {
++        double d0 = 0.03125D;
++
++        this.s = this.m.a(this.s, (double) (i * 16), (double) (j * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
++
++        for (int k = 0; k < 16; ++k) {
++            for (int l = 0; l < 16; ++l) {
++                BiomeBase biomebase = abiomebase[l + k * 16];
++
++                biomebase.a(this.n, this.i, ablock, abyte, i * 16 + k, j * 16 + l, this.s[l + k * 16]);
++            }
++        }
++    }
++
++    public Chunk getChunkAt(int i, int j) {
++        return this.getOrCreateChunk(i, j);
++    }
++
++    public Chunk getOrCreateChunk(int i, int j) {
++        this.i.setSeed((long) i * 341873128712L + (long) j * 132897987541L);
++        Block[] ablock = new Block[65536];
++        byte[] abyte = new byte[65536];
++
++        this.a(i, j, ablock);
++        this.z = this.n.getWorldChunkManager().getBiomeBlock(this.z, i * 16, j * 16, 16, 16);
++        this.a(i, j, ablock, abyte, this.z);
++        this.t.a(this, this.n, i, j, ablock);
++        this.y.a(this, this.n, i, j, ablock);
++        if (this.o) {
++            this.w.a(this, this.n, i, j, ablock);
++            this.v.a(this, this.n, i, j, ablock);
++            this.u.a(this, this.n, i, j, ablock);
++            this.x.a(this, this.n, i, j, ablock);
++        }
++
++        Chunk chunk = new Chunk(this.n, ablock, abyte, i, j);
++        byte[] abyte1 = chunk.m();
++
++        for (int k = 0; k < abyte1.length; ++k) {
++            abyte1[k] = (byte) this.z[k].id;
++        }
++
++        chunk.initLighting();
++        return chunk;
++    }
++
++    private void a(int i, int j, int k) {
++        double d0 = 684.412D;
++        double d1 = 684.412D;
++        double d2 = 512.0D;
++        double d3 = 512.0D;
++
++        this.g = this.b.a(this.g, i, k, 5, 5, 200.0D, 200.0D, 0.5D);
++        this.d = this.l.a(this.d, i, j, k, 5, 33, 5, 8.555150000000001D, 4.277575000000001D, 8.555150000000001D);
++        this.e = this.j.a(this.e, i, j, k, 5, 33, 5, 684.412D, 684.412D, 684.412D);
++        this.f = this.k.a(this.f, i, j, k, 5, 33, 5, 684.412D, 684.412D, 684.412D);
++        boolean flag = false;
++        boolean flag1 = false;
++        int l = 0;
++        int i1 = 0;
++        double d4 = 8.5D;
++
++        for (int j1 = 0; j1 < 5; ++j1) {
++            for (int k1 = 0; k1 < 5; ++k1) {
++                float f = 0.0F;
++                float f1 = 0.0F;
++                float f2 = 0.0F;
++                byte b0 = 2;
++                BiomeBase biomebase = this.z[j1 + 2 + (k1 + 2) * 10];
++
++                for (int l1 = -b0; l1 <= b0; ++l1) {
++                    for (int i2 = -b0; i2 <= b0; ++i2) {
++                        BiomeBase biomebase1 = this.z[j1 + l1 + 2 + (k1 + i2 + 2) * 10];
++                        float f3 = biomebase1.am;
++                        float f4 = biomebase1.an;
++
++                        if (this.p == WorldType.AMPLIFIED && f3 > 0.0F) {
++                            f3 = 1.0F + f3 * 2.0F;
++                            f4 = 1.0F + f4 * 4.0F;
++                        }
++
++                        float f5 = this.r[l1 + 2 + (i2 + 2) * 5] / (f3 + 2.0F);
++
++                        if (biomebase1.am > biomebase.am) {
++                            f5 /= 2.0F;
++                        }
++
++                        f += f4 * f5;
++                        f1 += f3 * f5;
++                        f2 += f5;
++                    }
++                }
++
++                f /= f2;
++                f1 /= f2;
++                f = f * 0.9F + 0.1F;
++                f1 = (f1 * 4.0F - 1.0F) / 8.0F;
++                double d5 = this.g[i1] / 8000.0D;
++
++                if (d5 < 0.0D) {
++                    d5 = -d5 * 0.3D;
++                }
++
++                d5 = d5 * 3.0D - 2.0D;
++                if (d5 < 0.0D) {
++                    d5 /= 2.0D;
++                    if (d5 < -1.0D) {
++                        d5 = -1.0D;
++                    }
++
++                    d5 /= 1.4D;
++                    d5 /= 2.0D;
++                } else {
++                    if (d5 > 1.0D) {
++                        d5 = 1.0D;
++                    }
++
++                    d5 /= 8.0D;
++                }
++
++                ++i1;
++                double d6 = (double) f1;
++                double d7 = (double) f;
++
++                d6 += d5 * 0.2D;
++                d6 = d6 * 8.5D / 8.0D;
++                double d8 = 8.5D + d6 * 4.0D;
++
++                for (int j2 = 0; j2 < 33; ++j2) {
++                    double d9 = ((double) j2 - d8) * 12.0D * 128.0D / 256.0D / d7;
++
++                    if (d9 < 0.0D) {
++                        d9 *= 4.0D;
++                    }
++
++                    double d10 = this.e[l] / 512.0D;
++                    double d11 = this.f[l] / 512.0D;
++                    double d12 = (this.d[l] / 10.0D + 1.0D) / 2.0D;
++                    double d13 = MathHelper.b(d10, d11, d12) - d9;
++
++                    if (j2 > 29) {
++                        double d14 = (double) ((float) (j2 - 29) / 3.0F);
++
++                        d13 = d13 * (1.0D - d14) + -10.0D * d14;
++                    }
++
++                    this.q[l] = d13;
++                    ++l;
++                }
++            }
++        }
++    }
++
++    public boolean isChunkLoaded(int i, int j) {
++        return true;
++    }
++
++    public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
++        BlockFalling.instaFall = true;
++        int k = i * 16;
++        int l = j * 16;
++        BiomeBase biomebase = this.n.getBiome(k + 16, l + 16);
++
++        this.i.setSeed(this.n.getSeed());
++        long i1 = this.i.nextLong() / 2L * 2L + 1L;
++        long j1 = this.i.nextLong() / 2L * 2L + 1L;
++
++        this.i.setSeed((long) i * i1 + (long) j * j1 ^ this.n.getSeed());
++        boolean flag = false;
++
++        if (this.o) {
++            this.w.a(this.n, this.i, i, j);
++            flag = this.v.a(this.n, this.i, i, j);
++            this.u.a(this.n, this.i, i, j);
++            this.x.a(this.n, this.i, i, j);
++        }
++
++        int k1;
++        int l1;
++        int i2;
++
++        if (biomebase != BiomeBase.DESERT && biomebase != BiomeBase.DESERT_HILLS && !flag && this.i.nextInt(4) == 0) {
++            k1 = k + this.i.nextInt(16) + 8;
++            l1 = this.i.nextInt(256);
++            i2 = l + this.i.nextInt(16) + 8;
++            (new WorldGenLakes(Blocks.STATIONARY_WATER)).generate(this.n, this.i, k1, l1, i2);
++        }
++
++        if (!flag && this.i.nextInt(8) == 0) {
++            k1 = k + this.i.nextInt(16) + 8;
++            l1 = this.i.nextInt(this.i.nextInt(248) + 8);
++            i2 = l + this.i.nextInt(16) + 8;
++            if (l1 < 63 || this.i.nextInt(10) == 0) {
++                (new WorldGenLakes(Blocks.STATIONARY_LAVA)).generate(this.n, this.i, k1, l1, i2);
++            }
++        }
++
++        for (k1 = 0; k1 < 8; ++k1) {
++            l1 = k + this.i.nextInt(16) + 8;
++            i2 = this.i.nextInt(256);
++            int j2 = l + this.i.nextInt(16) + 8;
++
++            (new WorldGenDungeons()).generate(this.n, this.i, l1, i2, j2);
++        }
++
++        biomebase.a(this.n, this.i, k, l);
++        SpawnerCreature.a(this.n, biomebase, k + 8, l + 8, 16, 16, this.i);
++        k += 8;
++        l += 8;
++
++        for (k1 = 0; k1 < 16; ++k1) {
++            for (l1 = 0; l1 < 16; ++l1) {
++                i2 = this.n.h(k + k1, l + l1);
++                if (this.n.r(k1 + k, i2 - 1, l1 + l)) {
++                    this.n.setTypeAndData(k1 + k, i2 - 1, l1 + l, Blocks.ICE, 0, 2);
++                }
++
++                if (this.n.e(k1 + k, i2, l1 + l, true)) {
++                    this.n.setTypeAndData(k1 + k, i2, l1 + l, Blocks.SNOW, 0, 2);
++                }
++            }
++        }
++
++        BlockFalling.instaFall = false;
++    }
++
++    public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
++        return true;
++    }
++
++    public void c() {}
++
++    public boolean unloadChunks() {
++        return false;
++    }
++
++    public boolean canSave() {
++        return true;
++    }
++
++    public String getName() {
++        return "RandomLevelSource";
++    }
++
++    public List getMobsFor(EnumCreatureType enumcreaturetype, int i, int j, int k) {
++        BiomeBase biomebase = this.n.getBiome(i, k);
++
++        return enumcreaturetype == EnumCreatureType.MONSTER && this.x.a(i, j, k) ? this.x.b() : biomebase.getMobs(enumcreaturetype);
++    }
++
++    public ChunkPosition findNearestMapFeature(World world, String s, int i, int j, int k) {
++        return "Stronghold".equals(s) && this.u != null ? this.u.getNearestGeneratedFeature(world, i, j, k) : null;
++    }
++
++    public int getLoadedChunks() {
++        return 0;
++    }
++
++    public void recreateStructures(int i, int j) {
++        if (this.o) {
++            this.w.a(this, this.n, i, j, (Block[]) null);
++            this.v.a(this, this.n, i, j, (Block[]) null);
++            this.u.a(this, this.n, i, j, (Block[]) null);
++            this.x.a(this, this.n, i, j, (Block[]) null);
++        }
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/ChunkProviderHell.java b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+new file mode 100644
+index 0000000..ef4894e
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/ChunkProviderHell.java
+@@ -0,0 +1,445 @@
++package net.minecraft.server;
++
++import java.util.List;
++import java.util.Random;
++
++public class ChunkProviderHell implements IChunkProvider {
++
++    private Random i;
++    private NoiseGeneratorOctaves j;
++    private NoiseGeneratorOctaves k;
++    private NoiseGeneratorOctaves l;
++    private NoiseGeneratorOctaves m;
++    private NoiseGeneratorOctaves n;
++    public NoiseGeneratorOctaves a;
++    public NoiseGeneratorOctaves b;
++    private World o;
++    private double[] p;
++    public WorldGenNether c = new WorldGenNether();
++    private double[] q = new double[256];
++    private double[] r = new double[256];
++    private double[] s = new double[256];
++    private WorldGenBase t = new WorldGenCavesHell();
++    double[] d;
++    double[] e;
++    double[] f;
++    double[] g;
++    double[] h;
++
++    public ChunkProviderHell(World world, long i) {
++        this.o = world;
++        this.i = new Random(i);
++        this.j = new NoiseGeneratorOctaves(this.i, 16);
++        this.k = new NoiseGeneratorOctaves(this.i, 16);
++        this.l = new NoiseGeneratorOctaves(this.i, 8);
++        this.m = new NoiseGeneratorOctaves(this.i, 4);
++        this.n = new NoiseGeneratorOctaves(this.i, 4);
++        this.a = new NoiseGeneratorOctaves(this.i, 10);
++        this.b = new NoiseGeneratorOctaves(this.i, 16);
++    }
++
++    public void a(int i, int j, Block[] ablock) {
++        byte b0 = 4;
++        byte b1 = 32;
++        int k = b0 + 1;
++        byte b2 = 17;
++        int l = b0 + 1;
++
++        this.p = this.a(this.p, i * b0, 0, j * b0, k, b2, l);
++
++        for (int i1 = 0; i1 < b0; ++i1) {
++            for (int j1 = 0; j1 < b0; ++j1) {
++                for (int k1 = 0; k1 < 16; ++k1) {
++                    double d0 = 0.125D;
++                    double d1 = this.p[((i1 + 0) * l + j1 + 0) * b2 + k1 + 0];
++                    double d2 = this.p[((i1 + 0) * l + j1 + 1) * b2 + k1 + 0];
++                    double d3 = this.p[((i1 + 1) * l + j1 + 0) * b2 + k1 + 0];
++                    double d4 = this.p[((i1 + 1) * l + j1 + 1) * b2 + k1 + 0];
++                    double d5 = (this.p[((i1 + 0) * l + j1 + 0) * b2 + k1 + 1] - d1) * d0;
++                    double d6 = (this.p[((i1 + 0) * l + j1 + 1) * b2 + k1 + 1] - d2) * d0;
++                    double d7 = (this.p[((i1 + 1) * l + j1 + 0) * b2 + k1 + 1] - d3) * d0;
++                    double d8 = (this.p[((i1 + 1) * l + j1 + 1) * b2 + k1 + 1] - d4) * d0;
++
++                    for (int l1 = 0; l1 < 8; ++l1) {
++                        double d9 = 0.25D;
++                        double d10 = d1;
++                        double d11 = d2;
++                        double d12 = (d3 - d1) * d9;
++                        double d13 = (d4 - d2) * d9;
++
++                        for (int i2 = 0; i2 < 4; ++i2) {
++                            int j2 = i2 + i1 * 4 << 11 | 0 + j1 * 4 << 7 | k1 * 8 + l1;
++                            short short1 = 128;
++                            double d14 = 0.25D;
++                            double d15 = d10;
++                            double d16 = (d11 - d10) * d14;
++
++                            for (int k2 = 0; k2 < 4; ++k2) {
++                                Block block = null;
++
++                                if (k1 * 8 + l1 < b1) {
++                                    block = Blocks.STATIONARY_LAVA;
++                                }
++
++                                if (d15 > 0.0D) {
++                                    block = Blocks.NETHERRACK;
++                                }
++
++                                ablock[j2] = block;
++                                j2 += short1;
++                                d15 += d16;
++                            }
++
++                            d10 += d12;
++                            d11 += d13;
++                        }
++
++                        d1 += d5;
++                        d2 += d6;
++                        d3 += d7;
++                        d4 += d8;
++                    }
++                }
++            }
++        }
++    }
++
++    public void b(int i, int j, Block[] ablock) {
++        byte b0 = 64;
++        double d0 = 0.03125D;
++
++        this.q = this.m.a(this.q, i * 16, j * 16, 0, 16, 16, 1, d0, d0, 1.0D);
++        this.r = this.m.a(this.r, i * 16, 109, j * 16, 16, 1, 16, d0, 1.0D, d0);
++        this.s = this.n.a(this.s, i * 16, j * 16, 0, 16, 16, 1, d0 * 2.0D, d0 * 2.0D, d0 * 2.0D);
++
++        for (int k = 0; k < 16; ++k) {
++            for (int l = 0; l < 16; ++l) {
++                boolean flag = this.q[k + l * 16] + this.i.nextDouble() * 0.2D > 0.0D;
++                boolean flag1 = this.r[k + l * 16] + this.i.nextDouble() * 0.2D > 0.0D;
++                int i1 = (int) (this.s[k + l * 16] / 3.0D + 3.0D + this.i.nextDouble() * 0.25D);
++                int j1 = -1;
++                Block block = Blocks.NETHERRACK;
++                Block block1 = Blocks.NETHERRACK;
++
++                for (int k1 = 127; k1 >= 0; --k1) {
++                    int l1 = (l * 16 + k) * 128 + k1;
++
++                    if (k1 < 127 - this.i.nextInt(5) && k1 > 0 + this.i.nextInt(5)) {
++                        Block block2 = ablock[l1];
++
++                        if (block2 != null && block2.getMaterial() != Material.AIR) {
++                            if (block2 == Blocks.NETHERRACK) {
++                                if (j1 == -1) {
++                                    if (i1 <= 0) {
++                                        block = null;
++                                        block1 = Blocks.NETHERRACK;
++                                    } else if (k1 >= b0 - 4 && k1 <= b0 + 1) {
++                                        block = Blocks.NETHERRACK;
++                                        block1 = Blocks.NETHERRACK;
++                                        if (flag1) {
++                                            block = Blocks.GRAVEL;
++                                            block1 = Blocks.NETHERRACK;
++                                        }
++
++                                        if (flag) {
++                                            block = Blocks.SOUL_SAND;
++                                            block1 = Blocks.SOUL_SAND;
++                                        }
++                                    }
++
++                                    if (k1 < b0 && (block == null || block.getMaterial() == Material.AIR)) {
++                                        block = Blocks.STATIONARY_LAVA;
++                                    }
++
++                                    j1 = i1;
++                                    if (k1 >= b0 - 1) {
++                                        ablock[l1] = block;
++                                    } else {
++                                        ablock[l1] = block1;
++                                    }
++                                } else if (j1 > 0) {
++                                    --j1;
++                                    ablock[l1] = block1;
++                                }
++                            }
++                        } else {
++                            j1 = -1;
++                        }
++                    } else {
++                        ablock[l1] = Blocks.BEDROCK;
++                    }
++                }
++            }
++        }
++    }
++
++    public Chunk getChunkAt(int i, int j) {
++        return this.getOrCreateChunk(i, j);
++    }
++
++    public Chunk getOrCreateChunk(int i, int j) {
++        this.i.setSeed((long) i * 341873128712L + (long) j * 132897987541L);
++        Block[] ablock = new Block['\u8000'];
++
++        this.a(i, j, ablock);
++        this.b(i, j, ablock);
++        this.t.a(this, this.o, i, j, ablock);
++        this.c.a(this, this.o, i, j, ablock);
++        Chunk chunk = new Chunk(this.o, ablock, i, j);
++        BiomeBase[] abiomebase = this.o.getWorldChunkManager().getBiomeBlock((BiomeBase[]) null, i * 16, j * 16, 16, 16);
++        byte[] abyte = chunk.m();
++
++        for (int k = 0; k < abyte.length; ++k) {
++            abyte[k] = (byte) abiomebase[k].id;
++        }
++
++        chunk.n();
++        return chunk;
++    }
++
++    private double[] a(double[] adouble, int i, int j, int k, int l, int i1, int j1) {
++        if (adouble == null) {
++            adouble = new double[l * i1 * j1];
++        }
++
++        double d0 = 684.412D;
++        double d1 = 2053.236D;
++
++        this.g = this.a.a(this.g, i, j, k, l, 1, j1, 1.0D, 0.0D, 1.0D);
++        this.h = this.b.a(this.h, i, j, k, l, 1, j1, 100.0D, 0.0D, 100.0D);
++        this.d = this.l.a(this.d, i, j, k, l, i1, j1, d0 / 80.0D, d1 / 60.0D, d0 / 80.0D);
++        this.e = this.j.a(this.e, i, j, k, l, i1, j1, d0, d1, d0);
++        this.f = this.k.a(this.f, i, j, k, l, i1, j1, d0, d1, d0);
++        int k1 = 0;
++        int l1 = 0;
++        double[] adouble1 = new double[i1];
++
++        int i2;
++
++        for (i2 = 0; i2 < i1; ++i2) {
++            adouble1[i2] = Math.cos((double) i2 * 3.141592653589793D * 6.0D / (double) i1) * 2.0D;
++            double d2 = (double) i2;
++
++            if (i2 > i1 / 2) {
++                d2 = (double) (i1 - 1 - i2);
++            }
++
++            if (d2 < 4.0D) {
++                d2 = 4.0D - d2;
++                adouble1[i2] -= d2 * d2 * d2 * 10.0D;
++            }
++        }
++
++        for (i2 = 0; i2 < l; ++i2) {
++            for (int j2 = 0; j2 < j1; ++j2) {
++                double d3 = (this.g[l1] + 256.0D) / 512.0D;
++
++                if (d3 > 1.0D) {
++                    d3 = 1.0D;
++                }
++
++                double d4 = 0.0D;
++                double d5 = this.h[l1] / 8000.0D;
++
++                if (d5 < 0.0D) {
++                    d5 = -d5;
++                }
++
++                d5 = d5 * 3.0D - 3.0D;
++                if (d5 < 0.0D) {
++                    d5 /= 2.0D;
++                    if (d5 < -1.0D) {
++                        d5 = -1.0D;
++                    }
++
++                    d5 /= 1.4D;
++                    d5 /= 2.0D;
++                    d3 = 0.0D;
++                } else {
++                    if (d5 > 1.0D) {
++                        d5 = 1.0D;
++                    }
++
++                    d5 /= 6.0D;
++                }
++
++                d3 += 0.5D;
++                d5 = d5 * (double) i1 / 16.0D;
++                ++l1;
++
++                for (int k2 = 0; k2 < i1; ++k2) {
++                    double d6 = 0.0D;
++                    double d7 = adouble1[k2];
++                    double d8 = this.e[k1] / 512.0D;
++                    double d9 = this.f[k1] / 512.0D;
++                    double d10 = (this.d[k1] / 10.0D + 1.0D) / 2.0D;
++
++                    if (d10 < 0.0D) {
++                        d6 = d8;
++                    } else if (d10 > 1.0D) {
++                        d6 = d9;
++                    } else {
++                        d6 = d8 + (d9 - d8) * d10;
++                    }
++
++                    d6 -= d7;
++                    double d11;
++
++                    if (k2 > i1 - 4) {
++                        d11 = (double) ((float) (k2 - (i1 - 4)) / 3.0F);
++                        d6 = d6 * (1.0D - d11) + -10.0D * d11;
++                    }
++
++                    if ((double) k2 < d4) {
++                        d11 = (d4 - (double) k2) / 4.0D;
++                        if (d11 < 0.0D) {
++                            d11 = 0.0D;
++                        }
++
++                        if (d11 > 1.0D) {
++                            d11 = 1.0D;
++                        }
++
++                        d6 = d6 * (1.0D - d11) + -10.0D * d11;
++                    }
++
++                    adouble[k1] = d6;
++                    ++k1;
++                }
++            }
++        }
++
++        return adouble;
++    }
++
++    public boolean isChunkLoaded(int i, int j) {
++        return true;
++    }
++
++    public void getChunkAt(IChunkProvider ichunkprovider, int i, int j) {
++        BlockFalling.instaFall = true;
++        int k = i * 16;
++        int l = j * 16;
++
++        this.c.a(this.o, this.i, i, j);
++
++        int i1;
++        int j1;
++        int k1;
++        int l1;
++
++        for (i1 = 0; i1 < 8; ++i1) {
++            j1 = k + this.i.nextInt(16) + 8;
++            k1 = this.i.nextInt(120) + 4;
++            l1 = l + this.i.nextInt(16) + 8;
++            (new WorldGenHellLava(Blocks.LAVA, false)).generate(this.o, this.i, j1, k1, l1);
++        }
++
++        i1 = this.i.nextInt(this.i.nextInt(10) + 1) + 1;
++
++        int i2;
++
++        for (j1 = 0; j1 < i1; ++j1) {
++            k1 = k + this.i.nextInt(16) + 8;
++            l1 = this.i.nextInt(120) + 4;
++            i2 = l + this.i.nextInt(16) + 8;
++            (new WorldGenFire()).generate(this.o, this.i, k1, l1, i2);
++        }
++
++        i1 = this.i.nextInt(this.i.nextInt(10) + 1);
++
++        for (j1 = 0; j1 < i1; ++j1) {
++            k1 = k + this.i.nextInt(16) + 8;
++            l1 = this.i.nextInt(120) + 4;
++            i2 = l + this.i.nextInt(16) + 8;
++            (new WorldGenLightStone1()).generate(this.o, this.i, k1, l1, i2);
++        }
++
++        for (j1 = 0; j1 < 10; ++j1) {
++            k1 = k + this.i.nextInt(16) + 8;
++            l1 = this.i.nextInt(128);
++            i2 = l + this.i.nextInt(16) + 8;
++            (new WorldGenLightStone2()).generate(this.o, this.i, k1, l1, i2);
++        }
++
++        if (this.i.nextInt(1) == 0) {
++            j1 = k + this.i.nextInt(16) + 8;
++            k1 = this.i.nextInt(128);
++            l1 = l + this.i.nextInt(16) + 8;
++            (new WorldGenFlowers(Blocks.BROWN_MUSHROOM)).generate(this.o, this.i, j1, k1, l1);
++        }
++
++        if (this.i.nextInt(1) == 0) {
++            j1 = k + this.i.nextInt(16) + 8;
++            k1 = this.i.nextInt(128);
++            l1 = l + this.i.nextInt(16) + 8;
++            (new WorldGenFlowers(Blocks.RED_MUSHROOM)).generate(this.o, this.i, j1, k1, l1);
++        }
++
++        WorldGenMinable worldgenminable = new WorldGenMinable(Blocks.QUARTZ_ORE, 13, Blocks.NETHERRACK);
++
++        int j2;
++
++        for (k1 = 0; k1 < 16; ++k1) {
++            l1 = k + this.i.nextInt(16);
++            i2 = this.i.nextInt(108) + 10;
++            j2 = l + this.i.nextInt(16);
++            worldgenminable.generate(this.o, this.i, l1, i2, j2);
++        }
++
++        for (k1 = 0; k1 < 16; ++k1) {
++            l1 = k + this.i.nextInt(16);
++            i2 = this.i.nextInt(108) + 10;
++            j2 = l + this.i.nextInt(16);
++            (new WorldGenHellLava(Blocks.LAVA, true)).generate(this.o, this.i, l1, i2, j2);
++        }
++
++        BlockFalling.instaFall = false;
++    }
++
++    public boolean saveChunks(boolean flag, IProgressUpdate iprogressupdate) {
++        return true;
++    }
++
++    public void c() {}
++
++    public boolean unloadChunks() {
++        return false;
++    }
++
++    public boolean canSave() {
++        return true;
++    }
++
++    public String getName() {
++        return "HellRandomLevelSource";
++    }
++
++    public List getMobsFor(EnumCreatureType enumcreaturetype, int i, int j, int k) {
++        if (enumcreaturetype == EnumCreatureType.MONSTER) {
++            if (this.c.b(i, j, k)) {
++                return this.c.b();
++            }
++
++            if (this.c.d(i, j, k) && this.o.getType(i, j - 1, k) == Blocks.NETHER_BRICK) {
++                return this.c.b();
++            }
++        }
++
++        BiomeBase biomebase = this.o.getBiome(i, k);
++
++        return biomebase.getMobs(enumcreaturetype);
++    }
++
++    public ChunkPosition findNearestMapFeature(World world, String s, int i, int j, int k) {
++        return null;
++    }
++
++    public int getLoadedChunks() {
++        return 0;
++    }
++
++    public void recreateStructures(int i, int j) {
++        this.c.a(this, this.o, i, j, (Block[]) null);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/ItemMilkBucket.java b/src/main/java/net/minecraft/server/ItemMilkBucket.java
+new file mode 100644
+index 0000000..39f1bc0
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/ItemMilkBucket.java
+@@ -0,0 +1,34 @@
++package net.minecraft.server;
++
++public class ItemMilkBucket extends Item {
++
++    public ItemMilkBucket() {
++        this.e(1);
++        this.a(CreativeModeTab.f);
++    }
++
++    public ItemStack b(ItemStack itemstack, World world, EntityHuman entityhuman) {
++        if (!entityhuman.abilities.canInstantlyBuild) {
++            --itemstack.count;
++        }
++
++        if (!world.isStatic) {
++            entityhuman.removeAllEffects();
++        }
++
++        return itemstack.count <= 0 ? new ItemStack(Items.BUCKET) : itemstack;
++    }
++
++    public int d_(ItemStack itemstack) {
++        return 32;
++    }
++
++    public EnumAnimation d(ItemStack itemstack) {
++        return EnumAnimation.DRINK;
++    }
++
++    public ItemStack a(ItemStack itemstack, World world, EntityHuman entityhuman) {
++        entityhuman.a(itemstack, this.d_(itemstack));
++        return itemstack;
++    }
++}
 diff --git a/src/main/java/net/minecraft/server/MobEffectAttackDamage.java b/src/main/java/net/minecraft/server/MobEffectAttackDamage.java
 new file mode 100644
 index 0000000..3eb029d
@@ -171,6 +2481,208 @@ index 0000000..3eb029d
 +
 +    public double a(int i, AttributeModifier attributemodifier) {
 +        return this.id == MobEffectList.WEAKNESS.id ? (double) (-0.5F * (float) (i + 1)) : 1.3D * (double) (i + 1);
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/NBTTagList.java b/src/main/java/net/minecraft/server/NBTTagList.java
+new file mode 100644
+index 0000000..bdde30a
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/NBTTagList.java
+@@ -0,0 +1,168 @@
++package net.minecraft.server;
++
++import java.io.DataInput;
++import java.io.DataOutput;
++import java.io.IOException;
++import java.util.ArrayList;
++import java.util.Iterator;
++import java.util.List;
++
++public class NBTTagList extends NBTBase {
++
++    private List list = new ArrayList();
++    private byte type = 0;
++
++    public NBTTagList() {}
++
++    void write(DataOutput dataoutput) throws IOException {
++        if (!this.list.isEmpty()) {
++            this.type = ((NBTBase) this.list.get(0)).getTypeId();
++        } else {
++            this.type = 0;
++        }
++
++        dataoutput.writeByte(this.type);
++        dataoutput.writeInt(this.list.size());
++
++        for (int i = 0; i < this.list.size(); ++i) {
++            ((NBTBase) this.list.get(i)).write(dataoutput);
++        }
++    }
++
++    void load(DataInput datainput, int i, NBTReadLimiter nbtreadlimiter) throws IOException {
++        if (i > 512) {
++            throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
++        } else {
++            nbtreadlimiter.a(8L);
++            this.type = datainput.readByte();
++            int j = datainput.readInt();
++
++            this.list = new ArrayList();
++
++            for (int k = 0; k < j; ++k) {
++                NBTBase nbtbase = NBTBase.createTag(this.type);
++
++                nbtbase.load(datainput, i + 1, nbtreadlimiter);
++                this.list.add(nbtbase);
++            }
++        }
++    }
++
++    public byte getTypeId() {
++        return (byte) 9;
++    }
++
++    public String toString() {
++        String s = "[";
++        int i = 0;
++
++        for (Iterator iterator = this.list.iterator(); iterator.hasNext(); ++i) {
++            NBTBase nbtbase = (NBTBase) iterator.next();
++
++            s = s + "" + i + ':' + nbtbase + ',';
++        }
++
++        return s + "]";
++    }
++
++    public void add(NBTBase nbtbase) {
++        if (this.type == 0) {
++            this.type = nbtbase.getTypeId();
++        } else if (this.type != nbtbase.getTypeId()) {
++            System.err.println("WARNING: Adding mismatching tag types to tag list");
++            return;
++        }
++
++        this.list.add(nbtbase);
++    }
++
++    public NBTTagCompound get(int i) {
++        if (i >= 0 && i < this.list.size()) {
++            NBTBase nbtbase = (NBTBase) this.list.get(i);
++
++            return nbtbase.getTypeId() == 10 ? (NBTTagCompound) nbtbase : new NBTTagCompound();
++        } else {
++            return new NBTTagCompound();
++        }
++    }
++
++    public int[] c(int i) {
++        if (i >= 0 && i < this.list.size()) {
++            NBTBase nbtbase = (NBTBase) this.list.get(i);
++
++            return nbtbase.getTypeId() == 11 ? ((NBTTagIntArray) nbtbase).c() : new int[0];
++        } else {
++            return new int[0];
++        }
++    }
++
++    public double d(int i) {
++        if (i >= 0 && i < this.list.size()) {
++            NBTBase nbtbase = (NBTBase) this.list.get(i);
++
++            return nbtbase.getTypeId() == 6 ? ((NBTTagDouble) nbtbase).g() : 0.0D;
++        } else {
++            return 0.0D;
++        }
++    }
++
++    public float e(int i) {
++        if (i >= 0 && i < this.list.size()) {
++            NBTBase nbtbase = (NBTBase) this.list.get(i);
++
++            return nbtbase.getTypeId() == 5 ? ((NBTTagFloat) nbtbase).h() : 0.0F;
++        } else {
++            return 0.0F;
++        }
++    }
++
++    public String getString(int i) {
++        if (i >= 0 && i < this.list.size()) {
++            NBTBase nbtbase = (NBTBase) this.list.get(i);
++
++            return nbtbase.getTypeId() == 8 ? nbtbase.a_() : nbtbase.toString();
++        } else {
++            return "";
++        }
++    }
++
++    public int size() {
++        return this.list.size();
++    }
++
++    public NBTBase clone() {
++        NBTTagList nbttaglist = new NBTTagList();
++
++        nbttaglist.type = this.type;
++        Iterator iterator = this.list.iterator();
++
++        while (iterator.hasNext()) {
++            NBTBase nbtbase = (NBTBase) iterator.next();
++            NBTBase nbtbase1 = nbtbase.clone();
++
++            nbttaglist.list.add(nbtbase1);
++        }
++
++        return nbttaglist;
++    }
++
++    public boolean equals(Object object) {
++        if (super.equals(object)) {
++            NBTTagList nbttaglist = (NBTTagList) object;
++
++            if (this.type == nbttaglist.type) {
++                return this.list.equals(nbttaglist.list);
++            }
++        }
++
++        return false;
++    }
++
++    public int hashCode() {
++        return super.hashCode() ^ this.list.hashCode();
++    }
++
++    public int d() {
++        return this.type;
++    }
++}
+diff --git a/src/main/java/net/minecraft/server/PathfinderGoalFloat.java b/src/main/java/net/minecraft/server/PathfinderGoalFloat.java
+new file mode 100644
+index 0000000..b91d74b
+--- /dev/null
++++ b/src/main/java/net/minecraft/server/PathfinderGoalFloat.java
+@@ -0,0 +1,22 @@
++package net.minecraft.server;
++
++public class PathfinderGoalFloat extends PathfinderGoal {
++
++    private EntityInsentient a;
++
++    public PathfinderGoalFloat(EntityInsentient entityinsentient) {
++        this.a = entityinsentient;
++        this.a(4);
++        entityinsentient.getNavigation().e(true);
++    }
++
++    public boolean a() {
++        return this.a.M() || this.a.P();
++    }
++
++    public void e() {
++        if (this.a.aI().nextFloat() < 0.8F) {
++            this.a.getControllerJump().a();
++        }
 +    }
 +}
 diff --git a/src/main/java/net/minecraft/server/RandomPositionGenerator.java b/src/main/java/net/minecraft/server/RandomPositionGenerator.java
@@ -365,5 +2877,5 @@ index 0000000..143cffb
 +    }
 +}
 -- 
-1.9.1
+2.5.0
 

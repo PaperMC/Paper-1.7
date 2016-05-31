@@ -1,14 +1,14 @@
-From 9be819202ea6ab85a9acca973e090495fb40893a Mon Sep 17 00:00:00 2001
+From cc1e648d7b82490fc10974baf797d8e754d4f3de Mon Sep 17 00:00:00 2001
 From: Jedediah Smith <jedediah@silencegreys.com>
 Date: Fri, 8 Aug 2014 22:51:26 -0500
 Subject: [PATCH] Player affects spawning API
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index b2ad5b7..b2a8e2e 100644
+index 152235b..988820a 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -1102,6 +1102,28 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
+@@ -1123,6 +1123,28 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
          {
              throw new UnsupportedOperationException( "Not supported yet." );
          }

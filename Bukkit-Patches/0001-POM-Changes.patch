@@ -1,14 +1,14 @@
-From 08428965ebbf972796dbd554ecca48eea639e852 Mon Sep 17 00:00:00 2001
+From 577c4f9bd0cd9f9e109251f521fd7e2c10854709 Mon Sep 17 00:00:00 2001
 From: md_5 <md_5@live.com.au>
 Date: Sun, 2 Jun 2013 10:36:24 +1000
 Subject: [PATCH] POM Changes
 
 
 diff --git a/pom.xml b/pom.xml
-index 4c5937a..2e5420b 100644
+index 4c5937a..72636a0 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -1,42 +1,21 @@
+@@ -1,42 +1,28 @@
  <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
      <modelVersion>4.0.0</modelVersion>
 -    <groupId>org.bukkit</groupId>
@@ -30,7 +30,13 @@ index 4c5937a..2e5420b 100644
 -        <connection>scm:git:git://github.com/Bukkit/Bukkit.git</connection>
 -        <url>https://github.com/Bukkit/Bukkit/tree/master/</url>
 -    </scm>
--
++    <parent>
++        <groupId>org.spigotmc</groupId>
++        <artifactId>spigot-parent</artifactId>
++        <version>dev-SNAPSHOT</version>
++        <relativePath>../pom.xml</relativePath>
++    </parent>
+ 
 -    <ciManagement>
 -        <system>jenkins</system>
 -        <url>http://ci.bukkit.org</url>
@@ -41,26 +47,38 @@ index 4c5937a..2e5420b 100644
 -            <id>jd.bukkit.org</id>
 -            <url>file:///home/javadocs/public_html/</url>
 -        </site>
--        <repository>
++    <repositories>
+         <repository>
 -            <id>repobo-rel</id>
 -            <name>repo.bukkit.org Releases</name>
 -            <url>http://repo.bukkit.org/content/repositories/releases/</url>
--        </repository>
++            <id>sonatype-snapshots</id>
++            <url>https://oss.sonatype.org/content/repositories/public</url>
+         </repository>
 -        <snapshotRepository>
 -            <id>repobo-snap</id>
 -            <name>repo.bukkit.org Snapshots</name>
 -            <url>http://repo.bukkit.org/content/repositories/snapshots/</url>
 -        </snapshotRepository>
 -    </distributionManagement>
-+    <parent>
-+        <groupId>org.spigotmc</groupId>
-+        <artifactId>spigot-parent</artifactId>
-+        <version>dev-SNAPSHOT</version>
-+        <relativePath>../pom.xml</relativePath>
-+    </parent>
++    </repositories>
  
      <build>
          <plugins>
+@@ -95,6 +81,13 @@
+     </build>
+     <dependencies>
+         <dependency>
++            <groupId>net.md-5</groupId>
++            <artifactId>bungeecord-chat</artifactId>
++            <version>1.8-SNAPSHOT</version>
++            <type>jar</type>
++            <scope>compile</scope>
++        </dependency>
++        <dependency>
+             <groupId>org.yaml</groupId>
+             <artifactId>snakeyaml</artifactId>
+             <version>1.9</version>
 -- 
 1.9.1
 
