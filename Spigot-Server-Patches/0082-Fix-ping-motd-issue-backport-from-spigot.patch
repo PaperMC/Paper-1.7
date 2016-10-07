@@ -1,0 +1,69 @@
+From 913dad6487fc5199d117ab9aa86d0e6dcdc07a4b Mon Sep 17 00:00:00 2001
+From: caoli5288 <caoli5288@gmail.com>
+Date: Mon, 3 Aug 2015 17:35:18 +0800
+Subject: [PATCH] Fix ping motd issue backport from spigot
+
+
+diff --git a/src/main/java/net/minecraft/server/PacketStatusListener.java b/src/main/java/net/minecraft/server/PacketStatusListener.java
+index f1571f1..04baba4 100644
+--- a/src/main/java/net/minecraft/server/PacketStatusListener.java
++++ b/src/main/java/net/minecraft/server/PacketStatusListener.java
+@@ -1,22 +1,22 @@
+ package net.minecraft.server;
+ 
+ import java.net.InetSocketAddress;
+-
+ // CraftBukkit start
+ import java.util.Iterator;
+ 
+-import org.bukkit.craftbukkit.util.CraftIconCache;
+-import org.bukkit.entity.Player;
+-
+ import net.minecraft.util.com.mojang.authlib.GameProfile;
+ // CraftBukkit end
+-
+ import net.minecraft.util.io.netty.util.concurrent.GenericFutureListener;
+ 
++import org.bukkit.craftbukkit.util.CraftIconCache;
++import org.bukkit.entity.Player;
++
+ public class PacketStatusListener implements PacketStatusInListener {
+ 
+     private final MinecraftServer minecraftServer;
+     private final NetworkManager networkManager;
++    
++    private int status; // Paper patch
+ 
+     public PacketStatusListener(MinecraftServer minecraftserver, NetworkManager networkmanager) {
+         this.minecraftServer = minecraftserver;
+@@ -34,6 +34,13 @@ public class PacketStatusListener implements PacketStatusInListener {
+     public void a() {}
+ 
+     public void a(PacketStatusInStart packetstatusinstart) {
++        // Paper start
++        if (this.status != 0) {
++            this.networkManager.close(null);
++            return;
++        }
++        this.status = 1;
++        // Paper end
+         // CraftBukkit start - fire ping event
+         final Object[] players = minecraftServer.getPlayerList().players.toArray();
+         class ServerListPingEvent extends org.bukkit.event.server.ServerListPingEvent {
+@@ -130,6 +137,13 @@ public class PacketStatusListener implements PacketStatusInListener {
+     }
+ 
+     public void a(PacketStatusInPing packetstatusinping) {
++        // Paper start
++        if (this.status != 1) {
++            this.networkManager.close(null);
++            return;
++        }
++        this.status = 2;
++        // Paper end
+         this.networkManager.handle(new PacketStatusOutPong(packetstatusinping.c()), new GenericFutureListener[0]);
+     }
+ }
+-- 
+2.4.3
+
