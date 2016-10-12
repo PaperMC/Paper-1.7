@@ -1,6 +1,8 @@
 PaperSpigot 1.7[![Travis Status](https://travis-ci.org/PaperSpigot/PaperSpigot.svg?branch=master)](https://travis-ci.org/PaperSpigot/PaperSpigot)
 ===========
 
+THIS VERSION FIXES PROBLEMS WHEN USING TIMINGS
+
 THIS REPO AND VERSION ARE DEPRECATED. NEITHER WILL BE SUPPORTED ANY LONGER.
 ===========================================================================
 

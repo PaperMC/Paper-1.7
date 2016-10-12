@@ -1,0 +1,24 @@
+From cf4f665e5af9b6a659968bccbbe24d4772093d9b Mon Sep 17 00:00:00 2001
+From: Caio Weslley <CaioWzy@gmail.com>
+Date: Sun, 18 Sep 2016 22:53:08 -0300
+Subject: [PATCH] Added a fallback plugin repository
+
+
+diff --git a/pom.xml b/pom.xml
+index 34cbf19..65eb516 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -37,6 +37,10 @@
+       <id>bukkit-plugins</id>
+       <url>http://repo.bukkit.org/content/groups/public</url>
+     </pluginRepository>
++    <pluginRepository>
++      <id>bukkit-plugins-alternate-repo</id>
++      <url>http://maven.elmakers.com/repository/</url>
++    </pluginRepository>
+   </pluginRepositories>
+ 
+   <dependencies>
+-- 
+2.7.4
+
