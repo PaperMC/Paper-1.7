@@ -1,0 +1,38 @@
+From 78831352e06dd2e15c0c7cab42faf19b58c73054 Mon Sep 17 00:00:00 2001
+From: DoctorDark <doctordark11@gmail.com>
+Date: Fri, 11 Sep 2015 14:54:49 +0100
+Subject: [PATCH] Cook speed multiplier API for furnaces
+
+
+diff --git a/src/main/java/org/bukkit/block/Furnace.java b/src/main/java/org/bukkit/block/Furnace.java
+index 94af85e..f25304d 100644
+--- a/src/main/java/org/bukkit/block/Furnace.java
++++ b/src/main/java/org/bukkit/block/Furnace.java
+@@ -8,6 +8,24 @@ import org.bukkit.inventory.FurnaceInventory;
+ public interface Furnace extends BlockState, ContainerBlock {
+ 
+     /**
++     * Gets the speed multiplier that this {@link Furnace} will cook
++     * compared to vanilla.
++     *
++     * @return the multiplier, a value between 0 and 200
++     */
++    double getCookSpeedMultiplier() throws IllegalArgumentException;
++
++    /**
++     * Sets the speed multiplier that this {@link Furnace} will cook
++     * compared to vanilla.
++     *
++     * @param multiplier the multiplier to set, a value between 0 and 200
++     * @throws IllegalArgumentException if value is less than 0
++     * @throws IllegalArgumentException if value is more than 200
++     */
++    void setCookSpeedMultiplier(double multiplier);
++
++    /**
+      * Get burn time.
+      *
+      * @return Burn time
+-- 
+1.9.5.github.0
+
