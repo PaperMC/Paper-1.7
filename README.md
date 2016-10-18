@@ -1,70 +1,30 @@
-PaperSpigot 1.7[![Travis Status](https://travis-ci.org/PaperSpigot/PaperSpigot.svg?branch=master)](https://travis-ci.org/PaperSpigot/PaperSpigot)
-===========
+# IPVP PaperSpigot 1.7 Fork #
+<p>This is the primary repository for the IPVP PaperSpigot 1.7.10 software. PaperSpigot is a high performance 
+Spigot fork that aims to fix gameplay and mechanics inconsistencies. PaperSpigot 1.7.10 is no longer a supported
+software by their development team; please do not bug them to fix any issues for you. You are free to submit
+issues via the Issue tracker on GitHub, we will aim to fix or add any issues you come across.</p>
 
-THIS REPO AND VERSION ARE DEPRECATED. NEITHER WILL BE SUPPORTED ANY LONGER.
-===========================================================================
+## Installation Instructions ##
+Install our customized version of PaperSpigot via 3 easy steps:
 
-We will no longer support PaperSpigot 1.7.10 in any capacity. Given the upcoming release of Minecraft 1.9, and the age of 1.7.10 and its numerous feature and security flaws, it is no longer worth our time to support it in any capacity whatsoever. It is assumed that if you choose to run this outdated version, you know what you're doing and are capable of fixing any issues yourself. Those of you who chose to continue using it, and that plan to continue work with the source, are recommended to fork this repo now, as this official repo will recieve no more support.
+1. Initialize git submodules: `git submodule update --init` 
+2. Apply code patches to update submodules: `./applyPatches.sh`
+3. Compile the code via [Maven 3](http://maven.apache.org/download.html): `mvn clean install`
 
-The only potential exception is for security backports, and even then, they will be provided at-will, and should not be expected.
+The PaperSpigot server file will appear in the `PaperSpigot-Server/target/` directory as `paperspigot-1.7.10-R0.1-SNAPSHOT.jar`
 
-We recommend users update to 1.8.8, available [here](https://hub.spigotmc.org/stash/projects/PAPER). If that is not an option we, at the very least, recommend jumping ship to 1.9 as soon as it is available. Either way, we're done with 1.7.10. So long, and thanks for all the fish.
+**New to this?** <br />
+Installation requires Git and Maven 3, if you do not have these please view the following links:
 
-
-
-
-
-
-
-Original readme
------------------------------------------------------
-
-High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.
-
-DO NOT BUG US FOR SUPPORT FOR 1.7.10. YOU WILL NOT GET ANY.
-
-[IRC Support and Project Discussion](http://irc.spi.gt/iris/?channels=PaperSpigot)
-
-The 1.8 codebase can be found on [SpigotMC's Stash Service here](https://hub.spigotmc.org/stash/projects/PAPER). This repo contains the 1.7 and 1.7.10 with protocol patch codebase.
-
-How To
------------
-
-Init the submodules : `git submodule update --init`
-
-Apply Patches : `./applyPatches.sh`
-
-### Create patch for server ###
-
-`cd PaperSpigot-Server`
-
-Add your file for commit : `git add <file>`
-
-Commit : `git commit -m <msg>`
-
-`cd ..`
-
-Create Patch `./rebuildPatches.sh`
-
-### Create patch for API ###
-
-`cd Paperspigot-API`
-
-Add your file for commit : `git add <file>`
-
-Commit : `git commit -m <msg>`
-
-`cd ..`
-
-Create Patch `./rebuildPatches.sh`
+* [Maven 3 Download](http://maven.apache.org/download.html) and [Installation Instructions](https://maven.apache.org/install.html)
+* For Windows: [Git Download](https://git-scm.com/downloads)
 
 
+## Developers ##
+Creation of a patch is simple and easy:
 
-
-Compilation
------------
-
-We use maven to handle our dependencies.
-
-* Install [Maven 3](http://maven.apache.org/download.html)
-* Clone this repo and: `mvn clean install`
+1. Follow the Installation Instructions and install our current patches
+2. Navigate to `PaperSpigot-Server` or `PaperSpigot-API` and modify the code you need
+3. Commit your changes to the `PaperSpigot-Server` or `PaperSpigot-API` subdirectories
+4. Return to the parent directory and execute the `./rebuildPatches.sh` script
+    * This will automatically generate your new patch files for your code
