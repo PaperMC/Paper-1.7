@@ -1,4 +1,4 @@
-From d9a17c7d2f0ad817c9f80c13c955b2aa18c0bc28 Mon Sep 17 00:00:00 2001
+From b7afc36b9d4c06ef92f073c0625b3c3578153078 Mon Sep 17 00:00:00 2001
 From: Matthew <matthew.steglinski@utoronto.ca>
 Date: Mon, 1 Aug 2016 22:07:27 -0400
 Subject: [PATCH] Pull knockback fixes from SportBukkit
@@ -82,10 +82,10 @@ index 1a8e5dc..afa674f 100644
                              this.b(entity);
                          }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index fa27421..566a2ae 100644
+index 9384cbe..5067399 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -1321,6 +1321,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -1336,6 +1336,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
          // Spigot end
      }
  

@@ -1,4 +1,4 @@
-From 8146a50c286f60e025cc6a5085ac1f0187e25bb8 Mon Sep 17 00:00:00 2001
+From ba2210e9b0ff68b4e800457cf5e232c475c3ae5b Mon Sep 17 00:00:00 2001
 From: Matthew <matthew.steglinski@utoronto.ca>
 Date: Thu, 26 May 2016 09:12:48 -0400
 Subject: [PATCH] Add exit location to VehicleExitEvent

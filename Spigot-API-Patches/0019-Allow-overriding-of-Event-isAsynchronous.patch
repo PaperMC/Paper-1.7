@@ -1,4 +1,4 @@
-From 46ec9a782b6dd4e38e152dc039ded61d426c90e0 Mon Sep 17 00:00:00 2001
+From 9cdb01145bddc4d0387a35fa5d7e8f4285e4baf8 Mon Sep 17 00:00:00 2001
 From: Matthew Steglinski <sainttx@users.noreply.github.com>
 Date: Mon, 17 Oct 2016 23:55:39 -0400
 Subject: [PATCH] Allow overriding of Event#isAsynchronous

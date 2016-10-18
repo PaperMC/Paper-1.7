@@ -1,4 +1,4 @@
-From e003b85e0a6b9bdf7dd317d4bcdbe3a9b937a93e Mon Sep 17 00:00:00 2001
+From 0f9eecb99c69dd50e712cd1e18bc1a9d8e67c89e Mon Sep 17 00:00:00 2001
 From: Matthew <matthew.steglinski@utoronto.ca>
 Date: Mon, 8 Feb 2016 14:56:18 -0500
 Subject: [PATCH] Add Sign Editable API
@@ -28,5 +28,5 @@ index 5d7a633..26088e5 100644
 +    public boolean isEditable();
  }
 -- 
-2.7.0.windows.2
+2.8.4 (Apple Git-73)
 

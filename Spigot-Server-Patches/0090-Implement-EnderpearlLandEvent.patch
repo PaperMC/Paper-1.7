@@ -1,4 +1,4 @@
-From a94be93ba092423b32bad37495151436e0731596 Mon Sep 17 00:00:00 2001
+From e62680f6e516eea54fb3ac492f5e7d684affa0fc Mon Sep 17 00:00:00 2001
 From: Matthew <matthew.steglinski@utoronto.ca>
 Date: Fri, 19 Feb 2016 14:02:00 -0500
 Subject: [PATCH] Implement EnderpearlLandEvent
@@ -30,5 +30,5 @@ index 718a63e..617f50d 100644
                      location.setPitch(player.getLocation().getPitch());
                      location.setYaw(player.getLocation().getYaw());
 -- 
-2.7.0.windows.2
+2.8.4 (Apple Git-73)
 
