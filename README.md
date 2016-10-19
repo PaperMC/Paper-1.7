@@ -7,9 +7,10 @@ issues via the Issue tracker on GitHub, we will aim to fix or add any issues you
 ## Installation Instructions ##
 Install our customized version of PaperSpigot via 3 easy steps:
 
-1. Initialize git submodules: `git submodule update --init` 
-2. Apply code patches to update submodules: `./applyPatches.sh`
-3. Compile the code via [Maven 3](http://maven.apache.org/download.html): `mvn clean install`
+1. Clone this repository to your computer via `git clone` or GitHub's download feature
+2. Initialize git submodules: `git submodule update --init` 
+3. Apply code patches to update submodules: `./applyPatches.sh`
+4. Compile the code via [Maven 3](http://maven.apache.org/download.html): `mvn clean install`
 
 The PaperSpigot server file will appear in the `PaperSpigot-Server/target/` directory as `paperspigot-1.7.10-R0.1-SNAPSHOT.jar`
 
