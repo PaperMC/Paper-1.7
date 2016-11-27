@@ -1,0 +1,42 @@
+From fdfade085ac69f36a710af16336d7bd07635596f Mon Sep 17 00:00:00 2001
+From: Techcable <Techcable@outlook.com>
+Date: Wed, 22 Jul 2015 03:46:39 -0700
+Subject: [PATCH] Add MicroPlayerMoveEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerConnection.java b/src/main/java/net/minecraft/server/PlayerConnection.java
+index b03531e..be4d757 100644
+--- a/src/main/java/net/minecraft/server/PlayerConnection.java
++++ b/src/main/java/net/minecraft/server/PlayerConnection.java
+@@ -59,6 +59,7 @@ import org.bukkit.inventory.InventoryView;
+ import org.bukkit.util.NumberConversions;
+ // CraftBukkit end
+ 
++import org.github.paperspigot.MicroPlayerMoveEvent; // PaperSpigot -- Add MicroPlayerMoveEvent
+ import org.github.paperspigot.PaperSpigotConfig; // PaperSpigot
+ 
+ public class PlayerConnection implements PacketPlayInListener {
+@@ -238,7 +239,10 @@ public class PlayerConnection implements PacketPlayInListener {
+             double delta = Math.pow(this.lastPosX - to.getX(), 2) + Math.pow(this.lastPosY - to.getY(), 2) + Math.pow(this.lastPosZ - to.getZ(), 2);
+             float deltaAngle = Math.abs(this.lastYaw - to.getYaw()) + Math.abs(this.lastPitch - to.getPitch());
+ 
+-            if ((delta > 1f / 256 || deltaAngle > 10f) && (this.checkMovement && !this.player.dead)) {
++            // PaperSpigot Start - MicroPlayerMoveEvent
++            boolean micro = delta > 1f / 256 || deltaAngle > 10f;
++            if (this.checkMovement && !this.player.dead && !micro || MicroPlayerMoveEvent.isListenedFor()) {
++                // PaperSpigot End
+                 this.lastPosX = to.getX();
+                 this.lastPosY = to.getY();
+                 this.lastPosZ = to.getZ();
+@@ -247,7 +251,7 @@ public class PlayerConnection implements PacketPlayInListener {
+ 
+                 // Skip the first time we do this
+                 if (true) { // Spigot - don't skip any move events
+-                    PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
++                    PlayerMoveEvent event = micro ? new MicroPlayerMoveEvent(player, from, to) : new PlayerMoveEvent(player, from, to); // PaperSpigot - MicroPlayerMoveEvent
+                     this.server.getPluginManager().callEvent(event);
+ 
+                     // If the event is cancelled we move the player back to their old location.
+-- 
+1.8.3.msysgit.0
+
