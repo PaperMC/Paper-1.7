@@ -1,0 +1,43 @@
+From bcfa1b211222289b29fb828000508896d877d149 Mon Sep 17 00:00:00 2001
+From: Byteflux <byte@byteflux.net>
+Date: Fri, 10 Apr 2015 02:24:20 -0700
+Subject: [PATCH] Quick drain water and lava
+
+
+diff --git a/src/main/java/net/minecraft/server/BlockFlowing.java b/src/main/java/net/minecraft/server/BlockFlowing.java
+index 6409391..157dc1b 100644
+--- a/src/main/java/net/minecraft/server/BlockFlowing.java
++++ b/src/main/java/net/minecraft/server/BlockFlowing.java
+@@ -82,6 +82,12 @@ public class BlockFlowing extends BlockFluids {
+                     this.n(world, i, j, k);
+                 }
+             } else {
++                // PaperSpigot start - Quick drain water and lava
++                if ((this.material == Material.WATER && world.paperSpigotConfig.quickDrainWater) ||
++                        (this.material == Material.LAVA && world.paperSpigotConfig.quickDrainLava)) {
++                    j1 = -1;
++                }
++                // PaperSpigot end
+                 l = j1;
+                 if (j1 < 0) {
+                     world.setAir(i, j, k);
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 037fbc0..2df1ee9 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -242,4 +242,12 @@ public class PaperSpigotWorldConfig
+         entityMaxTickTime = getInt( "max-tick-time-entity", 50 );
+         log( "Entity max Tick Time: " + entityMaxTickTime + "ms" );
+     }
++
++    public boolean quickDrainWater;
++    public boolean quickDrainLava;
++    private void quickDrain()
++    {
++        quickDrainWater = getBoolean( "quick-drain.water", false );
++        quickDrainLava = getBoolean( "quick-drain.lava", false );
++    }
+ }
+-- 
+1.9.4.msysgit.2
+
