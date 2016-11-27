@@ -1,0 +1,163 @@
+From a5ecee82b5cfdf3a3afeb12b9aed31dc3210d982 Mon Sep 17 00:00:00 2001
+From: HyperPlay ForgedPassport <admin@forgedpassport.uk>
+Date: Mon, 20 Jul 2015 18:18:23 +0100
+Subject: [PATCH] Added an option to paper.yml to disable player data saving.
+
+
+diff --git a/src/main/java/net/minecraft/server/PlayerList.java b/src/main/java/net/minecraft/server/PlayerList.java
+index 3cb395c..b379237 100644
+--- a/src/main/java/net/minecraft/server/PlayerList.java
++++ b/src/main/java/net/minecraft/server/PlayerList.java
+@@ -36,6 +36,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
+ import org.bukkit.event.player.PlayerRespawnEvent;
+ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+ import org.bukkit.util.Vector;
++import org.github.paperspigot.PaperSpigotConfig;
+ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
+ // CraftBukkit end
+ 
+@@ -272,13 +273,21 @@ public abstract class PlayerList {
+             nbttagcompound1 = nbttagcompound;
+             g.debug("loading single player");
+         } else {
+-            nbttagcompound1 = this.playerFileData.load(entityplayer);
++            //PaperSpigot Start
++            if(PaperSpigotConfig.savePlayerData) {
++                nbttagcompound1 = this.playerFileData.load(entityplayer);
++            } else {
++                nbttagcompound1 = new NBTTagCompound();
++                entityplayer.a(nbttagcompound1);
++                entityplayer.getFoodData().a(nbttagcompound1); //Fix 0 saturation issue.
++            }
++            //PaperSpigot End
+         }
+-
+         return nbttagcompound1;
+     }
+ 
+     protected void b(EntityPlayer entityplayer) {
++        if(!PaperSpigotConfig.savePlayerData) return; //PaperSpigot
+         this.playerFileData.save(entityplayer);
+         ServerStatisticManager serverstatisticmanager = (ServerStatisticManager) this.n.get(entityplayer.getUniqueID());
+ 
+@@ -1147,6 +1156,7 @@ public abstract class PlayerList {
+     }
+ 
+     public void savePlayers() {
++        if(!PaperSpigotConfig.savePlayerData) return; //PaperSpigot
+         for (int i = 0; i < this.players.size(); ++i) {
+             this.b((EntityPlayer) this.players.get(i));
+         }
+diff --git a/src/main/java/net/minecraft/server/WorldNBTStorage.java b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+index 141248e..d614a48 100644
+--- a/src/main/java/net/minecraft/server/WorldNBTStorage.java
++++ b/src/main/java/net/minecraft/server/WorldNBTStorage.java
+@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
+ import java.util.UUID;
+ 
+ import org.bukkit.craftbukkit.entity.CraftPlayer;
++import org.github.paperspigot.PaperSpigotConfig;
+ // CraftBukkit end
+ 
+ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+@@ -31,13 +32,18 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+     public WorldNBTStorage(File file1, String s, boolean flag) {
+         this.baseDir = new File(file1, s);
+         this.baseDir.mkdirs();
+-        this.playerDir = new File(this.baseDir, "playerdata");
+         this.dataDir = new File(this.baseDir, "data");
+         this.dataDir.mkdirs();
+         this.f = s;
+-        if (flag) {
++
++        //PaperSpigot Start
++        if (PaperSpigotConfig.savePlayerData && flag) {
++            this.playerDir = new File(this.baseDir, "playerdata");
+             this.playerDir.mkdirs();
++        } else {
++            playerDir = null;
+         }
++        //PaperSpigot End
+ 
+         this.h();
+     }
+@@ -188,6 +194,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             file1.renameTo(file2);
+         } catch (Exception exception) {
+             a.warn("Failed to save player data for " + entityhuman.getName());
++            a.warn("This is likely to due the save-player-data value in paper.yml being set to false! This can only be triggered by a plugin, which has likely failed due the save-player-data."); //PaperSpigot
+         }
+     }
+ 
+@@ -220,6 +227,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             // Spigot End
+         } catch (Exception exception) {
+             a.warn("Failed to load player data for " + entityhuman.getName());
++            a.warn("This is likely to due the save-player-data value in paper.yml being set to false! This can only be triggered by a plugin, which has likely failed due the save-player-data."); //PaperSpigot
+         }
+ 
+         if (nbttagcompound != null) {
+@@ -249,6 +257,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+             }
+         } catch (Exception exception) {
+             a.warn("Failed to load player data for " + s);
++            a.warn("This is likely to due the save-player-data value in paper.yml being set to false! This can only be triggered by a plugin, which has likely failed due the save-player-data."); //PaperSpigot
+         }
+ 
+         return null;
+@@ -259,6 +268,7 @@ public class WorldNBTStorage implements IDataManager, IPlayerFileData {
+     }
+ 
+     public String[] getSeenPlayers() {
++        if(playerDir == null) return new String[0]; //PaperSpigot
+         String[] astring = this.playerDir.list();
+ 
+         for (int i = 0; i < astring.length; ++i) {
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+index 826ea3c..e308ff3 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
+@@ -59,6 +59,7 @@ import org.bukkit.metadata.MetadataValue;
+ import org.bukkit.plugin.Plugin;
+ import org.bukkit.plugin.messaging.StandardMessenger;
+ import org.bukkit.scoreboard.Scoreboard;
++import org.github.paperspigot.PaperSpigotConfig;
+ 
+ @DelegateDeserialization(CraftOfflinePlayer.class)
+ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -560,11 +561,17 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+ 
+     @Override
+     public void loadData() {
++        //PaperSpigot Start
++        if(!PaperSpigotConfig.savePlayerData) {
++            server.getServer().getPlayerList().a(this.getHandle());
++        }
++        //PaperSpigot End
+         server.getHandle().playerFileData.load(getHandle());
+     }
+ 
+     @Override
+     public void saveData() {
++        if(!PaperSpigotConfig.savePlayerData) return; //PaperSpigot
+         server.getHandle().playerFileData.save(getHandle());
+     }
+ 
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+index a44a7f6..ba61c52 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotConfig.java
+@@ -220,4 +220,10 @@ public class PaperSpigotConfig
+             e.printStackTrace();
+         }
+     }
++
++    public static boolean savePlayerData;
++    private static void savePlayerData()
++    {
++        savePlayerData = getBoolean("save-player-data", true);
++    }
+ }
+-- 
+2.1.4
+
