@@ -1,0 +1,40 @@
+From 2a9fb6f74288b6b87a0faf5b09e8ab7bc5bfb346 Mon Sep 17 00:00:00 2001
+From: Roman Alexander <romanalexander@users.noreply.github.com>
+Date: Tue, 24 Mar 2015 12:38:33 -0400
+Subject: [PATCH] Backporting configurable tickNextTickCap
+
+
+diff --git a/src/main/java/net/minecraft/server/WorldServer.java b/src/main/java/net/minecraft/server/WorldServer.java
+index e98d282..32d54d5 100644
+--- a/src/main/java/net/minecraft/server/WorldServer.java
++++ b/src/main/java/net/minecraft/server/WorldServer.java
+@@ -538,8 +538,8 @@ public class WorldServer extends World {
+                 // CraftBukkit end
+             } */
+ 
+-            if (i > 10000) {
+-                i = 10000;
++            if (i > paperSpigotConfig.tickNextTickCap) {
++                i = paperSpigotConfig.tickNextTickCap;
+             }
+             // PaperSpigot end
+ 
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 5bc6b51..3e2933d 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -203,4 +203,11 @@ public class PaperSpigotWorldConfig
+         useAsyncLighting = getBoolean( "use-async-lighting", false);
+         log( "World async lighting: " + useAsyncLighting);
+     }
++
++    public int tickNextTickCap;
++    private void tickNextTickCap()
++    {
++        tickNextTickCap = 10000; // Higher values will be friendlier to vanilla style mechanics but may hurt performance
++        log( "WorldServer TickNextTick cap set at " + tickNextTickCap );
++    }
+ }
+-- 
+1.9.5.msysgit.0
+
