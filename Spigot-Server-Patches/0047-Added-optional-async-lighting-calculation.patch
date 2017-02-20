@@ -1,0 +1,311 @@
+From e17a95f0cf79e0a47017f47feecb2c422d8c0be9 Mon Sep 17 00:00:00 2001
+From: Roman Alexander <romanalexander@users.noreply.github.com>
+Date: Tue, 24 Mar 2015 01:06:40 -0400
+Subject: [PATCH] Added optional async lighting calculation.
+
+
+diff --git a/src/main/java/net/minecraft/server/World.java b/src/main/java/net/minecraft/server/World.java
+index 1977c6c..0ea4b20 100644
+--- a/src/main/java/net/minecraft/server/World.java
++++ b/src/main/java/net/minecraft/server/World.java
+@@ -9,7 +9,7 @@ import java.util.List;
+ import java.util.Random;
+ import java.util.Set;
+ import java.util.UUID;
+-import java.util.concurrent.Callable;
++import java.util.concurrent.*;
+ 
+ // CraftBukkit start
+ import org.bukkit.Bukkit;
+@@ -812,11 +812,10 @@ public abstract class World implements IBlockAccess {
+             int l = i >> 4;
+             int i1 = k >> 4;
+ 
+-            if (!this.isChunkLoaded(l, i1)) {
++            Chunk chunk = this.getChunkIfLoaded(l, i1);
++            if (chunk == null) {
+                 return enumskyblock.c;
+             } else {
+-                Chunk chunk = this.getChunkAt(l, i1);
+-
+                 return chunk.getBrightness(enumskyblock, i & 15, j, k & 15);
+             }
+         } else {
+@@ -828,9 +827,8 @@ public abstract class World implements IBlockAccess {
+         if (i >= -30000000 && k >= -30000000 && i < 30000000 && k < 30000000) {
+             if (j >= 0) {
+                 if (j < 256) {
+-                    if (this.isChunkLoaded(i >> 4, k >> 4)) {
+-                        Chunk chunk = this.getChunkAt(i >> 4, k >> 4);
+-
++                    Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
++                    if (chunk != null) {
+                         chunk.a(enumskyblock, i & 15, j, k & 15, l);
+ 
+                         for (int i1 = 0; i1 < this.u.size(); ++i1) {
+@@ -2388,10 +2386,11 @@ public abstract class World implements IBlockAccess {
+     }
+ 
+     private int a(int i, int j, int k, EnumSkyBlock enumskyblock) {
+-        if (enumskyblock == EnumSkyBlock.SKY && this.i(i, j, k)) {
++        Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
++        if (chunk == null || (enumskyblock == EnumSkyBlock.SKY && chunk.d(i & 15, j, k & 15))) {
+             return 15;
+         } else {
+-            Block block = this.getType(i, j, k);
++            Block block = chunk.getType(i & 15, j, k & 15);
+             int l = enumskyblock == EnumSkyBlock.SKY ? 0 : block.m();
+             int i1 = block.k();
+ 
+@@ -2428,117 +2427,137 @@ public abstract class World implements IBlockAccess {
+         }
+     }
+ 
+-    public boolean c(EnumSkyBlock enumskyblock, int i, int j, int k) {
+-        // CraftBukkit start - Use neighbor cache instead of looking up
+-        Chunk chunk = this.getChunkIfLoaded(i >> 4, k >> 4);
+-        if (chunk == null || !chunk.areNeighborsLoaded(1) /* !this.areChunksLoaded(i, j, k, 17)*/) {
+-            // CraftBukkit end
+-            return false;
+-        } else {
+-            int l = 0;
+-            int i1 = 0;
+-
+-            this.methodProfiler.a("getBrightness");
+-            int j1 = this.b(enumskyblock, i, j, k);
+-            int k1 = this.a(i, j, k, enumskyblock);
+-            int l1;
+-            int i2;
+-            int j2;
+-            int k2;
+-            int l2;
+-            int i3;
+-            int j3;
+-            int k3;
+-            int l3;
+-
+-            if (k1 > j1) {
+-                this.I[i1++] = 133152;
+-            } else if (k1 < j1) {
+-                this.I[i1++] = 133152 | j1 << 18;
+-
+-                while (l < i1) {
+-                    l1 = this.I[l++];
+-                    i2 = (l1 & 63) - 32 + i;
+-                    j2 = (l1 >> 6 & 63) - 32 + j;
+-                    k2 = (l1 >> 12 & 63) - 32 + k;
+-                    l2 = l1 >> 18 & 15;
+-                    i3 = this.b(enumskyblock, i2, j2, k2);
+-                    if (i3 == l2) {
+-                        this.b(enumskyblock, i2, j2, k2, 0);
+-                        if (l2 > 0) {
+-                            j3 = MathHelper.a(i2 - i);
+-                            l3 = MathHelper.a(j2 - j);
+-                            k3 = MathHelper.a(k2 - k);
+-                            if (j3 + l3 + k3 < 17) {
+-                                for (int i4 = 0; i4 < 6; ++i4) {
+-                                    int j4 = i2 + Facing.b[i4];
+-                                    int k4 = j2 + Facing.c[i4];
+-                                    int l4 = k2 + Facing.d[i4];
+-                                    int i5 = Math.max(1, this.getType(j4, k4, l4).k());
+-
+-                                    i3 = this.b(enumskyblock, j4, k4, l4);
+-                                    if (i3 == l2 - i5 && i1 < this.I.length) {
+-                                        this.I[i1++] = j4 - i + 32 | k4 - j + 32 << 6 | l4 - k + 32 << 12 | l2 - i5 << 18;
++    private ThreadPoolExecutor service = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
++    public boolean c(final EnumSkyBlock enumskyblock, final int i, final int j, final int k) {
++        Callable<Boolean> callable = new Callable<Boolean>() {
++            @Override
++            public Boolean call() {
++                // CraftBukkit start - Use neighbor cache instead of looking up
++                Chunk chunk = World.this.getChunkIfLoaded(i >> 4, k >> 4);
++                if (chunk == null || !chunk.areNeighborsLoaded(1) /* !World.this.areChunksLoaded(i, j, k, 17)*/) {
++                    // CraftBukkit end
++                    return false;
++                } else {
++                    int l = 0;
++                    int i1 = 0;
++
++                    World.this.methodProfiler.a("getBrightness");
++                    int j1 = World.this.b(enumskyblock, i, j, k);
++                    int k1 = World.this.a(i, j, k, enumskyblock);
++                    int l1;
++                    int i2;
++                    int j2;
++                    int k2;
++                    int l2;
++                    int i3;
++                    int j3;
++                    int k3;
++                    int l3;
++
++                    if (k1 > j1) {
++                        World.this.I[i1++] = 133152;
++                    } else if (k1 < j1) {
++                        World.this.I[i1++] = 133152 | j1 << 18;
++
++                        while (l < i1) {
++                            l1 = World.this.I[l++];
++                            i2 = (l1 & 63) - 32 + i;
++                            j2 = (l1 >> 6 & 63) - 32 + j;
++                            k2 = (l1 >> 12 & 63) - 32 + k;
++                            l2 = l1 >> 18 & 15;
++                            i3 = World.this.b(enumskyblock, i2, j2, k2);
++                            if (i3 == l2) {
++                                World.this.b(enumskyblock, i2, j2, k2, 0);
++                                if (l2 > 0) {
++                                    j3 = MathHelper.a(i2 - i);
++                                    l3 = MathHelper.a(j2 - j);
++                                    k3 = MathHelper.a(k2 - k);
++                                    if (j3 + l3 + k3 < 17) {
++                                        for (int i4 = 0; i4 < 6; ++i4) {
++                                            int j4 = i2 + Facing.b[i4];
++                                            int k4 = j2 + Facing.c[i4];
++                                            int l4 = k2 + Facing.d[i4];
++                                            Chunk lightChunk = World.this.getChunkIfLoaded(j4 >> 4, l4 >> 4);
++                                            int i5;
++                                            if (lightChunk != null) {
++                                                i5 = Math.max(1, chunk.getType(j4 & 15, k4, l4 & 15).k());
++                                            } else {
++                                                i5 = 255;
++                                            }
++                                            i3 = World.this.b(enumskyblock, j4, k4, l4);
++                                            if (i3 == l2 - i5 && i1 < World.this.I.length) {
++                                                World.this.I[i1++] = j4 - i + 32 | k4 - j + 32 << 6 | l4 - k + 32 << 12 | l2 - i5 << 18;
++                                            }
++                                        }
+                                     }
+                                 }
+                             }
+                         }
+-                    }
+-                }
+ 
+-                l = 0;
+-            }
++                        l = 0;
++                    }
+ 
+-            this.methodProfiler.b();
+-            this.methodProfiler.a("checkedPosition < toCheckCount");
+-
+-            while (l < i1) {
+-                l1 = this.I[l++];
+-                i2 = (l1 & 63) - 32 + i;
+-                j2 = (l1 >> 6 & 63) - 32 + j;
+-                k2 = (l1 >> 12 & 63) - 32 + k;
+-                l2 = this.b(enumskyblock, i2, j2, k2);
+-                i3 = this.a(i2, j2, k2, enumskyblock);
+-                if (i3 != l2) {
+-                    this.b(enumskyblock, i2, j2, k2, i3);
+-                    if (i3 > l2) {
+-                        j3 = Math.abs(i2 - i);
+-                        l3 = Math.abs(j2 - j);
+-                        k3 = Math.abs(k2 - k);
+-                        boolean flag = i1 < this.I.length - 6;
+-
+-                        if (j3 + l3 + k3 < 17 && flag) {
+-                            if (this.b(enumskyblock, i2 - 1, j2, k2) < i3) {
+-                                this.I[i1++] = i2 - 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
+-                            }
++                    World.this.methodProfiler.b();
++                    World.this.methodProfiler.a("checkedPosition < toCheckCount");
++
++                    while (l < i1) {
++                        l1 = World.this.I[l++];
++                        i2 = (l1 & 63) - 32 + i;
++                        j2 = (l1 >> 6 & 63) - 32 + j;
++                        k2 = (l1 >> 12 & 63) - 32 + k;
++                        l2 = World.this.b(enumskyblock, i2, j2, k2);
++                        i3 = World.this.a(i2, j2, k2, enumskyblock);
++                        if (i3 != l2) {
++                            World.this.b(enumskyblock, i2, j2, k2, i3);
++                            if (i3 > l2) {
++                                j3 = Math.abs(i2 - i);
++                                l3 = Math.abs(j2 - j);
++                                k3 = Math.abs(k2 - k);
++                                boolean flag = i1 < World.this.I.length - 6;
++
++                                if (j3 + l3 + k3 < 17 && flag) {
++                                    if (World.this.b(enumskyblock, i2 - 1, j2, k2) < i3) {
++                                        World.this.I[i1++] = i2 - 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
++                                    }
+ 
+-                            if (this.b(enumskyblock, i2 + 1, j2, k2) < i3) {
+-                                this.I[i1++] = i2 + 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
+-                            }
++                                    if (World.this.b(enumskyblock, i2 + 1, j2, k2) < i3) {
++                                        World.this.I[i1++] = i2 + 1 - i + 32 + (j2 - j + 32 << 6) + (k2 - k + 32 << 12);
++                                    }
+ 
+-                            if (this.b(enumskyblock, i2, j2 - 1, k2) < i3) {
+-                                this.I[i1++] = i2 - i + 32 + (j2 - 1 - j + 32 << 6) + (k2 - k + 32 << 12);
+-                            }
++                                    if (World.this.b(enumskyblock, i2, j2 - 1, k2) < i3) {
++                                        World.this.I[i1++] = i2 - i + 32 + (j2 - 1 - j + 32 << 6) + (k2 - k + 32 << 12);
++                                    }
+ 
+-                            if (this.b(enumskyblock, i2, j2 + 1, k2) < i3) {
+-                                this.I[i1++] = i2 - i + 32 + (j2 + 1 - j + 32 << 6) + (k2 - k + 32 << 12);
+-                            }
++                                    if (World.this.b(enumskyblock, i2, j2 + 1, k2) < i3) {
++                                        World.this.I[i1++] = i2 - i + 32 + (j2 + 1 - j + 32 << 6) + (k2 - k + 32 << 12);
++                                    }
+ 
+-                            if (this.b(enumskyblock, i2, j2, k2 - 1) < i3) {
+-                                this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 - 1 - k + 32 << 12);
+-                            }
++                                    if (World.this.b(enumskyblock, i2, j2, k2 - 1) < i3) {
++                                        World.this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 - 1 - k + 32 << 12);
++                                    }
+ 
+-                            if (this.b(enumskyblock, i2, j2, k2 + 1) < i3) {
+-                                this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 + 1 - k + 32 << 12);
++                                    if (World.this.b(enumskyblock, i2, j2, k2 + 1) < i3) {
++                                        World.this.I[i1++] = i2 - i + 32 + (j2 - j + 32 << 6) + (k2 + 1 - k + 32 << 12);
++                                    }
++                                }
+                             }
+                         }
+                     }
++
++                    World.this.methodProfiler.b();
++                    return true;
+                 }
+             }
+-
+-            this.methodProfiler.b();
+-            return true;
++        };
++        if(paperSpigotConfig.useAsyncLighting) {
++            service.submit(callable);
++        } else {
++            try {
++                return callable.call();
++            } catch(Exception ignore) {
++            }
+         }
++        return true;
+     }
+ 
+     public boolean a(boolean flag) {
+diff --git a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+index 686b457..8b68ba1 100644
+--- a/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
++++ b/src/main/java/org/github/paperspigot/PaperSpigotWorldConfig.java
+@@ -196,4 +196,12 @@ public class PaperSpigotWorldConfig
+         boatsDropBoats = getBoolean( "game-mechanics.boats-drop-boats", false );
+         lessPickyTorches = getBoolean( "game-mechanics.less-picky-torch-placement", false );
+     }
++
++    public boolean useAsyncLighting;
++    private void useAsyncLighting()
++    {
++        useAsyncLighting = getBoolean( "use-async-lighting", false);
++        log( "World async lighting: " + useAsyncLighting);
++    }
++
+ }
+-- 
+1.9.5.msysgit.0
+
