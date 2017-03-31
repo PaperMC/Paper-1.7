@@ -1,0 +1,49 @@
+From 744c6886fd6c8ddc9a512e18c907c1cc2965fae9 Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Tue, 24 May 2016 11:37:52 -0400
+Subject: [PATCH] Add ServerShutdownEvent
+
+
+diff --git a/src/main/java/org/github/paperspigot/event/server/ServerShutdownEvent.java b/src/main/java/org/github/paperspigot/event/server/ServerShutdownEvent.java
+new file mode 100644
+index 0000000..8754aca
+--- /dev/null
++++ b/src/main/java/org/github/paperspigot/event/server/ServerShutdownEvent.java
+@@ -0,0 +1,33 @@
++package org.github.paperspigot.event.server;
++
++import org.bukkit.Server;
++import org.bukkit.event.HandlerList;
++import org.bukkit.event.server.ServerEvent;
++
++public class ServerShutdownEvent extends ServerEvent {
++    
++    private static final HandlerList handlers = new HandlerList();
++    private final Server server;
++
++    public ServerShutdownEvent(final Server server) {
++        this.server = server;
++    }
++
++    /**
++     * Gets the server that is shutting down.
++     * 
++     * @return Server that is shutting down
++     */
++    public Server getServer() {
++        return server;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++}
+\ No newline at end of file
+-- 
+2.8.4 (Apple Git-73)
+

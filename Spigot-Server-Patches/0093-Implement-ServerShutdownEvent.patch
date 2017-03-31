@@ -1,0 +1,86 @@
+From 63f3a8063d8842f96418b95114d8a647aa737f57 Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Tue, 24 May 2016 11:38:05 -0400
+Subject: [PATCH] Implement ServerShutdownEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
+index a9b7d5c..b70424e 100644
+--- a/src/main/java/net/minecraft/server/MinecraftServer.java
++++ b/src/main/java/net/minecraft/server/MinecraftServer.java
+@@ -1,22 +1,7 @@
+ package net.minecraft.server;
+ 
+-import java.awt.GraphicsEnvironment;
+-import java.awt.image.BufferedImage;
+-import java.io.File;
+-import java.net.Proxy;
+-import java.security.KeyPair;
+-import java.text.SimpleDateFormat;
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.Collections;
+-import java.util.Date;
+-import java.util.Iterator;
+-import java.util.List;
+-import java.util.Random;
+-import java.util.UUID;
+-import java.util.concurrent.Callable;
+-import javax.imageio.ImageIO;
+-
++import jline.console.ConsoleReader;
++import joptsimple.OptionSet;
+ import net.minecraft.util.com.google.common.base.Charsets;
+ import net.minecraft.util.com.mojang.authlib.GameProfile;
+ import net.minecraft.util.com.mojang.authlib.GameProfileRepository;
+@@ -29,18 +14,31 @@ import net.minecraft.util.io.netty.handler.codec.base64.Base64;
+ import net.minecraft.util.org.apache.commons.lang3.Validate;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+-
+-// CraftBukkit start
+-import java.io.IOException;
+-
+-import jline.console.ConsoleReader;
+-import joptsimple.OptionSet;
+-
+ import org.bukkit.World.Environment;
+-import org.bukkit.craftbukkit.SpigotTimings; // Spigot
++import org.bukkit.craftbukkit.SpigotTimings;
+ import org.bukkit.craftbukkit.util.Waitable;
+ import org.bukkit.event.server.RemoteServerCommandEvent;
+ import org.bukkit.event.world.WorldSaveEvent;
++import org.github.paperspigot.event.server.ServerShutdownEvent;
++
++import javax.imageio.ImageIO;
++import java.awt.GraphicsEnvironment;
++import java.awt.image.BufferedImage;
++import java.io.File;
++import java.io.IOException;
++import java.net.Proxy;
++import java.security.KeyPair;
++import java.text.SimpleDateFormat;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.Collections;
++import java.util.Date;
++import java.util.List;
++import java.util.Random;
++import java.util.UUID;
++import java.util.concurrent.Callable;
++
++// CraftBukkit start
+ // CraftBukkit end
+ 
+ public abstract class MinecraftServer implements ICommandListener, Runnable, IMojangStatistics {
+@@ -382,6 +380,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
+     public void stop() throws ExceptionWorldConflict { // CraftBukkit - added throws
+         if (!this.M) {
+             i.info("Stopping server");
++            this.server.getPluginManager().callEvent(new ServerShutdownEvent(server)); // iPVP - Call ServerShutdownEvent
+             // CraftBukkit start
+             if (this.server != null) {
+                 this.server.disablePlugins();
+-- 
+2.8.4 (Apple Git-73)
+

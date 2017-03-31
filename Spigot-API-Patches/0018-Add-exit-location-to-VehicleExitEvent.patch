@@ -1,0 +1,50 @@
+From ba2210e9b0ff68b4e800457cf5e232c475c3ae5b Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Thu, 26 May 2016 09:12:48 -0400
+Subject: [PATCH] Add exit location to VehicleExitEvent
+
+
+diff --git a/src/main/java/org/bukkit/event/vehicle/VehicleExitEvent.java b/src/main/java/org/bukkit/event/vehicle/VehicleExitEvent.java
+index 364451b..ea631f4 100644
+--- a/src/main/java/org/bukkit/event/vehicle/VehicleExitEvent.java
++++ b/src/main/java/org/bukkit/event/vehicle/VehicleExitEvent.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.event.vehicle;
+ 
++import org.bukkit.Location;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.entity.Vehicle;
+ import org.bukkit.event.Cancellable;
+@@ -12,10 +13,12 @@ public class VehicleExitEvent extends VehicleEvent implements Cancellable {
+     private static final HandlerList handlers = new HandlerList();
+     private boolean cancelled;
+     private final LivingEntity exited;
++    private final Location exit;
+ 
+-    public VehicleExitEvent(final Vehicle vehicle, final LivingEntity exited) {
++    public VehicleExitEvent(final Vehicle vehicle, final LivingEntity exited, final Location exit) {
+         super(vehicle);
+         this.exited = exited;
++        this.exit = exit;
+     }
+ 
+     /**
+@@ -27,6 +30,15 @@ public class VehicleExitEvent extends VehicleEvent implements Cancellable {
+         return exited;
+     }
+ 
++    /**
++     * Returns the dismount location for the entity
++     * 
++     * @return the exit location
++     */
++    public Location getExitLocation() {
++        return exit;
++    }
++
+     public boolean isCancelled() {
+         return cancelled;
+     }
+-- 
+2.8.4 (Apple Git-73)
+

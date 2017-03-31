@@ -1,0 +1,22 @@
+From 9cdb01145bddc4d0387a35fa5d7e8f4285e4baf8 Mon Sep 17 00:00:00 2001
+From: Matthew Steglinski <sainttx@users.noreply.github.com>
+Date: Mon, 17 Oct 2016 23:55:39 -0400
+Subject: [PATCH] Allow overriding of Event#isAsynchronous
+
+
+diff --git a/src/main/java/org/bukkit/event/Event.java b/src/main/java/org/bukkit/event/Event.java
+index fa29c27..bdb88ba 100644
+--- a/src/main/java/org/bukkit/event/Event.java
++++ b/src/main/java/org/bukkit/event/Event.java
+@@ -69,7 +69,7 @@ public abstract class Event {
+      *
+      * @return false by default, true if the event fires asynchronously
+      */
+-    public final boolean isAsynchronous() {
++    public boolean isAsynchronous() {
+         return async;
+     }
+ 
+-- 
+2.8.4 (Apple Git-73)
+

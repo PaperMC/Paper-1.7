@@ -1,0 +1,22 @@
+From c6e0eba875454ce0e606d4aa80df680595cc4d78 Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Fri, 29 Jul 2016 14:38:36 -0400
+Subject: [PATCH] Enable TCP_NODELAY
+
+
+diff --git a/src/main/java/net/minecraft/server/ServerConnectionChannel.java b/src/main/java/net/minecraft/server/ServerConnectionChannel.java
+index d7d93a0..adc76c3 100644
+--- a/src/main/java/net/minecraft/server/ServerConnectionChannel.java
++++ b/src/main/java/net/minecraft/server/ServerConnectionChannel.java
+@@ -22,7 +22,7 @@ class ServerConnectionChannel extends ChannelInitializer {
+         }
+ 
+         try {
+-            channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(false));
++            channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.valueOf(true));
+         } catch (ChannelException channelexception1) {
+             ;
+         }
+-- 
+2.8.4 (Apple Git-73)
+

@@ -1,0 +1,30 @@
+From 63d9c1c5efca1360ce88e31129b2dce1d9c4e0c5 Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Mon, 8 Feb 2016 14:56:34 -0500
+Subject: [PATCH] Implement Sign Editable API
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftSign.java b/src/main/java/org/bukkit/craftbukkit/block/CraftSign.java
+index 1533dd4..a0e0ba5 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftSign.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftSign.java
+@@ -37,6 +37,16 @@ public class CraftSign extends CraftBlockState implements Sign {
+     }
+ 
+     @Override
++    public void setEditable(boolean b) {
++        sign.isEditable = b;
++    }
++
++    @Override
++    public boolean isEditable() {
++        return sign.isEditable;
++    }
++
++    @Override
+     public boolean update(boolean force, boolean applyPhysics) {
+         boolean result = super.update(force, applyPhysics);
+ 
+-- 
+2.8.4 (Apple Git-73)
+

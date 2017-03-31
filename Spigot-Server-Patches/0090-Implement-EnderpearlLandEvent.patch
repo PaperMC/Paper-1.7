@@ -1,0 +1,34 @@
+From e62680f6e516eea54fb3ac492f5e7d684affa0fc Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Fri, 19 Feb 2016 14:02:00 -0500
+Subject: [PATCH] Implement EnderpearlLandEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityEnderPearl.java b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+index 718a63e..617f50d 100644
+--- a/src/main/java/net/minecraft/server/EntityEnderPearl.java
++++ b/src/main/java/net/minecraft/server/EntityEnderPearl.java
+@@ -2,7 +2,9 @@ package net.minecraft.server;
+ 
+ // CraftBukkit start
+ import org.bukkit.Bukkit;
++import org.bukkit.craftbukkit.entity.CraftEnderPearl;
+ import org.bukkit.craftbukkit.event.CraftEventFactory;
++import org.bukkit.event.entity.EnderpearlLandEvent;
+ import org.bukkit.event.player.PlayerTeleportEvent;
+ // CraftBukkit end
+ 
+@@ -40,6 +42,10 @@ public class EntityEnderPearl extends EntityProjectile {
+                 if (entityplayer.playerConnection.b().isConnected() && entityplayer.world == this.world) {
+                     // CraftBukkit start - Fire PlayerTeleportEvent
+                     org.bukkit.craftbukkit.entity.CraftPlayer player = entityplayer.getBukkitEntity();
++
++                    EnderpearlLandEvent landEvent = new EnderpearlLandEvent((CraftEnderPearl) getBukkitEntity());
++                    Bukkit.getPluginManager().callEvent(landEvent);
++
+                     org.bukkit.Location location = getBukkitEntity().getLocation();
+                     location.setPitch(player.getLocation().getPitch());
+                     location.setYaw(player.getLocation().getYaw());
+-- 
+2.8.4 (Apple Git-73)
+

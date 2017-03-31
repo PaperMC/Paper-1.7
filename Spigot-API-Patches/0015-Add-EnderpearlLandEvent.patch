@@ -1,0 +1,43 @@
+From de6c54872265c786237ec406ae104e76b65898c3 Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Fri, 19 Feb 2016 14:01:42 -0500
+Subject: [PATCH] Add EnderpearlLandEvent
+
+
+diff --git a/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java b/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java
+new file mode 100644
+index 0000000..2377192
+--- /dev/null
++++ b/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java
+@@ -0,0 +1,28 @@
++package org.bukkit.event.entity;
++
++import org.bukkit.entity.EnderPearl;
++import org.bukkit.event.HandlerList;
++
++public class EnderpearlLandEvent extends EntityEvent {
++
++    private static final HandlerList handlers = new HandlerList();
++
++    public EnderpearlLandEvent(final EnderPearl enderPearl) {
++        super(enderPearl);
++    }
++
++    @Override
++    public EnderPearl getEntity() {
++        return (EnderPearl) entity;
++    }
++
++    @Override
++    public HandlerList getHandlers() {
++        return handlers;
++    }
++
++    public static HandlerList getHandlerList() {
++        return handlers;
++    }
++
++}
+-- 
+2.8.4 (Apple Git-73)
+

@@ -1,0 +1,102 @@
+From b7e8a83e8d8f5b3ca739cbe45baedd54262f026b Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Thu, 26 May 2016 09:13:16 -0400
+Subject: [PATCH] Add exit location to VehicleExitEvent
+
+
+diff --git a/src/main/java/net/minecraft/server/Entity.java b/src/main/java/net/minecraft/server/Entity.java
+index f2fc0cd..69eefea 100644
+--- a/src/main/java/net/minecraft/server/Entity.java
++++ b/src/main/java/net/minecraft/server/Entity.java
+@@ -1,34 +1,35 @@
+ package net.minecraft.server;
+ 
+-import java.util.List;
+-import java.util.Random;
+-import java.util.UUID;
+-import java.util.concurrent.Callable;
+-
+-// CraftBukkit start
+ import org.bukkit.Bukkit;
+ import org.bukkit.Location;
+ import org.bukkit.Server;
+ import org.bukkit.TravelAgent;
+ import org.bukkit.block.BlockFace;
++import org.bukkit.craftbukkit.CraftWorld;
++import org.bukkit.craftbukkit.entity.CraftEntity;
++import org.bukkit.craftbukkit.entity.CraftPlayer;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ import org.bukkit.entity.Hanging;
+ import org.bukkit.entity.LivingEntity;
+ import org.bukkit.entity.Painting;
+ import org.bukkit.entity.Vehicle;
+-import org.spigotmc.CustomTimingsHandler; // Spigot
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
++import org.bukkit.event.entity.EntityCombustEvent;
++import org.bukkit.event.entity.EntityPortalEvent;
+ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+ import org.bukkit.event.painting.PaintingBreakByEntityEvent;
+ import org.bukkit.event.vehicle.VehicleBlockCollisionEvent;
+ import org.bukkit.event.vehicle.VehicleEnterEvent;
+ import org.bukkit.event.vehicle.VehicleExitEvent;
+-import org.bukkit.craftbukkit.CraftWorld;
+-import org.bukkit.craftbukkit.entity.CraftEntity;
+-import org.bukkit.craftbukkit.entity.CraftPlayer;
+-import org.bukkit.craftbukkit.event.CraftEventFactory;
+-import org.bukkit.event.entity.EntityCombustEvent;
+-import org.bukkit.event.entity.EntityPortalEvent;
+ import org.bukkit.plugin.PluginManager;
++import org.spigotmc.CustomTimingsHandler;
++
++import java.util.List;
++import java.util.Random;
++import java.util.UUID;
++import java.util.concurrent.Callable;
++
++// CraftBukkit start
+ // CraftBukkit end
+ 
+ public abstract class Entity {
+@@ -1467,8 +1468,9 @@ public abstract class Entity {
+         if (entity == null) {
+             if (this.vehicle != null) {
+                 // CraftBukkit start
++                Location exit = new Location(this.world.getWorld(), this.vehicle.locX, this.vehicle.boundingBox.b + (double) this.vehicle.length, this.vehicle.locZ, this.yaw, this.pitch);
+                 if ((this.bukkitEntity instanceof LivingEntity) && (this.vehicle.getBukkitEntity() instanceof Vehicle)) {
+-                    VehicleExitEvent event = new VehicleExitEvent((Vehicle) this.vehicle.getBukkitEntity(), (LivingEntity) this.bukkitEntity);
++                    VehicleExitEvent event = new VehicleExitEvent((Vehicle) this.vehicle.getBukkitEntity(), (LivingEntity) this.bukkitEntity, exit);
+                     pluginManager.callEvent(event);
+ 
+                     if (event.isCancelled() || this.vehicle != originalVehicle) {
+@@ -1478,7 +1480,7 @@ public abstract class Entity {
+                 // CraftBukkit end
+                 pluginManager.callEvent( new org.spigotmc.event.entity.EntityDismountEvent( this.getBukkitEntity(), this.vehicle.getBukkitEntity() ) ); // Spigot
+ 
+-                this.setPositionRotation(this.vehicle.locX, this.vehicle.boundingBox.b + (double) this.vehicle.length, this.vehicle.locZ, this.yaw, this.pitch);
++                this.setPositionRotation(exit.getX(), exit.getY(), exit.getZ(), exit.getYaw(), exit.getPitch());
+                 this.vehicle.passenger = null;
+             }
+ 
+@@ -1489,7 +1491,8 @@ public abstract class Entity {
+                 // It's possible to move from one vehicle to another.  We need to check if they're already in a vehicle, and fire an exit event if they are.
+                 VehicleExitEvent exitEvent = null;
+                 if (this.vehicle != null && this.vehicle.getBukkitEntity() instanceof Vehicle) {
+-                    exitEvent = new VehicleExitEvent((Vehicle) this.vehicle.getBukkitEntity(), (LivingEntity) this.bukkitEntity);
++                    Location exit = new Location(this.world.getWorld(), this.vehicle.locX, this.vehicle.boundingBox.b + (double) this.vehicle.length, this.vehicle.locZ, this.yaw, this.pitch);
++                    exitEvent = new VehicleExitEvent((Vehicle) this.vehicle.getBukkitEntity(), (LivingEntity) this.bukkitEntity, exit);
+                     pluginManager.callEvent(exitEvent);
+ 
+                     if (exitEvent.isCancelled() || this.vehicle != originalVehicle || (this.vehicle != null && this.vehicle.passenger != originalPassenger)) {
+@@ -1504,7 +1507,8 @@ public abstract class Entity {
+                 if (event.isCancelled() || this.vehicle != originalVehicle || (this.vehicle != null && this.vehicle.passenger != originalPassenger)) {
+                     // If we only cancelled the enterevent then we need to put the player in a decent position.
+                     if (exitEvent != null && this.vehicle == originalVehicle && this.vehicle != null && this.vehicle.passenger == originalPassenger) {
+-                        this.setPositionRotation(this.vehicle.locX, this.vehicle.boundingBox.b + (double) this.vehicle.length, this.vehicle.locZ, this.yaw, this.pitch);
++                        Location exit = exitEvent.getExitLocation();
++                        this.setPositionRotation(exit.getX(), exit.getY(), exit.getZ(), exit.getYaw(), exit.getPitch());
+                         this.vehicle.passenger = null;
+                         this.vehicle = null;
+                     }
+-- 
+2.8.4 (Apple Git-73)
+

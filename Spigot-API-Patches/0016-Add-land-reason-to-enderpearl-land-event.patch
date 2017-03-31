@@ -1,0 +1,51 @@
+From 0dc1ba3d3e054c2efcb5d64185e49fb8fd2faf03 Mon Sep 17 00:00:00 2001
+From: Matthew <matthew.steglinski@utoronto.ca>
+Date: Mon, 28 Mar 2016 20:06:09 -0400
+Subject: [PATCH] Add land reason to enderpearl land event
+
+
+diff --git a/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java b/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java
+index 2377192..6af78b4 100644
+--- a/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java
++++ b/src/main/java/org/bukkit/event/entity/EnderpearlLandEvent.java
+@@ -6,15 +6,21 @@ import org.bukkit.event.HandlerList;
+ public class EnderpearlLandEvent extends EntityEvent {
+ 
+     private static final HandlerList handlers = new HandlerList();
++    private final Reason reason;
+ 
+-    public EnderpearlLandEvent(final EnderPearl enderPearl) {
++    public EnderpearlLandEvent(final EnderPearl enderPearl, final Reason reason) {
+         super(enderPearl);
++        this.reason = reason;
+     }
+ 
+     @Override
+     public EnderPearl getEntity() {
+         return (EnderPearl) entity;
+     }
++    
++    public Reason getReason() {
++        return reason;
++    }
+ 
+     @Override
+     public HandlerList getHandlers() {
+@@ -25,4 +31,14 @@ public class EnderpearlLandEvent extends EntityEvent {
+         return handlers;
+     }
+ 
++    public enum Reason {
++        /**
++         * Called when the pearl hits a block
++         */
++        BLOCK,
++        /**
++         * Called when the pearl hits an entity
++         */
++        ENTITY
++    }
+ }
+-- 
+2.8.4 (Apple Git-73)
+

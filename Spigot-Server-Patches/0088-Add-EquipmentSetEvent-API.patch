@@ -1,0 +1,185 @@
+From 37dbf988a9fe63913017200414ab6ed640f11326 Mon Sep 17 00:00:00 2001
+From: DoctorDark <doctordark11@gmail.com>
+Date: Sun, 4 Oct 2015 04:03:36 +0100
+Subject: [PATCH] Add EquipmentSetEvent API
+
+
+diff --git a/src/main/java/net/minecraft/server/EntityHuman.java b/src/main/java/net/minecraft/server/EntityHuman.java
+index 082b4af..d299568 100644
+--- a/src/main/java/net/minecraft/server/EntityHuman.java
++++ b/src/main/java/net/minecraft/server/EntityHuman.java
+@@ -5,15 +5,18 @@ import java.util.Iterator;
+ import java.util.List;
+ import java.util.UUID;
+ 
++import com.google.common.base.Objects;
+ import net.minecraft.util.com.google.common.base.Charsets;
+ import net.minecraft.util.com.mojang.authlib.GameProfile;
+ 
+ // CraftBukkit start
++import org.bukkit.Bukkit;
+ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+ import org.bukkit.craftbukkit.entity.CraftItem;
+ import org.bukkit.craftbukkit.inventory.CraftItemStack;
+ import org.bukkit.entity.Player;
+ import org.bukkit.event.entity.EntityCombustByEntityEvent;
++import org.bukkit.event.inventory.EquipmentSetEvent;
+ import org.bukkit.event.player.PlayerBedEnterEvent;
+ import org.bukkit.event.player.PlayerBedLeaveEvent;
+ import org.bukkit.event.player.PlayerDropItemEvent;
+@@ -1564,7 +1567,14 @@ public abstract class EntityHuman extends EntityLiving implements ICommandListen
+     }
+ 
+     public void setEquipment(int i, ItemStack itemstack) {
+-        this.inventory.armor[i] = itemstack;
++        ItemStack previous = this.inventory.armor[i];
++        if (!Objects.equal(itemstack, previous)) {
++            if (previous != null && EquipmentSetEvent.getHandlerList().getRegisteredListeners().length > 0) {
++                previous = previous.cloneItemStack();
++            }
++            this.inventory.armor[i] = itemstack;
++            Bukkit.getPluginManager().callEvent(new EquipmentSetEvent(getBukkitEntity(), i, CraftItemStack.asBukkitCopy(itemstack), CraftItemStack.asBukkitCopy(previous)));
++        }
+     }
+ 
+     public ItemStack[] getEquipment() {
+diff --git a/src/main/java/net/minecraft/server/EntityPlayer.java b/src/main/java/net/minecraft/server/EntityPlayer.java
+index 0f0e624..2bec03f 100644
+--- a/src/main/java/net/minecraft/server/EntityPlayer.java
++++ b/src/main/java/net/minecraft/server/EntityPlayer.java
+@@ -406,11 +406,11 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
+         // we clean the player's inventory after the EntityDeathEvent is called so plugins can get the exact state of the inventory.
+         if (!event.getKeepInventory()) {
+             for (int i = 0; i < this.inventory.items.length; ++i) {
+-                this.inventory.items[i] = null;
++                this.inventory.setItem(i, null);
+             }
+ 
+             for (int i = 0; i < this.inventory.armor.length; ++i) {
+-                this.inventory.armor[i] = null;
++                this.inventory.player.setEquipment(i, null);
+             }
+         }
+ 
+diff --git a/src/main/java/net/minecraft/server/PlayerInventory.java b/src/main/java/net/minecraft/server/PlayerInventory.java
+index 5cd6e14..3f249cc 100644
+--- a/src/main/java/net/minecraft/server/PlayerInventory.java
++++ b/src/main/java/net/minecraft/server/PlayerInventory.java
+@@ -127,7 +127,7 @@ public class PlayerInventory implements IInventory {
+             itemstack = this.armor[k];
+             if (itemstack != null && (item == null || itemstack.getItem() == item) && (i <= -1 || itemstack.getData() == i)) {
+                 j += itemstack.count;
+-                this.armor[k] = null;
++                this.player.setEquipment(k, null);
+             }
+         }
+ 
+@@ -277,7 +277,8 @@ public class PlayerInventory implements IInventory {
+     public ItemStack splitStack(int i, int j) {
+         ItemStack[] aitemstack = this.items;
+ 
+-        if (i >= this.items.length) {
++        boolean settingArmour = i >= this.items.length;
++        if (settingArmour) {
+             aitemstack = this.armor;
+             i -= this.items.length;
+         }
+@@ -287,12 +288,20 @@ public class PlayerInventory implements IInventory {
+ 
+             if (aitemstack[i].count <= j) {
+                 itemstack = aitemstack[i];
+-                aitemstack[i] = null;
++                if (settingArmour) {
++                    player.setEquipment(i, null);
++                } else {
++                    aitemstack[i] = null;
++                }
+                 return itemstack;
+             } else {
+                 itemstack = aitemstack[i].a(j);
+                 if (aitemstack[i].count == 0) {
+-                    aitemstack[i] = null;
++                    if (settingArmour) {
++                        player.setEquipment(i, null);
++                    } else {
++                        aitemstack[i] = null;
++                    }
+                 }
+ 
+                 return itemstack;
+@@ -305,15 +314,19 @@ public class PlayerInventory implements IInventory {
+     public ItemStack splitWithoutUpdate(int i) {
+         ItemStack[] aitemstack = this.items;
+ 
+-        if (i >= this.items.length) {
++        boolean settingArmour = i >= this.items.length;
++        if (settingArmour) {
+             aitemstack = this.armor;
+             i -= this.items.length;
+         }
+ 
+         if (aitemstack[i] != null) {
+             ItemStack itemstack = aitemstack[i];
+-
+-            aitemstack[i] = null;
++            if (settingArmour) {
++                player.setEquipment(i, null);
++            } else {
++                aitemstack[i] = null;
++            }
+             return itemstack;
+         } else {
+             return null;
+@@ -325,10 +338,10 @@ public class PlayerInventory implements IInventory {
+ 
+         if (i >= aitemstack.length) {
+             i -= aitemstack.length;
+-            aitemstack = this.armor;
++            player.setEquipment(i, itemstack);
++        } else {
++            aitemstack[i] = itemstack;
+         }
+-
+-        aitemstack[i] = itemstack;
+     }
+ 
+     public float a(Block block) {
+@@ -381,7 +394,7 @@ public class PlayerInventory implements IInventory {
+                 }
+ 
+                 if (j >= 100 && j < this.armor.length + 100) {
+-                    this.armor[j - 100] = itemstack;
++                    this.player.setEquipment(j - 100, itemstack);
+                 }
+             }
+         }
+@@ -452,7 +465,7 @@ public class PlayerInventory implements IInventory {
+             if (this.armor[i] != null && this.armor[i].getItem() instanceof ItemArmor) {
+                 this.armor[i].damage((int) f, this.player);
+                 if (this.armor[i].count == 0) {
+-                    this.armor[i] = null;
++                    this.player.setEquipment(i, null);
+                 }
+             }
+         }
+@@ -471,7 +484,7 @@ public class PlayerInventory implements IInventory {
+         for (i = 0; i < this.armor.length; ++i) {
+             if (this.armor[i] != null) {
+                 this.player.a(this.armor[i], true, false);
+-                this.armor[i] = null;
++                this.player.setEquipment(i, null);
+             }
+         }
+     }
+@@ -531,7 +544,7 @@ public class PlayerInventory implements IInventory {
+         }
+ 
+         for (i = 0; i < this.armor.length; ++i) {
+-            this.armor[i] = ItemStack.b(playerinventory.armor[i]);
++            this.player.setEquipment(i, ItemStack.b(playerinventory.armor[i]));
+         }
+ 
+         this.itemInHandIndex = playerinventory.itemInHandIndex;
+-- 
+1.9.5.github.0
+

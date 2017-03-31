@@ -1,0 +1,82 @@
+From 55d07767059baa3bd10e028612cb3bb25342e2dc Mon Sep 17 00:00:00 2001
+From: DoctorDark <doctordark11@gmail.com>
+Date: Fri, 11 Sep 2015 14:55:09 +0100
+Subject: [PATCH] Cook speed multiplier API for furnaces
+
+
+diff --git a/src/main/java/net/minecraft/server/TileEntityFurnace.java b/src/main/java/net/minecraft/server/TileEntityFurnace.java
+index 44b9175..a8e5460 100644
+--- a/src/main/java/net/minecraft/server/TileEntityFurnace.java
++++ b/src/main/java/net/minecraft/server/TileEntityFurnace.java
+@@ -19,6 +19,7 @@ public class TileEntityFurnace extends TileEntity implements IWorldInventory {
+     public int burnTime;
+     public int ticksForCurrentFuel;
+     public int cookTime;
++    public double cookSpeedMultiplier = 1.0; // PaperSpigot - cook speed multiplier API
+     private String o;
+ 
+     // CraftBukkit start - add fields and methods
+@@ -129,12 +130,19 @@ public class TileEntityFurnace extends TileEntity implements IWorldInventory {
+         if (nbttagcompound.hasKeyOfType("CustomName", 8)) {
+             this.o = nbttagcompound.getString("CustomName");
+         }
++
++        // PaperSpigot start - cook speed multiplier API
++        if (nbttagcompound.hasKey("CookSpeedMultiplier")) {
++            this.cookSpeedMultiplier = nbttagcompound.getDouble("CookSpeedMultiplier");
++        }
++        // PaperSpigot end - cook speed multiplier API
+     }
+ 
+     public void b(NBTTagCompound nbttagcompound) {
+         super.b(nbttagcompound);
+         nbttagcompound.setShort("BurnTime", (short) this.burnTime);
+         nbttagcompound.setShort("CookTime", (short) this.cookTime);
++        nbttagcompound.setDouble("CookSpeedMultiplier", this.cookSpeedMultiplier); // PaperSpigot - cook speed multiplier API
+         NBTTagList nbttaglist = new NBTTagList();
+ 
+         for (int i = 0; i < this.items.length; ++i) {
+@@ -171,7 +179,7 @@ public class TileEntityFurnace extends TileEntity implements IWorldInventory {
+ 
+         // CraftBukkit - moved from below
+         if (this.isBurning() && this.canBurn()) {
+-            this.cookTime += elapsedTicks;
++            this.cookTime += (elapsedTicks * cookSpeedMultiplier); // PaperSpigot - cook speed multiplier API
+             if (this.cookTime >= 200) {
+                 this.cookTime %= 200;
+                 this.burn();
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftFurnace.java b/src/main/java/org/bukkit/craftbukkit/block/CraftFurnace.java
+index 8c548f1..3fcd55e 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftFurnace.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftFurnace.java
+@@ -1,5 +1,6 @@
+ package org.bukkit.craftbukkit.block;
+ 
++import com.google.common.base.Preconditions;
+ import net.minecraft.server.TileEntityFurnace;
+ import org.bukkit.block.Block;
+ import org.bukkit.block.Furnace;
+@@ -31,6 +32,20 @@ public class CraftFurnace extends CraftBlockState implements Furnace {
+         return result;
+     }
+ 
++    // PaperSpigot start - furnace cook speed multiplier
++    @Override
++    public double getCookSpeedMultiplier() {
++        return furnace.cookSpeedMultiplier;
++    }
++
++    @Override
++    public void setCookSpeedMultiplier(double cookSpeedMultiplier) {
++        Preconditions.checkArgument(cookSpeedMultiplier >= 0, "Furnace speed multiplier cannot be negative");
++        Preconditions.checkArgument(cookSpeedMultiplier <= 100, "Furnace speed multiplier cannot more than 100");
++        furnace.cookSpeedMultiplier = cookSpeedMultiplier;
++    }
++    // PaperSpigot end
++
+     public short getBurnTime() {
+         return (short) furnace.burnTime;
+     }
+-- 
+1.9.5.github.0
+
