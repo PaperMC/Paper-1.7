@@ -1,0 +1,33 @@
+From 6959fb5549afc2c0c0d9d897b3cf5df7d42dcae1 Mon Sep 17 00:00:00 2001
+From: Zach Brown <zach@zachbr.io>
+Date: Tue, 8 Aug 2023 22:28:32 -0500
+Subject: [PATCH] Update pom patch for 2023 irl world changes
+
+
+diff --git a/pom.xml b/pom.xml
+index 34cbf19c..dccf27fb 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -27,15 +27,15 @@
+ 
+   <repositories>
+     <repository>
+-      <id>repobo-snap</id>
+-      <url>http://repo.bukkit.org/content/groups/public</url>
++      <id>papermc-public</id>
++      <url>https://repo.papermc.io/repository/maven-public/</url>
+     </repository>
+   </repositories>
+ 
+   <pluginRepositories>
+     <pluginRepository>
+-      <id>bukkit-plugins</id>
+-      <url>http://repo.bukkit.org/content/groups/public</url>
++      <id>papermc-public</id>
++      <url>https://repo.papermc.io/repository/maven-public/</url>
+     </pluginRepository>
+   </pluginRepositories>
+ 
+-- 
+2.41.0.windows.3
+
